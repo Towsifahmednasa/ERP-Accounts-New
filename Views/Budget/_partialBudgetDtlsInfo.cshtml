@@ -1,0 +1,59 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Budget\_partialBudgetDtlsInfo.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+
+
+
+@model IEnumerable<New_Accounts.Models.Budget.BudgetMonthAmountDAO>
+
+<table class="table table-bordered table-striped" id="tblIssueQC">
+    <thead style="background-color:#cceeff;font-weight:bold;">
+        <tr>
+          
+            <th>Period</th>
+            <th>Amount</th>
+            
+
+        </tr>
+    </thead>
+    <tbody id="tbodyid">
+        @{ int count = 1;}
+        @foreach (var item in Model)
+        {
+        <tr id="tr_@item.MYId">
+
+
+
+
+
+
+
+
+            <td id="Period_@item.MYId">
+                <input type="text" class="form-control form-control-sm mb-3" readonly id="txtPeriod_@item.MYId" value="@item.Period" />
+            </td>
+
+            <td id="Period_@item.MYId">
+                <input type="text" class="form-control form-control-sm mb-3" id="txtAmount_@item.MYId" oninput="CalculateAll()"  value="@item.Amount"  />
+            </td>
+
+        </tr>
+            count++;
+        }
+    </tbody>
+</table>
+
+
+@*<script type="text/javascript">
+
+    $('.datepicker').pickadate({
+        selectMonths: true,
+        selectYears: true
+    })
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+        placeholder: $(this).data('placeholder'),
+        allowClear: Boolean($(this).data('allow-clear')),
+    });
+
+</script>*@

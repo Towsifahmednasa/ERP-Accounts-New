@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>New_Accounts</RootNamespace>
+    <!-- Legacy DAL/Models/Controllers are ported verbatim (ASP.NET MVC 5, 2017-era C#); they predate nullable reference types. -->
+    <Nullable>disable</Nullable>
+    <!-- Legacy files carry their own explicit usings; implicit usings would make System.Web-era names (HttpContext) ambiguous with the compat shim. -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <!-- Legacy code kept as-is (migration, not a rewrite): unused 'ex' locals (CS0168), assigned-but-unused locals (CS0219),
+         'throw ex' re-throws (CA2200) and C# 'new' hiding (CS0108) exist in the source project. Documented in docs/migration/legacy-defects.md. -->
+    <NoWarn>$(NoWarn);CS0168;CS0219;CS0414;CA2200;CS0108;CS8981;SYSLIB0051</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Runtime.Caching" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="tests\**;docs\**" />
+    <Content Remove="tests\**;docs\**" />
+    <None Remove="tests\**;docs\**" />
+  </ItemGroup>
+
+</Project>

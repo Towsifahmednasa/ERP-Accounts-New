@@ -1,0 +1,29 @@
+@{
+    ViewBag.Title = "Crystal report";
+    string reportValue = ViewBag.ReportValue as string;
+    string reportParam = ViewBag.ReportParam as string;
+}
+<div class="strip warn"><svg width="16" height="16" style="flex:none;margin-top:1px;color:var(--sapCriticalColor)"><use href="#s-alert"/></svg>
+    <div><b>Printed (Crystal) reports are not available in this release.</b>
+        The legacy application rendered this report with SAP Crystal Reports 13 inside a WebForms page (@ViewBag.Page), which has no runtime on .NET 10.
+        The on-screen and Excel versions of the ledger, cash book, bank book, trial balance, chart of accounts and financial statement reports are available from their report pages.
+        See docs/migration/blocked-pages.md for the migration decision.</div>
+</div>
+<div class="opsect">
+    <h4>Report request (as staged by the legacy report page)</h4>
+    <div class="kv">
+        <div><div class="l">Viewer page</div><div class="v">@ViewBag.Page</div></div>
+        <div><div class="l">Query string</div><div class="v">@(string.IsNullOrEmpty((string)ViewBag.Query) ? "—" : (string)ViewBag.Query)</div></div>
+    </div>
+    @if (!string.IsNullOrEmpty(reportValue))
+    {
+        <div class="mini" style="margin-top:12px">Report parameters (Session["reportvalue"])</div>
+        <pre class="spec" style="white-space:pre-wrap">@reportValue</pre>
+    }
+    @if (!string.IsNullOrEmpty(reportParam))
+    {
+        <div class="mini">Crystal parameters (Session["reportparam"])</div>
+        <pre class="spec" style="white-space:pre-wrap">@reportParam</pre>
+    }
+    <div style="margin-top:10px"><button type="button" class="btn" onclick="window.close()">Close window</button></div>
+</div>

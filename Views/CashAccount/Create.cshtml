@@ -1,0 +1,464 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\CashAccount\Create.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Cash Account Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-group {
+        padding-bottom: 3px;
+    }
+</style>
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center  headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            Cash Account Entry
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+
+                                        <a class="small blue button" href="@Url.Action("Index", "CashAccount")">
+                                            <span class="fa fa-share"></span> Back to List
+
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                            <div class="col-md-12" style="margin-top:5px;">
+                                <div class="row">
+                                    <div class="col-md-2" style="display:none">
+                                        <div class="form-group">
+                                            <label for="ddlCompany" class="bold col-form-label">Company</label>
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadBusinessUnit()"></select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">   <label for="ddlBankName" class="bold col-form-label">Company: <span style="color: orangered !important;"> *</span></label></div>
+                                    <div class="col-md-10" id="divBusinessUnit">  <select class="form-select form-select-sm mb-3 multiple-select" multiple="multiple" style="width: 100%;" id="ddlBusinessUnit"></select> </div>
+                                </div>
+                                <div class="col-md-12" style="margin-top:10px;">
+                                    <div class="row">
+
+                                        <div class="col-md-6">
+
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Account Name:  <span style="color: orangered !important;"> *</span></label></div>
+                                                    <div class="col-md-8" id="DivAccountName">       <input type="text" id="txtAccountName" class="form-control form-control-sm mb-3" /></div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Currency:  <span style="color: orangered !important;"> *</span></label></div>
+                                                    <div class="col-md-8">   <select class="form-select form-select-sm mb-3 select2" disabled style="width: 100%;" id="ddlCurrency"></select> </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Description:  <span style="color: orangered !important;"> *</span></label></div>
+                                                    <div class="col-md-8" id="divRemarks">      <textarea id="txtRemarks" rows="3" cols="30" class="form-control" style="text-align:left"></textarea></div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Ledger Head:<span style="color: orangered !important;"> *</span></label>
+                                                <div class="col-md-8" id="divLedgerHead">
+                                                    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadControlLedger()" id="ddlLedgerHead"></select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Control Ledger:<span style="color: orangered !important;"> *</span></label>
+                                                <div class="col-md-8" id="divControlLedger">
+                                                    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadSubsidaryLedger()" id="ddlControlLedger"></select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Sub Control Ledger:<span style="color: orangered !important;"> *</span></label>
+                                                <div class="col-md-8" id="divSubControlLedger">
+                                                    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadSubSubControlLedger()" id="ddlSubControlLedger"></select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Sub Sub Control Ledger:<span style="color: orangered !important;"> *</span></label>
+                                                <div class="col-md-8" id="divSubSubControlLedger">
+                                                    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlSubSubControlLedger"></select>
+                                                </div>
+                                            </div>
+
+
+                                            
+
+                                        </div>
+
+
+                                    </div>
+
+
+                                    <div style="padding-top: 8px">
+                                        <div class="wrapper">
+                                            <div class="row">
+                                                <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                                    <div class="form-group">
+                                                        <button class="small blue button" id="btnSave" onclick="SaveBankAccount()">   Submit</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="MasterId" type="number" style="display: none;" value="@ViewBag.Id">
+@section Scripts
+{
+    <script type="text/javascript">
+        let id = $('#MasterId').val();
+        var Mode = 'E';
+
+
+        $(document).ready(function () {
+        
+
+            LoadCompany('ddlBusinessUnit');
+            ConfigureCompanyMultiSelect();
+
+            LoadBankName('ddlBankName');
+            $("#ddlCompany").val("1");
+            //  LoadBusinessUnit();
+            LoadCurrency();
+            $("#ddlCurrency").val("1");
+            LoadAccountType();
+            LoadLadgerHead();
+            if (id > 0) {
+                Mode = 'U';
+                GetData(id);
+            } else {
+                Mode = 'E';
+            }
+        });
+
+        function ConfigureCompanyMultiSelect() {
+            var $companyDropdown = $('#ddlBusinessUnit');
+            $companyDropdown.find('option[value="0"]').text('-- Select All --');
+            $companyDropdown.off('change.companySelectAll').on('change.companySelectAll', function () {
+                var selectedValues = $(this).val() || [];
+
+                if (selectedValues.includes('0')) {
+                    $(this).find('option:not([value="0"])').prop('selected', true);
+                    $(this).find('option[value="0"]').prop('selected', false);
+                    $(this).trigger('change.select2');
+                }
+            });
+        }
+
+        function LoadBusinessUnit() {
+                var companyId = $("#ddlCompany").val();
+                $.ajax({
+                    url: "/Utility/LoadCompanyUnitByCompanyId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlBusinessUnit').empty();
+                        $('#ddlBusinessUnit').append("<option value='0'>-- Select All --</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlBusinessUnit').append($("<option></option>").val(data[i].CompanyUnitId).html(data[i].CompanyUnitName));
+                        }
+
+                        ConfigureCompanyMultiSelect();
+                    }
+                });
+            }
+        function LoadCurrency() {
+            $.ajax({
+                url: "/Utility/GetCurrency",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+                    $('#ddlCurrency').empty();
+                    $('#ddlCurrency').append("<option value='0'>--Select Currency--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlCurrency').append($("<option></option>").val(data[i].CurrencyId).html(data[i].CurrencyName));
+                    }
+                }
+            });
+        }
+        function LoadAccountType() {
+            $.ajax({
+                url: "/Utility/GetAccountType",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+                    $('#ddlAccountType').empty();
+                    $('#ddlAccountType').append("<option value='0'>--Select  Account Type--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlAccountType').append($("<option></option>").val(data[i].AccountTypeId).html(data[i].AccountType));
+                    }
+                }
+            });
+        }
+        function LoadLadgerHead() {
+            $.ajax({
+                url: "/Utility/GetLadgerHead",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+                    $('#ddlLedgerHead').empty();
+                    $('#ddlLedgerHead').append("<option value='0'>--Select  Ledger Head--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlLedgerHead').append($("<option></option>").val(data[i].GLHeadId).html(data[i].GLName));
+                    }
+                }
+            });
+        }
+        function LoadControlLedger() {
+            var companyId = $("#ddlLedgerHead").val();
+
+            if (companyId > 0) {
+                $.ajax({
+                    url: "/SubControl/Get_ControlLedger_By_Ledger_DDL",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { LedgerId: companyId, mode: Mode },
+                    async: false,
+                    success: function (data) {
+                        var result = JSON.parse(data);
+                        $('#ddlControlLedger').empty();
+                        $('#ddlControlLedger').append("<option value='0'>--Select Control Ledger--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlControlLedger').append($("<option></option>").val(result[i].ControlLId).html(result[i].ControlLName));
+                        }
+                    }
+                });
+            }
+
+
+
+        }
+        function LoadSubsidaryLedger() {
+            var ControlLedgerId = $("#ddlControlLedger").val();
+            $.ajax({
+                url: "/Utility/LoadSubsidaryByControlLedgerId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { ControlLedgerId: ControlLedgerId, mode: Mode },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlSubControlLedger').empty();
+                    $('#ddlSubControlLedger').append("<option value='0'>--Select Control Ledger--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlSubControlLedger').append($("<option></option>").val(data[i].SubsidiryLId).html(data[i].SubsidiryLName));
+                    }
+                }
+            });
+        }
+
+
+        function LoadSubSubControlLedger() {
+            var SubControlLedgerId = $("#ddlSubControlLedger").val();
+            $.ajax({
+                url: "/Utility/LoadSubSubControlLedgerId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { SubControlLedgerId: SubControlLedgerId, mode: Mode },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlSubSubControlLedger').empty();
+                    $('#ddlSubSubControlLedger').append("<option value='0'>--Select Sub Sub Control Ledger--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlSubSubControlLedger').append($("<option></option>").val(data[i].SubSubControlLedgerId).html(data[i].SubSubControlLedgerName));
+                    }
+                }
+            });
+        }
+
+
+        function SaveBankAccountValidation() {
+            var isValid = true;
+            var message = "Some Values Required";
+            if ($('#ddlBusinessUnit').val() == null || $('#ddlBusinessUnit').val() == '') {
+
+                ValidationColorChangeNew("ddlBusinessUnit", "divBusinessUnit", "Company Required", true);
+                isValid = false;
+            }
+
+            if ($('#txtAccountName').val() == null || $('#txtAccountName').val() == '') {
+
+                ValidationColorChangeNew("txtAccountName", "DivAccountName", "Account Name Required", true);
+                isValid = false;
+            }
+
+            if ($('#txtRemarks').val() == null || $('#txtRemarks').val() == '') {
+
+                ValidationColorChangeNew("txtRemarks", "divRemarks", "Description Required", true);
+                isValid = false;
+            }
+
+            if ($('#ddlSubSubControlLedger').val() == 0 || $('#ddlSubSubControlLedger').val() == null || $('#ddlSubSubControlLedger').val() == '') {
+                ValidationColorChangeNew("ddlSubSubControlLedger", "divSubSubControlLedger", " Sub Sub Control Ledger Required", true);
+                isValid = false;
+            }
+
+
+            return isValid;
+        }
+        function SaveBankAccount() {
+            if (SaveBankAccountValidation() == true) {
+                swal({
+                    title: "Are you sure?",
+                    text: " ",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, I am sure!',
+                    cancelButtonText: "No, cancel it!",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                },
+                    function (isConfirm) {
+
+                        if (isConfirm) {
+                            SaveBankAccountFinal();
+                        } else {
+                            swal("Cancelled", " )", "error");
+                            e.preventDefault();
+                        }
+                    });
+            };
+           }
+        function SaveBankAccountFinal() {
+            var jsonData = {};
+            var dv = $('#ddlBusinessUnit').val();
+            var multiId = dv.toString();
+            jsonData["CashAccountId"] = $('#MasterId').val();
+            jsonData["CompanyName"] = multiId;
+            jsonData["AccountName"] = $('#txtAccountName').val();
+            jsonData["Currency"] = $('#ddlCurrency').val();
+            jsonData["Description"] = $('#txtRemarks').val();
+            jsonData["SubsidiryLId"] = $('#ddlSubSubControlLedger').val();
+            var urlpath = '@Url.Action("SaveCashAccount", "CashAccount")';
+            $.ajax({
+                contentType: "application/json",
+                data: JSON.stringify({ 'aMaster': jsonData }),
+                dataType: 'json',
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    $("#overlay").fadeIn(300);
+                }
+            }).success(function (result) {
+                setTimeout(function () {
+                    $("#overlay").fadeOut(300);
+                }, 500);
+                if (result.pk > 0) {
+                    swal({
+                        title: " Saved Successfully!",
+                        text: '',
+                        type: "success",
+                        showCancelButton: false,
+                        cancelButtonClass: 'btn-secondary waves-effect',
+                        confirmButtonClass: 'btn-success waves-effect waves-light',
+                        confirmButtonText: 'Yes!',
+                        closeOnConfirm: false
+                    }, function () {
+
+                        window.location.href = '@Url.Action("Index", "CashAccount")';
+                    });
+                }
+                else {
+
+                    swal(result.msg, "" , "error");
+                    e.preventDefault();
+                   
+                }
+                });
+        }
+
+        function GetData(id) {
+            var urlpath = '@Url.Action("Get_CashAcoount_Edit", "CashAccount")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                data: { id: id },
+                type: "Get",
+                async: true,
+                success: function (data) {
+                    $("#btnSave").html("Update");
+                    let arr = data.CompanyName.split(',');
+                    $('#ddlBusinessUnit').val(arr).change();
+                    $('#txtAccountName').val(data.AccountName)
+                    $('#txtRemarks').val(data.Description);
+                    $('#ddlCurrency').val(data.Currency).change();
+                    $('#ddlLedgerHead').val(data.GLHeadId).change();
+                    $('#ddlControlLedger').val(data.ControlLId).change();
+                    $('#ddlSubControlLedger').val(data.SubsidiryLId).change();
+                    $('#ddlSubSubControlLedger').val(data.SubSubControlLedgerId).change();
+                },
+            });
+     }
+
+    </script>
+}
+

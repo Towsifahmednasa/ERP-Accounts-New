@@ -1,0 +1,372 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Loan\L_List.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Loan List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Loan List</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="small blue button" href="@Url.Action("L_Entry", "Loan")">
+                                            <span class="fa fa-plus"></span> Add New
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+                            <div class="accordion accordion-flush" id="accordionFlushExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="flush-headingOne">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                            <i style="font-size: 1.4em !important" class="fadeIn animated bx bx-menu-alt-left"></i><span style="font-size: 1.1em !important">Filter</span>
+                                        </button>
+
+                                    </h2>
+                                    <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                        <div class="accordion-body">
+
+                                            <div class="row">
+                                                <div class="col-md-4">
+
+                                                    <div class="form-group">
+                                                        <div class="row">
+                                                            <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Business Unit:  </label></div>
+                                                            <div class="col-md-8" id="divCompany">
+                                                                <select class="form-select form-select-sm mb-3 select2 ddlCompany" style="width: 100%;" id="ddlCompany">
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+
+
+
+
+
+
+
+                                                </div>
+
+
+
+
+                                            </div>
+                                            <div>
+
+                                                <div class="wrapper">
+                                                    <div class="row">
+                                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                                            <div class="form-group">
+
+                                                                <button class="small blue button" onclick="ShowReport()">
+                                                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                                                    Search
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>SL#</th>
+                                                        <th>Business Unit</th>
+                                                        <th>Profit Center</th>
+                                                        <th>Supplier</th>
+                                                        <th>LC No</th>
+                                                        <th>LC Open Date</th>
+                                                        <th>Loan Issuing Bank</th>
+                                                        <th>Loan Issuing Branch</th>
+                                                        <th>Currency</th>
+                                                        <th>Conversion Rate</th>
+                                                        <th>Loan No</th>
+                                                        <th>Loan Tenor (Days)</th>
+                                                        <th>Loan Category</th>
+                                                        <th>Loan Create Date</th>
+                                                        <th>Loan Effective Date</th>
+                                                        <th>Loan Amount</th>
+                                                        <th>Grace Period (Days)</th>
+                                                        <th>Advanced Interest Payment</th>
+                                                        <th>Interest Type</th>
+                                                        <th>Interest Method</th>
+                                                        <th>Installment No</th>
+                                                        <th>Funded</th>
+                                                        <th>Loan Agreement</th>
+                                                        <th>Reimbursement Bank</th>
+                                                        <th>Margin Adjusted</th>
+                                                        <th>Interest Rate</th>
+                                                        <th>Loan Purpose</th>
+                                                        <th>Interest Amount</th>
+                                                        <th>Total Charge Amount</th>
+                                                        <th>Total Expense</th>
+                                                        <th>Total Payable Amount</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="dtTableBody">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .container-fluid {
+        margin: 5px; /* Adjust as needed */
+    }
+
+    .dataTables_filter {
+        float: right !important;
+        margin-right: -20px !important;
+        margin-bottom: 0px !important;
+    }
+
+    .dt-buttons {
+        text-align: center !important;
+    }
+</style>
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        $(function () {
+            LoadCompany('ddlCompany');
+            ShowReport();
+        });
+        function un(o) {
+            return o != null ? o : '';
+        }
+        function ShowReport() {
+
+
+            var param = '';
+            var comID = $('#ddlCompany').val();
+
+            if (jQuery.type(comID) === "undefined") { }
+            else {
+                if (comID !== "0" && comID !== null) {
+                    param = param + " and ln.BusinessUnitId='" + comID + "'";
+                }
+            }
+
+            var urlpath = '@Url.Action("Get_LoanInfoList", "Loan")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { param: param },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+                    $('#tabH').show();
+                    var result = JSON.parse(data);
+                    var row = "";
+                    $('#dtTableBody').html("");
+                    for (var i = 0; i <result.length; i++) {
+                        row += "<tr>";
+                        row += "<td>" + (i + 1) + "</td>"; // Serial number
+                        row += "<td>" + un(result[i].CompanyName) + "</td>";
+                        row += "<td>" + un(result[i].ProfitCenter) + "</td>";
+                        row += "<td>" + un(result[i].Supplier) + "</td>";
+                        row += "<td>" + un(result[i].LCNo) + "</td>";
+                        row += "<td>" + un(result[i].LCOpenDate) + "</td>";
+                        row += "<td>" + un(result[i].LoanIssuingBank) + "</td>";
+                        row += "<td>" + un(result[i].LoanIssuingBranch) + "</td>";
+                        row += "<td>" + un(result[i].Currency) + "</td>";
+                        row += "<td>" + un(result[i].ConversionRate) + "</td>";
+                        row += "<td>" + un(result[i].LoanNo) + "</td>";
+                        row += "<td>" + un(result[i].LoanTenorDays) + "</td>";
+                        row += "<td>" + un(result[i].LoanCategory) + "</td>";
+                        row += "<td>" + un(result[i].LoanCreateDate) + "</td>";
+                        row += "<td>" + un(result[i].LoanEffectiveDate) + "</td>";
+                        row += "<td>" + un(result[i].LoanAmount) + "</td>";
+                        row += "<td>" + un(result[i].GracePeriodDays) + "</td>";
+                        row += "<td>" +
+                            (result[i].AdvancedInterestPayment
+                                ? '<span class="badge bg-success">Yes</span>'
+                                : '<span class="badge bg-warning">No</span>') +
+                            "</td>";
+
+
+                        row += "<td>" + un(result[i].InterestType) + "</td>";
+                        row += "<td>" + un(result[i].InterestMethod) + "</td>";
+                        row += "<td>" + un(result[i].InstallmentNo) + "</td>";
+                        row += "<td>" +
+                            (result[i].Funded
+                                ? '<span class="badge bg-success">Yes</span>'
+                                : '<span class="badge bg-warning">No</span>') +
+                            "</td>";
+                       row += "<td>" +
+                           (result[i].LoanAgreement
+                                ? '<span class="badge bg-success">Yes</span>'
+                                : '<span class="badge bg-warning">No</span>') +
+                            "</td>";
+
+
+                           row += "<td>" + un(result[i].ReimbursementBank) + "</td>";
+                        row += "<td>" + un(result[i].MarginAdjusted) + "</td>";
+                        row += "<td>" + un(result[i].InterestRate) + "</td>";
+                        row += "<td>" + un(result[i].LoanPurpose) + "</td>";
+                        row += "<td>" + un(result[i].InterestAmount) + "</td>";
+                        row += "<td>" + un(result[i].TotalChargeAmount) + "</td>";
+                        row += "<td>" + un(result[i].TotalExpense) + "</td>";
+                        row += "<td>" + un(result[i].TotalPayableAmount) + "</td>";
+                        row += "<td><button style='border-style:none;'   onclick='editClick(" + result[i].LoanInfoID + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button> </td>";
+                        row += "</tr>";
+                    }
+                    $('#dtTableBody').html(row);
+                },
+                complete: function () {
+                    if ($.fn.dataTable.isDataTable('.jdtDataTable')) {
+                        table = $('#dtTb').DataTable({
+                            paging: true,
+                            retrieve: true,
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: true,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ]
+                        });
+                    }
+                    else {
+                        table = $('.jdtDataTable').DataTable({
+
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: true,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ]
+                        });
+                    }
+
+                    $('#dtTb_length select').removeClass('form-select form-select-sm');
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+         function editClick(id) {
+             location.href = '@Url.Action("L_Entry", "Loan")?id=' + id + '';
+        }
+    </script>
+
+}
+
+

@@ -1,0 +1,150 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Subsubsidairy\Index.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Subsidiary Ledger List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-success mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Subsidiary Ledger List</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="small blue button" href="@Url.Action("SubsubsidairyCreate", "Subsubsidairy")">
+                                            <span class="fa fa-plus"></span> Add New
+
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="table-responsive" id="MainGradeDiv">
+                                            <table id="dtTb" class="table table-bordered table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>SL#</th>
+                                                        <th>Subsidiary Ledger Code</th>
+                                                        <th>Subsidiary Ledger Name</th>
+                                                        <th>Chart of Account</th>
+                                                       
+                                                        <th>Action </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="dtTableBody">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            ShowReport();
+        });
+
+        function un(o) {
+            return o != null ? o : '';
+        }
+
+         function ShowReport() {
+            var urlpath = '@Url.Action("Get_SubsidiaryLedgerList", "Subsubsidairy")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "Get",
+                async: true,
+                success: function (data) {
+                    $('#tabH').show();
+                    var result = JSON.parse(data);
+                    var row = "";
+                    $('#dtTableBody').html("");
+                    for (var i = 0; i <result.length; i++) {
+                        row += "<tr>";
+                        row += "<td>" + (i + 1) + "</td>";
+                        row += "<td>" + un(result[i].SubsidiryLCode) + "</td>";
+                        row += "<td>" + un(result[i].SubsidiryLName) + "</td>";
+                        row += "<td>" + un(result[i].AccountName) + "</td>";
+                       
+                        row += "<td><button class='btn-outline-warning  btn-xs mb-1 mb-md-0' onclick='editClick(" + result[i].SubsidiryLId + ")'><i class='bx bxs-edit'></i></button> </td>";
+                    }
+                    $('#dtTableBody').html(row);
+                },
+                complete: function () {
+
+                    var table = $('#dtTb').DataTable({
+                        "bInfo": true,
+                        "bFilter": true,
+                        processing: true,
+
+                        dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                        lengthChange: false,
+                        language: {
+                            searchPlaceholder: "Search records",
+                            search: ' ',
+                            "emptyTable": "No Data Found!"
+                        },
+
+                        buttons: ['copy', 'excel', 'pdf', 'print']
+                    });
+
+                    //table.buttons().container()
+                    //    .appendTo('#dtTb_wrapper .col-md-6:eq(0)');
+                }
+            });
+        }
+
+
+
+
+
+        function editClick(id) {
+            location.href = '@Url.Action("ControlLedgerCreate", "ControlLedger")?id=' + id + '';
+        }
+
+    </script>
+
+}

@@ -1,0 +1,802 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\ReconcileBankAccount\RBAEntry.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Bank Reconciliation Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-success mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+
+
+                                            <span class=""> Bank Reconciliation Entry</span>
+
+
+
+
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        @*<a class="small blue button" href="@Url.Action("Create", "BankPayments")">
+                                            <span class="fa fa-plus"></span> Add New
+
+                                        </a>*@
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                   
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company:   <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divCompany">
+                                                                        <select class="form-select form-select-sm mb-3 select2 ddlCompany" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()">
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group" >
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlFinansialYear" class="bold col-form-label">Financial Year: <span class="required"> *</span> </label></div>
+                                                                    <div class="col-md-8" id="divFinansialYear">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFinansialYear"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+
+
+
+
+
+                                                        </div>
+
+
+                                                        <div class="col-md-4">
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtPostingFDate" class="bold col-form-label">Posting From Date: </label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtPostingFDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtPostingTDate" class="bold col-form-label">Posting To Date:  </label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtPostingTDate" class="form-control form-control-sm mb-3 datepicker txtPostingTDate" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtApproveFDate" class="bold col-form-label">Approve From Date: </label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtApproveFDate" class="form-control form-control-sm mb-3 datepicker"  /> </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtApproveTDate" class="bold col-form-label">Approve To Date:  </label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtApproveTDate" class="form-control form-control-sm mb-3 datepicker txtApproveTDate"   /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group" style="display:none">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlTransactionType" class="bold col-form-label">Transaction Type: </label></div>
+                                                                    <div class="col-md-8">
+                                                                        <select class="form-select form-select-sm mb-3" style="width: 100%;" id="ddlTransactionType">
+                                                                            <option value="0">All</option>
+                                                                            <option value="Journal">Journal</option>
+                                                                            <option value="CreditVoucherBank">Credit Voucher Bank </option>
+                                                                            <option value="DebitVoucherBank">Debit Voucher Bank </option>
+                                                                            <option value="CreditVoucherBank">Credit Voucher Cash </option>
+                                                                            <option value="DebitVoucherCash">Debit Voucher Cash </option>
+                                                                            <option value="FundTransfer">Contra </option>
+
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div>
+
+                                                        <div class="wrapper">
+                                                            <div class="row">
+                                                                <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                                                    <div class="form-group">
+
+                                                                        <button class="small blue button" onclick="SearchData()">
+                                                                            <i class="fa fa-search" aria-hidden="true"></i>
+                                                                            Search
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body ">
+
+
+
+                                        <div class="table table-responsive" style="overflow-x:auto; max-height:620px">
+
+                                            <div id="divApprovalData" class="table-responsive">
+                                            </div>
+
+                                        </div>
+
+
+
+                                    
+
+                                        <div class="wrapper">
+                                            <div class="row">
+                                                <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                                    <div class="form-group">
+
+                                                        <input type="button" name="next" class="small blue button" onclick="SaveDate()" value="Submit Information" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                                            </div>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        function un(o) {
+            return o != null ? o : '';
+        }
+
+        //$('.datepicker').pickadate({
+        //    selectMonths: true,
+        //    selectYears: true
+        //})
+        //$('.select2').select2({
+        //    theme: 'bootstrap4',
+        //    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+        //    placeholder: $(this).data('placeholder'),
+        //    allowClear: Boolean($(this).data('allow-clear')),
+        //});
+        $(document).ready(function () {
+
+
+            LoadCompany('ddlCompany');
+            $("#ddlTransactionType").val("FundTransfer");
+            $("#ddlTransactionType").prop("disabled", true);
+
+
+        });
+
+
+        function LoadDDlbyCom() {
+
+            LoadFinansialYear();
+
+        }
+
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                    if (data.length > 0) {
+                        // Select the first real financial year (index 1)
+                        $('#ddlFinansialYear').val(data[0].FinancialYearId).trigger('change');
+                    }
+                }
+            });
+        }
+        function CheckAll() {
+            if ($('#checkAll').is(':checked')) {
+
+                $('.chk_gg').prop('checked', true);
+            } else {
+                $('.chk_gg').prop('checked', false);
+            }
+        }
+
+        $(document).ready(function () {
+            //LoadFilterData();
+         //   SearchData();
+
+        });
+
+
+          function LoadFilterData() {
+            var urlpath = '@Url.Action("LoadFilterInPartialView", "Dashboard")';
+
+
+
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                async: true,
+                data: { },
+                beforeSend: function () {
+                    $('#detailsR').empty();
+
+
+
+                },
+                success: function (data) {
+
+                    $('#detailsR').append(data);
+                    // $('#reportTable1').dataTable();
+                }
+            });
+
+
+
+
+        }
+
+         @*function ShowReport() {
+          //
+
+             var param = '';
+             var comID = $('#ddlCompany').val();
+             var finID = $('#ddlFinansialYear').val();
+             var frmD = $('#txtPostingFDate').val();
+             var toD = $('#txtPostingTDate').val();
+             var Status = $('#ddlApprovalStatus').val();
+
+
+
+             if (jQuery.type(comID) === "undefined") { }
+             else {
+                 if (comID !== "0" && comID !== null) {
+                     param = param + " and mas.CompanyInfoId='" + comID + "'";
+                 }
+             }
+
+             if (jQuery.type(finID) === "undefined") { }
+             else {
+                 if (finID !== "0" && finID !== null) {
+                     param = param + " and mas.FinancialYearId='" + finID + "'";
+                 }
+             }
+
+
+             if (jQuery.type(frmD) === "undefined" && jQuery.type(toD) === "undefined") { }
+             else {
+                 if (frmD !== "" && toD !== "") {
+                     param = param + " and mas.PostingDate between '" + frmD + "' and '" + toD + "'";
+                 }
+             }
+
+             if (jQuery.type(Status) === "undefined") { }
+             else {
+                 if (Status !== "0" && Status !== null) {
+                     param = param + " and mas.ActionStatus='" + Status + "'";
+                 }
+             }
+
+
+            var urlpath = '@Url.Action("GetReconcileBankAccountListAll", "ReconcileBankAccount")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { param: param},
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    data = JSON.parse(data);
+                    $("#manuallist").html("");
+                    if (data.length > 0) {
+
+
+
+                        var row = "";
+                        var count = 1;
+                        $("#manuallist").html("");
+
+                        var count = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+
+                            row += "<tr class='row-select' id='" + count+"'> ";
+                            row += "<td  >" + count + "</td>";
+
+
+
+                            if (un(data[i].IsReconcile) == 1) {
+                                row += "<td class='chkVoucherMasterId'>  " + ' <input type = "hidden" style = "text-align:center" id = "hfMaster' + data[i].VoucherMasterId + '"   value = "' + data[i].VoucherMasterId + '" /><input type="checkbox" class="chk" style="border-style: none;display:none" value="' + data[i].VoucherMasterId + '" id="chk_' + data[i].VoucherMasterId + '" checked="checked" />' + "</td>";
+                            }
+                            else {
+                                row += "<td  class='chkVoucherMasterId'> " + '<input type="checkbox" class="chk" value="' + data[i].VoucherMasterId + '" id="chk_' + data[i].VoucherMasterId + '"  />' + "</td>";
+                            }
+
+
+                            if (data[i].ReconcileDate == '') {
+
+                                row += "<td  id='Reconcile'>" + '<input style="width: 150px" type="text"  class="form-control form-control-sm mb-3 datepicker"   value="' + data[i].ReconcileDate + '" id="txtReconcileDate_' + data[i].VoucherMasterId + '"  />' + "</td>";
+                            }
+                            else {
+
+                                row += "<td  >" + un(data[i].ReconcileDate) + "</td>";
+
+
+                            }
+                            row += "<td  >" + un(data[i].CompanyName) + "</td>";
+
+                            row += "<td  >" + un(data[i].VoucherCode)+ "</td>";
+                            row += "<td  >" + un(data[i].VoucherNo) + "</td>";
+                            row += "<td  >" + un(data[i].PostingDate) + "</td>";
+                            row += "<td  >" + un(data[i].VoucherCategory) + "</td>";
+
+
+                            row += "<td  >" + un( data[i].Narration) + "</td>";
+
+                            row += "<td  >" + un(data[i].TotalAmountBDT) + "</td>";
+
+                            if (un(data[i].ActionStatus) == 'Approved') {
+                                row += "<td><span class='badge bg-success'>Approved</span></td>";
+                            }
+                            else if (un(data[i].ActionStatus) == 'Canceled') {
+                                row += "<td><span class='badge bg-danger'>Canceled</span></td>";
+                            }
+
+                            else {
+                                row += "<td><span class='badge bg-warning'>Posting</span></td>";
+                            }
+
+
+                            row += "<td  >" + un(data[i].ApprovedBy) + "</td>";
+                            row += "<td  >" + un(data[i].ApprovedDate) + "</td>";
+                            //row += "<td  >" + un(data[i].UpdateBy) + "</td>";
+                            //row += "<td  >" + un(data[i].UpdateDate) + "</td>";
+
+
+
+
+
+
+                            row += "<td><button style='border-style:none;'   onclick='PrintReport(" + data[i].VoucherMasterId + ")'><i class='fa fa-print' style='color:#04AA6D'></i></button> </td>";
+
+                            row += "</tr>";
+                            count = count + 1;
+
+                        }
+                        $("#manuallist").html(row);
+                    }
+                },
+                complete: function () {
+
+                    //if ($.fn.dataTable.isDataTable('#dtTb')) {
+                    //    table = $('#dtTb').DataTable({
+                    //        paging: true,
+                    //        retrieve: true,
+                    //        "bInfo": true,
+                    //        "bFilter": true,
+                    //        processing: true,
+                    //        ordering: false,
+                    //        paging: false,
+
+                    //        dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                    //        lengthChange: false,
+                    //        language: {
+                    //            searchPlaceholder: "Search records",
+                    //            search: ' ',
+                    //            "emptyTable": "No Data Found!"
+                    //        },
+
+                    //        buttons: ['copy', 'excel', 'pdf', 'print']
+                    //    });
+                    //}
+                    //else {
+                    //    table = $('#dtTb').DataTable({
+
+                    //        "bInfo": true,
+                    //        "bFilter": true,
+                    //        processing: true,
+                    //        ordering: false,
+                    //        paging: false,
+                    //        dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                    //        lengthChange: false,
+                    //        language: {
+                    //            searchPlaceholder: "Search records",
+                    //            search: ' ',
+                    //            "emptyTable": "No Data Found!"
+                    //        },
+
+                    //        buttons: ['copy', 'excel', 'pdf', 'print']
+
+                    //    });
+                    //}
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+         }*@
+
+
+             function SearchData() {
+                 var param = '';
+                 var comID = $('#ddlCompany').val();
+                 var finID = $('#ddlFinansialYear').val();
+                 var frmD = $('#txtPostingFDate').val();
+                 var toD = $('#txtPostingTDate').val();
+             
+                 var AppfrmD = $('#txtApproveFDate').val();
+                 var ApptoD = $('#txtApproveTDate').val();
+
+                 if (comID !== "0" && comID !== null) {
+
+                     if (finID !== "0" && finID !== null) {
+                         if (comID !== "0" && comID !== null) {
+                             param = param + " and mas.CompanyInfoId='" + comID + "'";
+                         }
+
+
+
+                         if (finID !== "0" && finID !== null) {
+                             param = param + " and mas.FinancialYearId='" + finID + "'";
+                         }
+
+
+
+
+                         if (frmD !== "" && toD !== "") {
+                             param = param + " and mas.PostingDate between '" + frmD + "' and '" + toD + "'";
+                         }
+
+
+                         if (AppfrmD !== "" && ApptoD !== "") {
+                             param = param + " and mas.ApprovedDate between '" + AppfrmD + "' and '" + ApptoD + "'";
+                         }
+
+
+
+                         //if (jQuery.type(Status) === "undefined") { }
+                         //else {
+                         //    if (Status !== "0" && Status !== null) {
+                         //        param = param + " and mas.ActionStatus='" + Status + "'";
+                         //    }
+                         //}
+
+                         var urlpath = '@Url.Action("ReconcileBankAccountList", "ReconcileBankAccount")';
+                         $.ajax({
+                             url: urlpath,
+                             type: "Get",
+                             dataType: 'html',
+                             data: { param: param },
+                             async: false,
+                             success: function (data) {
+
+
+                                 $('#divApprovalData').empty();
+                                 $('#divApprovalData').html(data);
+                             },
+                             complete: function () {
+                                 if ($('#tblIssueQC tbody tr').length === 0) {
+                                     swal("No Records!!");
+                                 }
+                             }
+                         });
+                     } else {
+                         ValidationColorChangeNew("ddlFinansialYear", "divFinansialYear", "Financial Year Required", true);
+                     }
+                 } else {
+                    
+                  
+
+                     ValidationColorChangeNew("ddlCompany", "divCompany", "Company Required", true);
+                 }
+        }
+
+
+        function editClick(id) {
+
+            location.href = '../BankPayments/Create?MasterId=' + id + '';
+
+        }
+
+
+    function PrintReport(MasterId)
+        {
+            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
+        var reportValue = "AllVoucherReport";
+
+        $.ajax({
+            url: urlpath,
+            data: { MasterId: MasterId, reportValue: reportValue},
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+
+
+
+        function Validation() {
+            var isValid = true;
+            var message = "Check at least one checkbox";
+
+            //if ($('input.checkid:checked').length <= 0) {
+            //    isValid = false;
+            //    ShowMessage(message);
+            //}
+
+            //var CC=0 
+            //$('#tblIssueQC tbody tr').each(function () {
+
+            //    var idr = $(this).attr('id');
+            //    var id = idr.substring(3);
+                
+            //    if ($('#chk_' + id).is(":checked")) {
+
+            //        CC++;
+            //    }
+
+            //});
+
+            //if (CC == 0) {
+            //    isValid = false;
+            // ShowMessage(message);
+            //}
+            //    $('#tblIssueQC tbody tr').each(function (key, value) {
+                      
+            //        var id = $(this).prop("id");
+            //        if ($('#chk_' + id).is(":checked")) {
+            //            if ($('#txtReconcileDate_' + id).val() == '') {
+
+            //                isValid = false;
+            //                swal("Please provide the valid input");
+            //            }
+
+
+
+
+            //        }
+
+              
+
+            //    });
+
+
+            var count = $('input:checkbox.chk_gg:checked').length;
+            if (count == 0) {
+                ShowMessage("Please Check One Item");
+                isValid = false;
+            }
+
+
+            try {
+
+            $('#tblIssueQC tbody tr').each(function () {
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+
+
+
+
+                if ($('#chk_' + id).is(':checked')) {
+                    
+                  
+
+
+
+                    if ($('#txtReconcileDate_' + id).val() == '') {
+                        ShowMessage("Please select Reconcile Date");
+                        isValid = false;
+                    }
+
+
+
+                
+                }
+
+
+
+
+
+            }
+
+            );
+
+            } catch (error) {
+                // Handle the error here
+                console.log('An error occurred:', error);
+            }
+
+            return isValid;
+        }
+
+
+        function SaveDate() {
+
+            if (Validation()) {
+                $("#overlay").fadeIn(300);
+                var jsonObjs = [];
+
+                var jsonData = {};
+
+                 
+                try {
+                $('#tblIssueQC tbody tr').each(function () {
+                    var idr = $(this).attr('id');
+                    var id = idr.substring(3);
+
+
+
+
+
+                    if ($('#chk_' + id).is(':checked')) {
+                        var theObj = {};
+
+
+                        theObj["VoucherMasterId"] = $('#chk_' + id).val();
+
+
+
+                        theObj["ReconcileDate"] = $('#txtReconcileDate_' + id).val();
+
+
+
+                        jsonObjs.push(theObj);
+                    }
+
+
+
+
+
+                });
+
+
+
+                } catch (error) {
+                    // Handle the error here
+                    console.log('An error occurred:', error);
+                }
+
+
+           
+
+
+
+
+                alert(jsonObjs);
+
+                jsonData["aMaster"] = jsonObjs;
+
+
+            var urlpath = '@Url.Action("SaveReconcileBank", "ReconcileBankAccount")';
+            $.ajax({
+                contentType: "application/json",
+                data: JSON.stringify(jsonData),
+                dataType: 'json',
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    $("#overlay").fadeIn(300);
+                }
+            })
+                .success(function (result) {
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                    if (result.isSuccess == true) {
+                        swal({
+                            title: " Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            window.location.href = '@Url.Action("RBAEntry", "ReconcileBankAccount")';
+                        });
+                    }
+                    else {
+                        swal("Cancelled", " Please Select ", "error");
+                        e.preventDefault();
+                    }
+
+                });
+        }
+
+            }
+
+
+    </script>
+
+}                          

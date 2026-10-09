@@ -1,0 +1,67 @@
+@* Login (legacy Views/Home/Index.cshtml, Layout = null). Same contract: POST username/password to Home/LoginAction.
+   Presentation: wireframe "Login" screen (.loginpage split). The legacy page never showed the failure message
+   (GAP-PLT-002); it is shown here from TempData. *@
+@{
+    Layout = null;
+    string msg = TempData["LoginMsg"] as string;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In &middot; ERP &mdash; Accounts &amp; Finance</title>
+    <link rel="icon" href="/favicon.ico" />
+    <link href="/css/fiori/fiori.css" rel="stylesheet" />
+    <style>
+        body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .loginpage{width:100%;max-width:960px;min-width:0;box-shadow:var(--sapContent_Shadow2)}
+        .logincard{min-width:0;max-width:100%}
+        .logincard form{display:flex;flex-direction:column;gap:14px}
+        .logincard h3{margin:0 0 2px;font-size:20px;font-weight:600}
+        .logincard .mini{margin-bottom:8px}
+        .loginfoot{margin-top:18px;font-size:12px;color:var(--sapContent_LabelColor)}
+        .brand{display:flex;align-items:center;gap:8px;margin-bottom:26px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+        .brand b{font-size:15px;letter-spacing:0;text-transform:none;color:#fff}
+        @@media(max-width:599px){body{padding:12px}.loginpage{min-height:0}.logincard{width:100%;padding:28px 22px}}
+        @@media(max-width:1023px){.loginleft{padding:40px 32px}.loginleft h2{font-size:24px}}
+    </style>
+</head>
+<body>
+@await Html.PartialAsync("_FioriIcons")
+<div class="loginpage">
+    <div class="loginleft">
+        <div class="brand"><svg width="22" height="22"><use href="#s-grid"/></svg><b>CSTL ERP</b> &middot; Accounts &amp; Finance</div>
+        <h2>ERP &mdash; Accounts &amp; Finance</h2>
+        <p>Chart of accounts, vouchers, receivables &amp; payables, bank &amp; cash reconciliation, trial balance and financial statements, cost centres and budgets &mdash; one sign-in.</p>
+    </div>
+    <div class="logincard">
+        <h3>Sign In</h3>
+        <div class="mini">Enter your username and password.</div>
+        @if (!string.IsNullOrEmpty(msg))
+        {
+            <div class="strip err" data-msg="@msg"><svg width="16" height="16" style="flex:none;margin-top:1px;color:var(--sapNegativeColor)"><use href="#s-alert"/></svg><div><b>@msg</b></div></div>
+        }
+        <form method="post" action="/Home/LoginAction" id="loginForm">
+            @Html.AntiForgeryToken()
+            <div class="fld"><label for="form-username" class="req">User Name</label>
+                <input type="text" name="username" id="form-username" class="ctl" placeholder="Username" autocomplete="username" autofocus /></div>
+            <div class="fld"><label for="form-password" class="req">Password</label>
+                <input type="password" name="password" id="form-password" class="ctl" placeholder="Password" autocomplete="current-password" /></div>
+            <div class="errtxt" id="loginErr" hidden>Some value is required.!!!</div>
+            <button class="btn emph" type="submit" id="loginButton" style="height:38px;margin-top:4px">Sign in</button>
+        </form>
+        <div class="loginfoot"><span id="yearText"></span> &copy; Creatrix Soft.Tech.Ltd.</div>
+    </div>
+</div>
+<script>
+    document.getElementById("yearText").innerText = new Date().getFullYear();
+    // legacy SaveValidation(): both fields required ("Some value is required.!!!")
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+        var ok = document.getElementById("form-username").value !== "" && document.getElementById("form-password").value !== "";
+        document.getElementById("loginErr").hidden = ok;
+        if (!ok) { e.preventDefault(); }
+    });
+</script>
+</body>
+</html>

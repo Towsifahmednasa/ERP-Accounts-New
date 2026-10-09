@@ -1,0 +1,115 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Dashboard\_FilterMasterInfo.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@* Fiori filter bar (wireframe: .filterbar > .fb-top + .fb-fields). Element ids, classes used by scripts and ShowReport() unchanged. *@
+<div class="filterbar fbar-card collapsed" id="fbarCard">
+    <div class="fb-top">
+        <div class="variant" role="button" tabindex="0" onclick="$('#fbarCard').toggleClass('collapsed')" onkeydown="if(event.key==='Enter'||event.key===' '){$('#fbarCard').toggleClass('collapsed');event.preventDefault();}">Filter <svg class="fb-chev" width="15" height="15" style="color:#556b82"><use href="#s-down"/></svg></div>
+        <div class="fb-actions" style="margin-left:auto;display:flex;gap:6px;align-items:center">
+            <button type="button" class="btn tr sm" onclick="ClearFilter()">Clear</button>
+            <button type="button" class="btn emph" onclick="ShowReport()"><svg width="14" height="14"><use href="#s-search"/></svg>Go</button>
+        </div>
+    </div>
+    <div class="fb-fields">
+        <div class="fld" id="divCompany">
+            <label for="ddlCompany">Company</label>
+            <select class="select2 ddlCompany" id="ddlCompany" onchange="LoadDDlbyCom()"></select>
+        </div>
+        <div class="fld" id="divFinansialYear">
+            <label for="ddlFinansialYear">Financial Year</label>
+            <select class="select2" id="ddlFinansialYear"></select>
+        </div>
+        <div class="fld">
+            <label for="txtPostingFDate">Posting From Date</label>
+            <input type="text" id="txtPostingFDate" class="ctl datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+        </div>
+        <div class="fld">
+            <label for="txtPostingTDate">Posting To Date</label>
+            <input type="text" id="txtPostingTDate" class="ctl datepicker txtPostingTDate" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+        </div>
+        <div class="fld">
+            <label for="ddlApprovalStatus">Approval Status</label>
+            <select class="ctl" id="ddlApprovalStatus">
+                <option value="0">All</option>
+                <option value="Posted">Posting</option>
+                <option value="Approved">Approved</option>
+            </select>
+        </div>
+        <div class="fld">
+            <label for="ddlNote">ERP Voucher Integration</label>
+            <select class="ctl ParTialddlNote" id="ddlNote"></select>
+        </div>
+        <div class="fld" style="display:none">
+            <label for="ddlTransactionType">Transaction Type</label>
+            <select class="ctl" id="ddlTransactionType">
+                <option value="0">All</option>
+                <option value="Journal">Journal</option>
+                <option value="CreditVoucherBank">Credit Voucher Bank </option>
+                <option value="DebitVoucherBank">Debit Voucher Bank </option>
+                <option value="CreditVoucherBank">Credit Voucher Cash </option>
+                <option value="DebitVoucherCash">Debit Voucher Cash </option>
+                <option value="FundTransfer">Contra </option>
+            </select>
+        </div>
+    </div>
+</div>
+
+ 
+<script type="text/javascript">
+
+    $('.datepicker').pickadate({
+        selectMonths: true,
+        selectYears: true
+    })
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+        placeholder: $(this).data('placeholder'),
+        allowClear: Boolean($(this).data('allow-clear')),
+    });
+    $(document).ready(function () {
+
+
+        LoadCompany('ddlCompany');
+        $("#ddlTransactionType").val("FundTransfer");
+        $("#ddlTransactionType").prop("disabled", true);
+
+
+    });
+
+
+    function ClearFilter() {
+        var today = '@DateTime.Now.ToString("dd MMMM, yyyy")';
+        $('#txtPostingFDate, #txtPostingTDate').val(today);
+        $('#ddlApprovalStatus').val('0');
+        $('#ddlCompany').val('0').trigger('change');
+    }
+
+    function LoadDDlbyCom() {
+
+        LoadFinansialYear();
+
+    }
+
+    function LoadFinansialYear() {
+        var companyId = $("#ddlCompany").val();
+        $.ajax({
+            url: "/Utility/GetFinansialYearComId",
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            type: "Get",
+            data: { companyId: companyId },
+            async: false,
+            success: function (data) {
+
+                $('#ddlFinansialYear').empty();
+                $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                for (var i = 0; i < data.length; i++) {
+
+                    $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                }
+            }
+        });
+    }
+
+</script>

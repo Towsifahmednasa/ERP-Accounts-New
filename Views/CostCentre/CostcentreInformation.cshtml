@@ -1,0 +1,348 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\CostCentre\CostcentreInformation.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Cost Center Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Cost Center  Entry</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        <a class="small blue button" href="@Url.Action("CostcentreList", "CostCentre")">
+                                            <span class="fa fa-share"></span>  Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Company:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divCompany">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlcompany"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Cost Center Name:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divAccountName">
+                                            <input type="text" id="txtAccountName" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Start Date:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divStartDate">
+                                            <input type="text" id="txtStartDate" class="form-control form-control-sm datepicker" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                        <div class="col-md-8">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="customSwitch1" checked>
+                                                <label class="custom-control-label" for="customSwitch1">Active</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+                            <div style="padding-top: 1.5%">
+
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+
+                                                <button class="small blue button" id="btnSave" onclick="Save()">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<input id="masterId" value="@ViewBag.Id" style="display:none" />
+
+@section Scripts
+{
+    <script type="text/javascript">
+        let id = $('#masterId').val();
+        $(function () {
+            LoadCompany('0');
+
+            if (id > 0) {
+                GetData(id);
+            } else {
+                
+            }
+           
+            
+        });
+
+
+        function LoadCompany(setValue) {
+
+           $.ajax({
+               url: "/CostCentre/Load_Company_Info",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    $('#ddlcompany').empty();
+                    $('#ddlcompany').append("<option value='0'>--Select Company--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlcompany').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
+                    }
+
+                    $('#ddlcompany').val(setValue);
+                }
+            });
+        }
+
+
+
+        function SaveValidation() {
+            var isValid = true;
+            if ($('#ddlcompany').val() == 0 || $('#ddlcompany').val() == '') {
+                ValidationColorChangeNew("ddlcompany", "divCompany", "Company Required", true);
+                isValid = false;
+            }
+
+            if ($('#txtAccountName').val() == '' || $('#txtAccountName').val() == null) {
+                ValidationColorChangeNew("txtAccountName", "divReferenceType", "Description Required", false);
+                isValid = false;
+            }
+
+            if ($('#txtStartDate').val() == '' || $('#txtStartDate').val() == null) {
+                ValidationColorChangeNew("txtStartDate", "divStartDate", "Start Date Required", false);
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+
+
+        function Save() {
+            if (SaveValidation()) {
+                swal({
+                    title: "Are you sure?",
+                    text: " ",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, I am sure!',
+                    cancelButtonText: "No, cancel it!",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                FinalSave();
+                        } else {
+                            swal("Cancelled", " )", "error");
+                            e.preventDefault();
+                        }
+                    });
+            };
+        }
+
+    function FinalSave() {
+        var jsonData = {};
+        jsonData["CostCenterId"] = $('#masterId').val();
+        jsonData["CompanyId"] = $('#ddlcompany').val();
+        jsonData["Description"] = $('#txtAccountName').val().trim();
+        jsonData["CostCenterStartDate"] = $('#txtStartDate').val();
+        jsonData["IsActive"] = $('#customSwitch1').is(':checked');
+    
+          var urlpath = '@Url.Action("Save_CostCenter_Rana", "CostCentre")';
+            $.ajax({
+                data: jsonData,
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    _open_LoadingPopUp_WithMsg("popDiv", "Please wait. Data is Saving...");
+                },
+            }).success(function (result) {
+                _close_LoadingPopUp_WithMsg();
+                if (result.msg != "") {
+                    if (result.pk > 0) {
+                        swal({
+                            title: " Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            window.location.href = '@Url.Action("CostcentreList", "CostCentre")';
+                        });
+                    }
+                    else {
+                         swal({
+                            title: "Already Exists",
+                            text: '',
+                             type: "warning",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Back!',
+                            closeOnConfirm: false
+                        });
+
+                    }
+                }
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                    })
+                }
+                });
+
+        }
+
+
+
+
+        function GetData(id) {
+
+            var urlpath = '@Url.Action("GetCostCentre_ById_Rana", "CostCentre")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                data: { id: id },
+                type: "Get",
+                async: true,
+                success: function (data) {
+
+                    $("#btnSave").html("Update");
+
+                    console.log(data)
+
+                    // Load_Company_ById('ddlCompany');
+
+                   LoadCompany(data.CompanyId);
+
+                    $('#ddlcompany').val(data.CompanyId);
+                    $('#txtAccountName').val(data.Description);
+                    $('#txtStartDate').val(data._CostCenterStartDate);
+                    if (data.IsActive) {
+                        $('#customSwitch1').prop('checked', true);
+                    } else {
+                        $('#customSwitch1').prop('checked', false);
+                    }
+                },
+
+
+            });
+        }
+
+
+
+
+        //function _LoadCompany(id) {
+        //    $.ajax({
+        //        url: "/CostCentre/Load_Company_Info_ById",
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: 'json',
+        //        type: "Get",
+        //        data: { id: id },
+        //        async: false,
+        //        success: function (data) {
+        //            console.log(data);
+
+        //            // First, clear the existing options
+        //            $('#ddlcompany').empty();
+
+        //            // Add a default option
+        //            $('#ddlcompany').append("<option value='0'>--Select Company--</option>");
+
+        //            // Loop through the data and add options
+        //            for (var i = 0; i < data.length; i++) {
+        //                $('#ddlcompany').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
+        //            }
+
+        //            // Set the selected value to the given id
+        //            $('#ddlcompany').val(id);
+        //        },
+        //    });
+        //}
+
+
+
+    </script>
+
+}

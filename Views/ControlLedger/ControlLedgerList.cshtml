@@ -1,0 +1,247 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\ControlLedger\ControlLedgerList.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Control Ledger List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+ 
+ 
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-success mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Control Ledger List</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="small blue button" href="@Url.Action("ControlLedgerCreate", "ControlLedger")">
+                                                <span class="fa fa-plus"></span> Add New
+
+                                            </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="table-responsive" id="MainGradeDiv">
+                                            <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>SL#</th>
+
+                                                        <th>Ledger Head</th>
+                                                        <th>Control Ledger Code</th>
+                                                        <th>Control Ledger Name </th>
+                                                        <th>Status</th>
+                                                        <th>Action  </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="dtTableBody">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .container-fluid {
+        margin: 5px; /* Adjust as needed */
+    }
+
+    .dataTables_filter {
+        float: right !important;
+        margin-right: -20px !important;
+        margin-bottom: 0px !important;
+    }
+
+    .dt-buttons {
+        text-align: center !important;
+    }
+</style>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            ShowReport();
+        });
+
+        function un(o) {
+            return o != null ? o : '';
+        }
+
+         function ShowReport() {
+            var urlpath = '@Url.Action("Get_ControlLedger_List", "ControlLedger")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "Get",
+                async: true,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+
+
+                },
+                success: function (data) {
+                    $('#tabH').show();
+                    var result = JSON.parse(data);
+                    var row = "";
+                    $('#dtTableBody').html("");
+                    for (var i = 0; i <result.length; i++) {
+                        row += "<tr>";
+                        row += "<td>" + (i + 1) + "</td>";
+                        row += "<td>" + un(result[i].GLCode) + " : "+un(result[i].GLName) + "</td>";
+                       
+                        row += "<td>" + un(result[i].ControlLCode) + "</td>";
+                        row += "<td>" + un(result[i].ControlLName) + "</td>";
+                        if (result[i].IsActive == true) {
+                            row += "<td><span class='badge bg-success'>Active</span></td>";
+                        } else {
+                            row += "<td><span class='badge bg-danger'>Inactive</span></td>";
+                        }
+                        row += "<td><button style='border-style:none'   onclick='editClick(" + result[i].ControlLId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button> </td>";
+                    }
+                    $('#dtTableBody').html(row);
+                },
+                complete: function () {
+
+                    if ($.fn.dataTable.isDataTable('.jdtDataTable')) {
+                        table = $('#dtTb').DataTable({
+                            paging: true,
+                            retrieve: true,
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: true,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ]
+                        });
+                    }
+                    else {
+                        table = $('.jdtDataTable').DataTable({
+
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: true,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ]
+                        });
+                    }
+
+                    $('#dtTb_length select').removeClass('form-select form-select-sm');
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+
+
+
+
+        function editClick(id) {
+            location.href = '@Url.Action("ControlLedgerCreate", "ControlLedger")?id=' + id + '';
+        }
+
+    </script>
+
+}
+

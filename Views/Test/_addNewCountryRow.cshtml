@@ -1,0 +1,40 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Test\_addNewCountryRow.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    int sl = Convert.ToInt32(TempData["trSl"]);
+}
+<tr id="tr_@sl">
+
+    @*<td id="ts_@sl">@sl</td>*@
+    <td>
+        <select class="form-select form-select-sm mb-3 select2" id="ConId_@sl" style="width: 340px" onchange="GetCitybyCountryId(@sl)"></select>
+    </td>
+    @*<td>
+            <input type="text" class="form-control"  id="glName_@sl" />
+        </td>*@
+
+    <td>
+        <select class="form-select form-select-sm mb-3 select2" id="city_@sl" style="width: 180px"></select>
+    </td>
+    @*<td>
+            <select class="form-control select2" id="referenceType_@sl" style="width: 120px" onchange="GetReferenceNo(@sl)"></select>
+        </td>*@
+  
+    <td>
+        <input type="number" class="form-control form-control-sm" id="amount_@sl" oninput="CalculateAll()"   style="width: 100px" />
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm" id="remarks_@sl" />
+    </td>
+
+    <td class="actionHide">
+        <div class="form-group">
+            
+            <button class="small blue button" id="btnAdd_@sl" onclick="AddRow()">
+                <i class="fa fa-plus" aria-hidden="true"></i>
+            </button>
+            <button class="small blue button" id="btnRemove_@sl" onclick="RemoveRow(@sl)"><i class="fa fa-minus" aria-hidden="true"></i></button>
+
+        </div>
+    </td>
+</tr>

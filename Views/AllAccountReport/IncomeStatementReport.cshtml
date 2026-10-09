@@ -1,0 +1,482 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\IncomeStatementReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@{
+    ViewBag.Title = "Income Statement Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="loadingSpinner" style="display:none;">
+    <div class="overlay"></div>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span>Income Statement Report</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3"></div>
+
+                                            <div class="col-md-6">
+                                                <div class="card bg-light bg-gradient">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+                                                            <!-- Company -->
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <label class="bold col-form-label">
+                                                                            Company :
+                                                                            <span class="required">*</span>
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <select class="form-select form-select-sm mb-3 select2"
+                                                                                style="width:100%;"
+                                                                                id="ddlCompany"
+                                                                                onchange="LoadFinansialYear()">
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Financial Year -->
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <label class="bold col-form-label">
+                                                                            Financial Year :
+                                                                            <span class="required">*</span>
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <select class="form-select form-select-sm mb-3 select2"
+                                                                                style="width:100%;"
+                                                                                id="ddlFinansialYear"
+                                                                                onchange="LoadDaterangebyFiscal()">
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- From Date -->
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <label class="bold col-form-label">
+                                                                            From Date :
+                                                                            <span class="required">*</span>
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <input type="text"
+                                                                               id="txtfrmDate"
+                                                                               class="form-control form-control-sm mb-3 datepicker"
+                                                                               value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- To Date -->
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <label class="bold col-form-label">
+                                                                            To Date :
+                                                                            <span class="required">*</span>
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <input type="text"
+                                                                               id="txtToDate"
+                                                                               class="form-control form-control-sm mb-3 datepicker"
+                                                                               value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Search Button -->
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label class="col-md-4 bold col-form-label"></label>
+
+                                                                <div class="col-md-8">
+                                                                    <button class="small blue button"
+                                                                            onclick="LoadIncomeStatementReport()">
+                                                                        <i class="fa fa-search" aria-hidden="true"></i>
+                                                                        Search
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Report Table -->
+                                <div class="col-12">
+                                    <div class="row m-2">
+
+                                        <div class="col-12">
+                                            <div class="row">
+                                                <div class="col-12 text-end">
+                                                    <button id="exportButton"
+                                                            class="btn btn-sm btn-outline-success mb-3 me-2">
+                                                        📊 Export to Excel
+                                                    </button>
+
+                                                    <button id="printButton"
+                                                            class="btn btn-sm btn-outline-info mb-3">
+                                                        🖨️ Print
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row m-2">
+                                            <div class="col-12">
+
+                                                <div class="table-responsive"
+                                                     style="max-height: 600px; overflow-y: auto; border: 1px solid #ccc;">
+
+                                                    <table id="dtIncomeStatement"
+                                                           class="table table-bordered table-hover p-2"
+                                                           style="width:100%;">
+
+                                                        <thead>
+                                                            <tr>
+                                                                <th colspan="4"
+                                                                    style="text-align:center;
+                                                                           font-weight:bold;
+                                                                           font-size:16px;
+                                                                           color:blue;">
+                                                                    <label id="lblheading">
+                                                                        Income Statement Report
+                                                                    </label>
+                                                                </th>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="font-weight:bold;">Business Unit :</td>
+                                                                <td><label id="lblBusinessUnit"></label></td>
+
+                                                                <td style="font-weight:bold;">Financial Year :</td>
+                                                                <td><label id="lblFinancialYear"></label></td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="font-weight:bold;">From Date :</td>
+                                                                <td><label id="lblFromDate"></label></td>
+
+                                                                <td style="font-weight:bold;">To Date :</td>
+                                                                <td><label id="lblToDate"></label></td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td colspan="4"></td>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <thead style="position: sticky; top: 0; background-color: #285B86; z-index: 1;">
+                                                            <tr>
+                                                                <th style="text-align:center; color:white; width:10%;">
+                                                                    SL
+                                                                </th>
+
+                                                                <th style="text-align:left; color:white; width:45%;">
+                                                                    Particular
+                                                                </th>
+
+                                                                <th style="text-align:right; color:white; width:20%;">
+                                                                    Balance
+                                                                </th>
+
+                                                                <th style="text-align:left; color:white; width:25%;">
+                                                                    Remarks
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody id="incomeStatementList">
+                                                        </tbody>
+
+                                                    </table>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!-- End Report Table -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            LoadCompany('ddlCompany');
+
+        });
+
+        function LoadFinansialYear() {
+
+            var companyId = $("#ddlCompany").val();
+
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append(
+                            $("<option></option>")
+                                .val(data[i].FinancialYearId)
+                                .html(data[i].FinancialYearDesc)
+                        );
+                    }
+                }
+            });
+        }
+
+        function LoadDaterangebyFiscal() {
+
+            var companyId = $("#ddlCompany").val();
+            var FinancialYearId = $("#ddlFinansialYear").val();
+
+            $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {
+                    companyId: companyId,
+                    FinancialYearId: FinancialYearId
+                },
+                async: false,
+                success: function (data) {
+
+                    $('#txtfrmDate').val(data.StartDate);
+                    $('#txtToDate').val(data.EndDate);
+
+                }
+            });
+        }
+
+        function LoadIncomeStatementReport() {
+
+            var CompanyID = $('#ddlCompany').val();
+            var FinancialYearID = $('#ddlFinansialYear').val();
+
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+
+            var ComName = $("#ddlCompany option:selected").text();
+            var FinYear = $("#ddlFinansialYear option:selected").text();
+
+            if (!CompanyID || CompanyID == "0") {
+
+                toastr.error("Please Select Company");
+                return;
+            }
+
+            if (!FinancialYearID || FinancialYearID == "0") {
+
+                toastr.error("Please Select Financial Year");
+                return;
+            }
+
+            $.ajax({
+
+                url: '@Url.Action("GetIncomeStatementReport", "AllAccountReport")',
+
+                type: 'GET',
+
+                dataType: 'json',
+
+                data: {
+
+                    CompanyID: CompanyID,
+                    FinancialYearID: FinancialYearID,
+                    FromDate: FromDate,
+                    ToDate: ToDate
+
+                },
+
+                beforeSend: function () {
+
+                    $("#loadingSpinner").show();
+
+                },
+
+                success: function (data) {
+
+                    $('#incomeStatementList').empty();
+
+                    if (data.length <= 0) {
+
+                        toastr.warning("No Data Found");
+                        return;
+                    }
+
+                    var html = "";
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        html += `
+                            <tr>
+                                <td style="text-align:center;">
+                                    ${i + 1}
+                                </td>
+
+                                <td>
+                                    ${data[i].Particular == null ? '' : data[i].Particular}
+                                </td>
+
+                                <td style="text-align:right;">
+                                    ${parseFloat(data[i].Balance).toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })}
+                                </td>
+
+                                <td>
+                                    ${data[i].Remarks == null ? '' : data[i].Remarks}
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    $('#incomeStatementList').html(html);
+
+                    $('#lblBusinessUnit').text(ComName);
+                    $('#lblFinancialYear').text(FinYear);
+                    $('#lblFromDate').text(FromDate);
+                    $('#lblToDate').text(ToDate);
+
+                },
+
+                complete: function () {
+
+                    $("#loadingSpinner").hide();
+
+                }
+
+            });
+        }
+
+        // Print
+        $("#printButton").click(function () {
+
+            var printContents = document.getElementById("dtIncomeStatement").outerHTML;
+
+            document.body.innerHTML = `
+                <html>
+                    <head>
+                        <title>Print</title>
+
+                        <link rel="stylesheet"
+                              href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+                        <style>
+
+                            table {
+                                width: 100%;
+                                border-collapse: collapse;
+                            }
+
+                            th, td {
+                                border: 1px solid #ccc;
+                                padding: 4px;
+                                font-size: 12px;
+                            }
+
+                        </style>
+
+                    </head>
+
+                    <body>
+
+                        ${printContents}
+
+                    </body>
+
+                </html>
+            `;
+
+            window.print();
+
+            location.reload();
+
+        });
+
+        // Export Excel
+        $("#exportButton").click(function () {
+
+            $("#loadingSpinner").show();
+
+            setTimeout(function () {
+
+                var table = document.getElementById("dtIncomeStatement");
+
+                var workbook = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+
+                XLSX.writeFile(workbook, "IncomeStatementReport.xlsx");
+
+                $("#loadingSpinner").hide();
+
+            }, 1000);
+
+        });
+
+    </script>
+}

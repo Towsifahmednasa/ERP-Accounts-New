@@ -1,0 +1,259 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Ref_Sub_Type\SubsidairyType.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Subsidiary Type Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Subsidiary Type Entry</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        <a class="small blue button" href="@Url.Action("SubsidairyList", "Ref_Sub_Type")">
+                                            <span class="fa fa-share"></span>  Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Subsidiary Type:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divReferenceType">
+                                            <input type="text" id="txtReferenceType" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                        <div class="col-md-8">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="customSwitch1" checked>
+                                                <label class="custom-control-label" for="customSwitch1">Active</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div style="padding-top: 1.5%">
+
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+
+                                                <button class="small blue button" id="btnSave" onclick="Save()">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input id="masterId" value="@ViewBag.Id" style="display:none" />
+
+@section Scripts
+{
+    <script type="text/javascript">
+        let id = $('#masterId').val();
+        $(function () {
+            if (id > 0) {
+                GetData(id);
+            }
+        });
+        function SaveValidation() {
+            var isValid = true;
+            if ($('#txtReferenceType').val() == '' || $('#txtReferenceType').val() == null) {
+                ValidationColorChangeNew("txtReferenceType", "divReferenceType", "Subsidairy Type Required", false);
+                isValid = false;
+            }
+            return isValid;
+        }
+        function Save() {
+            if (SaveValidation()) {
+                swal({
+                    title: "Are you sure?",
+                    text: " ",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, I am sure!',
+                    cancelButtonText: "No, cancel it!",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                FinalSave();
+                        } else {
+                            swal("Cancelled", " )", "error");
+                            e.preventDefault();
+                        }
+                    });
+            };
+        }
+
+    function FinalSave() {
+        var jsonData = {};
+        jsonData["SubsidiaryTypeId"] = $('#masterId').val();
+        jsonData["SubsidiaryType"] = $('#txtReferenceType').val().trim();
+            jsonData["IsActive"] = $('#customSwitch1').is(':checked');
+          var urlpath = '@Url.Action("Save_SubsidairyType", "Ref_Sub_Type")';
+            $.ajax({
+                data: jsonData,
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    $("#overlay").fadeIn(300);
+                },
+            }).success(function (result) {
+                setTimeout(function () {
+                    $("#overlay").fadeOut(300);
+                }, 500);
+                if (result.msg != "") {
+                    if (result.pk > 0) {
+                        swal({
+                            title: " Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            window.location.href = '@Url.Action("SubsidairyList", "Ref_Sub_Type")';
+                        });
+                    }
+                    else {
+                         swal({
+                            title: "Already Exists",
+                            text: '',
+                             type: "warning",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Back!',
+                            closeOnConfirm: false
+                        });
+
+                    }
+                }
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                    })
+                }
+                });
+
+        }
+        @*function GetData(id) {
+            var urlpath = '@Url.Action("GetSubsidairyType_ById", "Ref_Sub_Type")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                data: {id : id},
+                type: "Get",
+                async: true,
+                success: function (data) {
+                    var result = JSON.parse(data);
+
+                    $('#ReferenceType').val(result.SubsidiryLName);
+                    if (result[0].IsActive) {
+                        $('#customSwitch1').prop('checked', true);
+                    } else {
+                        $('#customSwitch1').prop('checked', false);
+                    }
+                },
+                complete: function () {
+                    $("#btnSave").html("Update");
+                    //$('#territorySelect').attr('disabled', true);
+                }
+            });
+        }*@
+
+
+
+
+    function GetData(id) {
+            var urlpath = '@Url.Action("GetSubsidairyType_ById", "Ref_Sub_Type")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                data: { id: id },
+                type: "Get",
+                async: true,
+                success: function (data) {
+
+
+                    $("#btnSave").html("Update");
+
+                    $('#txtReferenceType').val(data.SubsidiaryType);
+                  
+                    if (data.IsActive) {
+                        $('#customSwitch1').prop('checked', true);
+                    } else {
+                        $('#customSwitch1').prop('checked', false);
+                    }
+
+
+                }
+              
+            });
+        }
+
+    </script>
+
+}
+
+

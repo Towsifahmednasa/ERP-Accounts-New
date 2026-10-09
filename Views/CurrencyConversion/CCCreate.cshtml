@@ -1,0 +1,424 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\CurrencyConversion\CCCreate.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@{
+    ViewBag.Title = "Currency Conversion Rate";
+}
+
+
+
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+
+
+                                            <span class=""> Currency Conversion</span>
+
+
+
+
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-5" style="text-align: right !important">
+                                                <label for="tbxLCDate" class="bold col-form-label"> Posting Date: <span class="required"> *</span> </label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input type="text" id="tbxLCDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card-body ">
+                                        <div class="table table-responsive" style="overflow-x: auto; ">
+
+                                            <table class="table table-bordered table-striped table-hover" id="topTbOrderInfo" style=" width: 100% !important; margin: auto !important;">
+                                                <thead style="background: #BECFD9 !important; color: black !important;">
+                                                    <tr class="bg-gradient">
+
+                                                        <th style="text-align:center!important; width: 2%;"># SL</th>
+
+                                                        <th style="text-align:center!important; width: 4%;"> Currency </th>
+                                                        <th style="text-align:center!important; width: 4%;"> Rate</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="topTbOrderInfoBody">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                            <div style="padding-top: 1.5%">
+
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+
+                                                <button class="small blue button" id="Reject" onclick="SaveB_Payment()">
+                                                    Submit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+
+            AddProformaInformation();
+            // Event handler for when the date is selected
+            $('#tbxLCDate').on('change', function () {
+                $('#topTbOrderInfoBody').empty();
+                var selectedDate = new Date($(this).val());
+
+                // Get today's date (without time)
+                var today = new Date();
+                today.setHours(0, 0, 0, 0); // Set to midnight to only compare dates
+
+                // If the selected date is earlier than today, hide the button
+                if (selectedDate < today) {
+                    $('#Reject').hide(); // Hide the button
+                    toastr.options = {
+                        "closeButton": true,
+                        "progressBar": true,
+                        "positionClass": "toast-bottom-right", // Shows the toastr message at the bottom-right
+                        "timeOut": "5000" // Auto-close after 5 seconds
+                    };
+
+                    toastr.warning("You selected a previous date. Submission is disabled.");
+
+                } else {
+                    $('#Reject').show(); // Show the button
+
+                }
+                // Call your function when the input value changes
+                AddProformaInformation();
+            });
+
+            // Optionally, you could use 'input' event for real-time detection
+            $('#tbxLCDate').on('input', function () {
+
+                $('#topTbOrderInfoBody').empty();
+                var selectedDate = new Date($(this).val());
+
+                // Get today's date (without time)
+                var today = new Date();
+                today.setHours(0, 0, 0, 0); // Set to midnight to only compare dates
+
+                // If the selected date is earlier than today, hide the button
+                if (selectedDate < today) {
+                    $('#Reject').hide(); // Hide the button
+
+                    toastr.options = {
+                        "closeButton": true,
+                        "progressBar": true,
+                        "positionClass": "toast-bottom-right", // Shows the toastr message at the bottom-right
+                        "timeOut": "5000" // Auto-close after 5 seconds
+                    };
+
+                    toastr.warning("You selected a previous date. Submission is disabled.");
+
+                } else {
+                    $('#Reject').show(); // Show the button
+
+
+
+                }
+                AddProformaInformation();
+            });
+        });
+
+           function AddProformaInformation() {
+               $('#topTbOrderInfoBody').empty();
+
+
+               var date = $('#tbxLCDate').val();
+
+            $.ajax({
+                url: "/CurrencyConversion/Load_CurrencyConversionList",
+                dataType: 'json',
+                type: "Get",
+                data: { date: date },
+                async: true,
+                success: function (result) {
+
+                    var Data = JSON.parse(result);
+
+                    console.log(Data);
+
+                    var newRow = "";
+
+                    // Asset Details
+
+                    let rowCounter = $('#topTbOrderInfoBody tr').length;
+                    let rowIndex = $('#topTbOrderInfoBody tr').length;
+
+                    console.log("Row Index: " + rowIndex);
+
+                    var currentPi = '';
+
+
+
+
+
+                    for (var i = 0; i < Data.length; i++) {
+
+
+                        var CurrencyId = Data[i].CurrencyId;
+                        var SL = Data[i].SL;
+                        var Currency = Data[i].CurrencyName;
+                        var Rate = Data[i].CurrencyRate;
+                        newRow += '<tr data-pi="' + (CurrencyId) + '">';
+                        newRow += '<td>' + (SL) + '</td>';
+                        newRow += '<td>' + (Currency) + '</td>';
+
+                        newRow += '<td>';
+                        newRow += '<input type="number" style="min-width: 130px !important;"    value="' + Rate + '" class="form-control form-control-sm Rate" id="Rate_' + rowIndex + '" >';
+                        newRow += '<input type="hidden" style="min-width: 130px !important;"    value="' + CurrencyId + '" class="form-control form-control-sm CurrencyId" id="CurrencyId_' + rowIndex + '" >';
+
+                        newRow += '</td>';
+                        newRow += '</tr>';
+
+
+
+
+                        rowIndex++;
+                    }
+
+                    $('#topTbOrderInfoBody').append(newRow);
+
+
+
+
+                },
+                error: function (data) {
+                },
+                complete: function () {
+
+
+
+
+
+                }
+            });
+
+
+        }
+
+
+
+
+        function SaveB_Payment() {
+            // Flag to check if all validations pass
+            var isValid = true;
+            var DATED = $('#tbxLCDate').val();
+
+            // Check if the date field is empty
+            if (DATED === '') {
+                toastr.error('Please select a date.');
+                $('#tbxLCDate').focus();  // Set focus to the date field
+                return false;  // Prevent form submission
+            }
+               if ($('#topTbOrderInfoBody tr').length === 0) {
+                toastr.error('No data available. Please add currency information before submitting.');
+                return false;  // Prevent form submission
+            }
+
+            // Loop through each row in the table and validate
+            $('#topTbOrderInfoBody tr').each(function () {
+                var rateInput = $(this).find('.Rate');  // Find the input field for rate
+                var rateValue = parseFloat(rateInput.val());  // Get the value as a number
+
+                // Check if the rate is NaN or less than 0
+                if (isNaN(rateValue) || rateValue < 0) {
+                    isValid = false;  // Set the flag to false if validation fails
+
+                    // Highlight the invalid field (optional)
+                    rateInput.addClass('is-invalid');
+
+                    // Show a Toastr error message for negative numbers
+                    toastr.error('Rate cannot be negative. Please enter a positive number or 0.');
+                } else {
+                    // Remove any previous error highlights if valid
+                    rateInput.removeClass('is-invalid');
+                }
+            });
+
+            // If any validation fails, prevent form submission
+            if (!isValid) {
+                toastr.warning('Please correct the highlighted errors before submitting.');
+                return false;  // Prevent the submit action
+            }
+
+            // If everything is valid, proceed with the form submission
+           // toastr.success('Form validated successfully! Submitting...');
+
+            // Add your form submission logic here (e.g., AJAX call, form submit)
+            // $('form').submit(); // Uncomment this line to submit the form if needed
+
+            swal({
+                title: "Are you sure?",
+                text: " ",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Yes, I am sure!',
+                cancelButtonText: "No, cancel it!",
+                closeOnConfirm: false,
+                closeOnCancel: false
+            },
+                function (isConfirm) {
+
+                    if (isConfirm) {
+
+                       SaveLCPreparation();
+
+                    } else {
+                        swal("Cancelled", "", "error");
+                        e.preventDefault();
+                    }
+                });
+        }
+
+
+            function SaveLCPreparation() {
+
+            // Master
+
+            var jsonData = {};
+
+            // First Column
+
+                jsonData["PostingDate"] = $('#tbxLCDate').val();
+
+
+            // Items Details
+
+            var jsonObjsItems = [];
+
+            $('#topTbOrderInfo tbody tr').each(function () {
+
+
+
+                    var $row = $(this).closest('tr');
+                    var $rowIndex = $row.index();
+
+                    var CurrencyRate = $("#Rate_" + $rowIndex).val();
+
+                    var CurrencyId = Number($("#CurrencyId_" + $rowIndex).val()) || 0;
+
+
+
+                    var rowData = {
+                        CurrencyId: CurrencyId,
+                        CurrencyRate: CurrencyRate
+                    };
+
+                    jsonObjsItems.push(rowData);
+
+            });
+
+                jsonData["CurrencyConversionDtls"] = jsonObjsItems;
+
+            // Charge Head Details
+
+
+
+            //console.log(jsonData);
+
+            // Perform your desired action with the JSON data here
+
+            var urlpath = '@Url.Action("SaveCurrencyConversion", "CurrencyConversion")';
+
+            $.ajax({
+                contentType: "application/json",
+                data: JSON.stringify(jsonData),
+                dataType: 'json',
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    _open_LoadingPopUp_WithMsg("popDiv", "Please wait. Data is Saving...");
+                },
+            }).success(function (result) {
+                _close_LoadingPopUp_WithMsg();
+
+
+                swal({
+                    title: "Operation Successful!" ,
+                    text: '',
+                    type: "success",
+                    showCancelButton: false,
+                    cancelButtonClass: 'btn-secondary waves-effect',
+                    confirmButtonClass: 'btn-success waves-effect waves-light',
+                    confirmButtonText: 'Yes!',
+                    closeOnConfirm: false
+                }, function () {
+
+
+
+                   window.location.href = '@Url.Action("CCCreate", "CurrencyConversion")';
+
+
+                 });
+
+
+                });
+        }
+    </script>
+}

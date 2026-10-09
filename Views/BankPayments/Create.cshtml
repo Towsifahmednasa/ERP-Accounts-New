@@ -1,0 +1,1648 @@
+@* Debit Voucher (bank/cash payment) laid out as wireframe screen 81 "Voucher Entry": voucher-type bar, voucher header,
+   payment details (the wireframe's payment-voucher variant), attachments, lines card with a running total footer,
+   simulation, Park/Submit. Every element id and the page scripts below are the same contract as before. *@
+
+@{
+    ViewBag.Title = "Debit Voucher Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .jr-types { background: #fff; border-radius: 12px; box-shadow: var(--sapContent_Shadow0); padding: 11px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .jr-types .lbl { font-size: 12px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--sapContent_LabelColor); }
+    .jr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px 24px; }
+    .jr-grid .customLabel p { margin: 2px 0 0; font-size: 12px; }
+    .jr-pay { flex: 1; min-width: 300px; border: 1px solid var(--sapList_BorderColor); border-radius: 9px; padding: 11px 13px; }
+    .jr-pay .jr-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px 18px; }
+    .jr-pay h5 { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 0 0 10px; }
+    .jr-pay label.form-control { background: #f5f6f7; }
+    #debitVoucher { table-layout: fixed; min-width: 1360px; }
+    #debitVoucher td { padding: 6px 8px; }
+    #debitVoucher td.hl { border-left-color: var(--sapPositiveColor); }
+    .jr-foot { padding: 10px 14px; border-top: 1px solid var(--sapList_BorderColor); display: flex; gap: 18px; flex-wrap: wrap; align-items: center; background: #fafbfc; font-size: 13px; }
+    .jr-file { display: flex; align-items: center; gap: 8px; border: 1px solid var(--sapList_BorderColor); border-radius: 8px; padding: 7px 11px; margin-bottom: 5px; font-size: 13px; }
+    .jr-file a { color: var(--sapLinkColor); font-weight: 600; text-decoration: none; }
+    .jr-file a:hover { text-decoration: underline; }
+</style>
+
+<div id="popDiv"></div>
+
+<div class="strip info" id="parkedStrip" style="display:none">
+    <svg width="16" height="16" style="flex:none;margin-top:1px"><use href="#s-alert"/></svg>
+    <div><b>Parked voucher.</b> It is saved as a draft and is not in the approval queue. Submit posts it; Park keeps it as a draft.</div>
+</div>
+
+<div class="strip err" id="periodStrip" style="display:none">
+    <svg width="16" height="16" style="flex:none;margin-top:1px;color:var(--sapNegativeColor)"><use href="#s-no"/></svg>
+    <div><b>Posting blocked &mdash; <span id="periodText"></span> is closed for financial accounting.</b>
+        Change the posting date to an open period, park the voucher as a draft, or re-open the period.
+        <div style="margin-top:7px"><a class="btn sm" href="@Url.Action("PeriodClose", "Journal")">Period-close status</a></div>
+    </div>
+</div>
+
+<div class="jr-types">
+    <span class="lbl">Voucher type</span>
+    <a class="btn" href="@Url.Action("JRCreate", "Journal")"><svg width="14" height="14"><use href="#s-doc"/></svg>Journal</a>
+    <a class="btn emph" href="@Url.Action("Create", "BankPayments")"><svg width="14" height="14"><use href="#s-money"/></svg>Debit Voucher</a>
+    <a class="btn" href="@Url.Action("CVCreate", "CreditVoucher")"><svg width="14" height="14"><use href="#s-dn"/></svg>Credit Voucher</a>
+    <a class="btn" href="@Url.Action("ContraEntry", "Contra")"><svg width="14" height="14"><use href="#s-up"/></svg>Contra</a>
+    <div style="margin-left:auto">
+        <a class="btn" href="@Url.Action("Index", "BankPayments")"><span class="fa fa-share"></span> Back to List</a>
+    </div>
+</div>
+
+<div class="opsect">
+    <h4>Voucher header</h4>
+    <div class="jr-grid">
+        <div class="fld">
+            <label for="ddlCompany">Company <span class="required">*</span></label>
+            <div id="divCompany"><select class="form-select form-select-sm select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select></div>
+        </div>
+        <div class="fld">
+            <label for="ddlFinansialYear">Financial Year <span class="required">*</span></label>
+            <div id="divFinansialYear"><select class="form-select form-select-sm select2" onchange="LoadDaterangebyFiscal()" style="width: 100%;" id="ddlFinansialYear"></select></div>
+        </div>
+        <div class="fld">
+            <label for="txtPostingDate">Posting Date <span class="required">*</span></label>
+            <div id="divPostingDate"><input type="text" id="txtPostingDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /></div>
+        </div>
+        <div class="fld" id="divIsMannualVoucher">
+            <label for="txtVoucherNo">Voucher No.</label>
+            <input type="text" id="txtVoucherNo" class="form-control form-control-sm" />
+        </div>
+        <div class="fld" id="divCurrency">
+            <label for="ddlCurrency">Currency <span class="required">*</span></label>
+            <select class="form-select form-select-sm select2" style="width: 100%;" id="ddlCurrency"></select>
+        </div>
+        <div class="fld">
+            <label for="txtConversionRate">Conversion Rate <span class="required">*</span></label>
+            <div id="divtConversionRate"><input type="text" readonly value="0" id="txtConversionRate" class="form-control form-control-sm" /></div>
+        </div>
+    </div>
+</div>
+
+<div class="opsect">
+    <h4>Payment details</h4>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px" id="divTransactionType">
+        <span class="mini" style="font-weight:700;letter-spacing:.4px;text-transform:uppercase">Pay from</span>
+        <input type="radio" name="rbTransactionType" value="Bank" id="bankRadio" />
+        <label for="bankRadio" style="font-weight:bold">Bank</label>
+        <input type="radio" id="cashRadio" name="rbTransactionType" value="Cash">
+        <label for="cashRadio" style="font-weight:bold">Cash</label>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:stretch">
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapBrandColor)"><use href="#s-money"/></svg>Bank</h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlBankAccount">Bank Account <span class="required">*</span></label>
+                    <div id="divBankAccount"><select class="form-select form-select-sm select2" onchange="LoadBankIndoById()" style="width: 100%;" id="ddlBankAccount"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="lblBankBalance">Bank Balance</label>
+                    <label class="form-control form-control-sm" id="lblBankBalance"></label>
+                </div>
+                <div class="fld">
+                    <label for="txtChequeNo">Cheque No <span class="required">*</span></label>
+                    <div id="divCheque"><input type="text" id="txtChequeNo" class="form-control form-control-sm" /></div>
+                </div>
+                <div class="fld">
+                    <label for="txtChequeDate">Cheque Date <span class="required">*</span></label>
+                    <div id="divChequeDate"><input type="text" id="txtChequeDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /></div>
+                </div>
+                <div class="fld">
+                    <label for="lblBankName">Bank Name</label>
+                    <label class="form-control form-control-sm" id="lblBankName"></label>
+                </div>
+                <div class="fld">
+                    <label for="lblBranchName">Branch Name</label>
+                    <label class="form-control form-control-sm" id="lblBranchName"></label>
+                </div>
+            </div>
+        </div>
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapBrandColor)"><use href="#s-money"/></svg>Cash</h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlCashAccount">Cash Account <span class="required">*</span></label>
+                    <div id="divCashAccount"><select class="form-select form-select-sm select2" style="width: 100%;" onchange="LoadCashInfoIndoById()" id="ddlCashAccount"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="lblCashBalance">Cash Balance</label>
+                    <label class="form-control form-control-sm" id="lblCashBalance"></label>
+                </div>
+                <div class="fld" id="divRefNo">
+                    <label for="txtRefNo">Ref. No</label>
+                    <input type="text" id="txtRefNo" class="form-control form-control-sm" />
+                </div>
+                <div class="fld" id="divRefDate">
+                    <label for="txtRefDate">Ref. Date</label>
+                    <input type="text" id="txtRefDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fld" style="margin-top:12px;max-width:640px">
+        <label for="txtNaration">Narration <span class="required">*</span></label>
+        <div id="divNaration"><textarea id="txtNaration" rows="2" class="form-control form-control-sm"> </textarea></div>
+    </div>
+</div>
+
+<div class="opsect">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <svg width="15" height="15" style="color:var(--sapBrandColor)"><use href="#s-doc"/></svg>
+        <b style="font-size:13px">Attachments</b><span class="mini" id="attachCount"></span>
+        <button type="button" class="btn sm" id="btnAttach" style="margin-left:auto" onclick="$('#attachFile').click()">Add</button>
+        <input type="file" id="attachFile" style="display:none" onchange="UploadAttachment(this)" />
+    </div>
+    <div id="attachList"></div>
+    <div class="mini" id="attachHint">Save the voucher first, then attach files (max 10 MB each).</div>
+</div>
+
+<div class="tblcard" style="margin-bottom:14px">
+    <div class="tbar">
+        <h3>Voucher lines <span class="cnt" id="lblLineCount">(0 lines)</span></h3>
+        <div class="tools">
+            <button type="button" class="btn sm" onclick="AddRow()"><svg width="14" height="14"><use href="#s-plus"/></svg>Add line</button>
+        </div>
+    </div>
+    <div class="tblwrap">
+        <table class="sap" id="debitVoucher">
+            <thead>
+                <tr>
+                    <th class="num" style="width: 44px">Ln</th>
+                    <th style="width: 320px">GL</th>
+                    <th style="width: 180px">Subsidiary Ledger</th>
+                    <th style="width: 180px">Cost Center</th>
+                    <th style="width: 180px">Ref. Info.</th>
+                    <th class="num" style="width: 120px">Amount (BDT)</th>
+                    <th class="num" style="width: 120px">Amount (FC)</th>
+                    <th>Remarks</th>
+                    <th style="width: 44px"></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="jr-foot">
+        <span class="objstat neu" id="balStatus"><svg width="15" height="15"><use href="#s-alert"/></svg><b>No amounts yet</b></span>
+        <span>Total (BDT) <b id="lblTotalAmountBDT">0</b></span>
+        <span>Total (FC) <b id="lblTotalAmountFC">0</b></span>
+        <span class="mini" id="lblPaySource"></span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+            <a class="btn tr" href="@Url.Action("Index", "BankPayments")">Cancel</a>
+            <button type="button" class="btn" onclick="SimulateJournal()">Simulate</button>
+            <button type="button" class="btn" id="btnPark" onclick="SaveB_Payment('Parked')">Park</button>
+            <button type="button" class="btn emph" id="Reject" onclick="SaveB_Payment('Posted')">Process Payment</button>
+        </div>
+    </div>
+</div>
+
+@* Simulation: built from the lines + the credit side the posting SP will add automatically. Nothing is sent to the server. *@
+<div class="opsect" id="simSection" style="display:none">
+    <h4>Simulation &mdash; document preview <span class="mini" style="font-weight:400">&middot; nothing is saved</span></h4>
+    <table class="sap" style="font-size:13px">
+        <thead><tr><th>Account</th><th class="num">Dr (BDT)</th><th class="num">Cr (BDT)</th><th>Check</th></tr></thead>
+        <tbody id="simBody"></tbody>
+    </table>
+    <div id="simChecks" style="margin-top:12px"></div>
+</div>
+
+@* hidden fiscal date range the balance lookups read *@
+<div style="display:none">
+    <input type="text" id="txtfrmDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+    <input type="text" id="txtToDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+</div>
+
+<input id="masterId" value="@ViewBag.MasterId" style="display:none" />
+@section Scripts
+{
+
+    <script type="text/javascript">
+        var coaDdlPendingLoads = 0;
+        var bpRowSeed = 1;
+        var isInitialDataLoading = false;
+
+        function setInitialLoadState(isLoading) {
+            isInitialDataLoading = isLoading;
+            $('#Reject, #btnPark').prop('disabled', isLoading);
+        }
+
+        var jrActionStatus = 'Posted';
+        var jrPeriodClosed = false;
+
+        // ---- FI period close: strip + lock; the server rejects a post into a closed month regardless ----
+        function CheckPeriod() {
+            var comID = $('#ddlCompany').val();
+            var d = $('#txtPostingDate').val();
+            if (!comID || comID == '0' || !d) { return; }
+            $.get('@Url.Action("PeriodCloseStatus", "Journal")', { companyId: comID, date: d }, function (r) {
+                jrPeriodClosed = r.closed;
+                $('#periodText').text('posting period of ' + d);
+                $('#periodStrip').toggle(r.closed);
+                $('#Reject').prop('disabled', r.closed || isInitialDataLoading);
+            });
+        }
+
+        // ---- Attachments (shared voucher-attachment endpoints; enabled once the voucher is saved) ----
+        function fmtSize(b) { return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+
+        function LoadAttachments() {
+            if (!(MasterId > 0)) { $('#btnAttach').prop('disabled', true); return; }
+            $('#attachHint').hide();
+            $.get('@Url.Action("VoucherAttachmentList", "Journal")', { masterId: MasterId }, function (list) {
+                var h = '';
+                for (var i = 0; i < list.length; i++) {
+                    h += '<div class="jr-file"><svg width="14" height="14" style="color:#556b82;flex:none"><use href="#s-doc"/></svg>'
+                        + '<a href="@Url.Action("DownloadVoucherAttachment", "Journal")?id=' + list[i].AttachmentId + '">' + $('<div>').text(list[i].FileName).html() + '</a>'
+                        + '<span class="mini" style="margin-left:auto">' + fmtSize(list[i].FileSize) + '</span>'
+                        + '<button type="button" class="btn icon" style="width:26px;height:26px" title="Remove" onclick="DeleteAttachment(' + list[i].AttachmentId + ')"><svg width="13" height="13"><use href="#s-no"/></svg></button></div>';
+                }
+                $('#attachList').html(h);
+                $('#attachCount').text(list.length ? list.length + ' file' + (list.length > 1 ? 's' : '') : '');
+            });
+        }
+
+        function UploadAttachment(input) {
+            if (!input.files || !input.files.length) { return; }
+            var f = input.files[0];
+            input.value = '';
+            if (f.size > 10 * 1024 * 1024) { toastr.warning('File is larger than 10 MB.'); return; }
+            var fd = new FormData();
+            fd.append('masterId', MasterId);
+            fd.append('file', f);
+            $.ajax({
+                url: '@Url.Action("UploadVoucherAttachment", "Journal")',
+                type: 'POST', data: fd, processData: false, contentType: false,
+                success: function (r) {
+                    if (r.isSuccess) { LoadAttachments(); } else { toastr.error(r.msg || 'Upload failed.'); }
+                },
+                error: function () { toastr.error('Upload failed.'); }
+            });
+        }
+
+        function DeleteAttachment(id) {
+            $.post('@Url.Action("DeleteVoucherAttachment", "Journal")', { id: id }, function (r) {
+                if (r.isSuccess) { LoadAttachments(); } else { toastr.error('Delete failed.'); }
+            });
+        }
+
+        // ---- Simulation: the Dr lines on screen plus the Cr side the posting SP adds from the selected bank/cash account ----
+        function jrEsc(s) { return $('<div>').text(s == null ? '' : s).html(); }
+        function jrMoney(n) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 4 }); }
+        function jrIcon(ok) { return '<svg width="13" height="13"><use href="' + (ok ? '#s-ok' : '#s-no') + '"/></svg>'; }
+
+        function RenderSimulation() {
+            var body = '', total = 0, missingGl = 0, zeroAmt = 0;
+            $('#debitVoucher tbody tr').each(function () {
+                var id = $(this).attr('id').substring(3);
+                var accId = parseFloat($('#COAId_' + id).val()) || 0;
+                var amt = parseFloat($('#amount_' + id).val()) || 0;
+                var problem = !accId ? 'Select GL' : amt <= 0 ? 'Amount is 0' : '';
+                if (!accId) { missingGl++; }
+                if (amt <= 0) { zeroAmt++; }
+                total += amt;
+                body += '<tr><td>' + (accId ? jrEsc($('#COAId_' + id + ' option:selected').text()) : '<span class="mini">&mdash;</span>') + '</td>'
+                    + '<td class="num">' + jrMoney(amt) + '</td><td class="num">&mdash;</td>'
+                    + '<td><span class="objstat ' + (problem ? 'neg' : 'pos') + '">' + jrIcon(!problem) + (problem || 'ok') + '</span></td></tr>';
+            });
+
+            var isBank = $('#bankRadio').is(':checked');
+            var srcSel = isBank ? '#ddlBankAccount' : '#ddlCashAccount';
+            var srcOk = (parseFloat($(srcSel).val()) || 0) > 0;
+            var srcName = srcOk ? $(srcSel + ' option:selected').text() : (isBank ? 'Bank account not selected' : 'Cash account not selected');
+            var balance = parseFloat((isBank ? $('#lblBankBalance') : $('#lblCashBalance')).text()) || 0;
+            body += '<tr><td>' + jrEsc(srcName) + ' <span class="mini">&middot; ' + (isBank ? 'bank' : 'cash') + ', added on posting</span></td>'
+                + '<td class="num">&mdash;</td><td class="num">' + jrMoney(total) + '</td>'
+                + '<td><span class="objstat ' + (srcOk ? 'pos' : 'neg') + '">' + jrIcon(srcOk) + (srcOk ? 'ok' : 'Select account') + '</span></td></tr>';
+            body += '<tr class="tot-row"><td>Document total</td><td class="num">' + jrMoney(total) + '</td><td class="num">' + jrMoney(total) + '</td><td></td></tr>';
+            $('#simBody').html(body);
+
+            var checks = [
+                { ok: missingGl === 0, t: 'Every line has a GL account', d: missingGl ? missingGl + ' line(s) without GL' : '' },
+                { ok: zeroAmt === 0, t: 'Every line has an amount', d: zeroAmt ? zeroAmt + ' line(s) with amount 0' : '' },
+                { ok: srcOk, t: (isBank ? 'Bank' : 'Cash') + ' account selected', d: '' },
+                { ok: total > 0 && total <= balance, t: 'Within available balance', d: 'Total ' + jrMoney(total) + ' vs balance ' + jrMoney(balance) },
+                { ok: (parseFloat($('#txtConversionRate').val()) || 0) > 0, t: "Today's conversion rate declared", d: '' },
+                { ok: $.trim($('#txtNaration').val()) !== '', t: 'Narration entered', d: '' }
+            ];
+            var html = '';
+            $.each(checks, function (i, c) {
+                html += '<div style="display:flex;gap:8px;margin-top:8px"><span class="objstat ' + (c.ok ? 'pos' : 'neg') + '">' + jrIcon(c.ok) + '</span>'
+                    + '<div><b style="font-size:13px"' + (c.ok ? '' : ' class="neg"') + '>' + jrEsc(c.t) + '</b>'
+                    + (c.d ? '<div class="mini' + (c.ok ? '' : ' neg') + '">' + jrEsc(c.d) + '</div>' : '') + '</div></div>';
+            });
+            $('#simChecks').html(html);
+        }
+
+        function SimulateJournal() {
+            RenderSimulation();
+            $('#simSection').show()[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        $(document).on('change', '[id^=COAId_]', function () {
+            if ($('#simSection').is(':visible')) { RenderSimulation(); }
+        });
+
+        let MasterId = $('#masterId').val();
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+
+            if (MasterId > 0) {
+                setInitialLoadState(true);
+                LoadCurrencyEdit().then(function () {
+                    return GetBankPaymentMaster(MasterId);
+                }).fail(function () {
+                    setInitialLoadState(false);
+                    toastr.error("Failed to load payment master data.");
+                });
+                $("#Reject").html('<i class="fa fa-edit"></i> Update');
+            } else {
+                LoadCurrency();
+                setInitialLoadState(false);
+                // Change the button to "Submit" and set the icon to fa-check
+                $("#Reject").html('<i class="fa fa-check"></i> Process Payment');
+            }
+
+            LoadAttachments();
+            $('#txtPostingDate, #ddlCompany').on('change', CheckPeriod);
+            setTimeout(CheckPeriod, 600); // after LoadCompany has selected the default company
+
+        });
+
+        function LoadCurrencyEdit() {
+            return $.ajax({
+                url: "/Utility/GetCurrency",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                success: function (data) {
+
+                    $('#ddlCurrency').empty();
+                    $('#ddlCurrency').append("<option value='0'>--Select Currency--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlCurrency').append($("<option></option>").val(data[i].CurrencyId).html(data[i].CurrencyName));
+                    }
+                }
+            });
+        }
+        function GetBankPaymentMaster(id) {
+
+            var urlpath = '@Url.Action("GetBankPaymentMasterId", "BankPayments")';
+            return $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "Get",
+                data: { id: id },
+                success: function (data) {
+                    $("#ddlCompany").val(data.CompanyInfoId).trigger('change.select2');
+
+                    LoadDDlbyCom({ autoSelectFiscal: false }).done(function () {
+                        $("#ddlCompany").prop("disabled", true);
+
+                        $("#ddlFinansialYear").val(data.FinancialYearId).trigger('change.select2');
+                        $("#ddlFinansialYear").prop("disabled", true);
+
+                        LoadDaterangebyFiscal(data.FinancialYearId).done(function () {
+                            $('#txtVoucherNo').val((data.VoucherNo));
+                     /*       $("#txtVoucherNo").prop("disabled", true);*/
+
+
+                            $('#txtPostingDate').val((data.PostingDateStr));
+                            //$("#txtPostingDate").prop("disabled", true);
+                            $("#ddlCurrency").val(data.CurrencyId).trigger('change.select2');
+                            $("#ddlCurrency").prop("disabled", true);
+                            $('#txtConversionRate').val(data.CurrencyCovRate);
+                            $("#txtConversionRate").prop("disabled", true);
+
+
+                            $("#ddlBankAccount").val(data.BankAccountId).trigger('change.select2');
+                            //$("#ddlBankAccount").prop("disabled", true);
+
+                            $('#txtChequeNo').val(data.ChequeNo);
+                            $('#txtChequeDate').val(data.ChequeDateStr);
+                            $('#txtNaration').val(data.Narration);
+
+
+
+
+
+                            $("#ddlCashAccount").val(data.CashAccountId).trigger('change.select2');
+                            //    $("#ddlCashAccount").prop("disabled", true);
+                            //alert(data.RefNo);
+                            $('#txtRefNo').val(data.RefNo);
+                            $('#txtRefDate').val(data.RefDateStr);
+
+
+
+                            var balanceRequest = $.Deferred().resolve().promise();
+                            if (data.VoucherCategoryID == 1)
+                            {
+                                 $('#bankRadio').prop('checked', true);
+
+                                $("#ddlCashAccount").prop("disabled", true);
+                                $("#txtRefNo").prop("disabled", true);
+                                $("#txtRefDate").prop("disabled", true);
+                                $("#txtRefNo").val("");
+
+                                balanceRequest = LoadBankIndoById(data.BankAccountId);
+                            }
+                            if (data.VoucherCategoryID == 2) {
+                                $('#cashRadio').prop('checked', true);
+
+                                $("#ddlBankAccount").prop("disabled", true);
+                                $("#ddlBankAccount").val("0");
+
+                             $("#lblBankBalance").val("0");
+                                $("#txtChequeNo").val("");
+                                $("#txtChequeDate").val("");
+                                $("#txtChequeNo").prop("disabled", true);
+                                $("#txtChequeDate").prop("disabled", true);
+                               $("#lblBankName").val("");
+                                $("#lblBranchName").val("");
+
+                                balanceRequest = LoadCashInfoIndoById(data.CashAccountId);
+                            }
+                            //$("#bankRadio").prop("disabled", true);
+                            //$("#cashRadio").prop("disabled", true);
+
+                            balanceRequest.always(function () {
+                                LoadPaymentDetailsRows(data.DetailsInfo || []).always(function () {
+                                    $('#debitVoucher tbody tr').each(function () {
+                                        var idr = $(this).attr('id');
+                                        var id = idr.substring(3);
+
+                                        var AccountId = isNaN(parseFloat($('#COAId_' + id).val())) ? 0 : parseFloat($('#COAId_' + id).val());
+
+                                        if (AccountId === 0) {
+                                            RemoveRow(id);
+                                        }
+
+                                    });
+                                    CalculateAll();
+                                    if (data.ActionStatus == 'Parked') { $('#parkedStrip').show(); }
+                                    setInitialLoadState(false);
+                                    CheckPeriod();
+                                });
+                            });
+                        }).fail(function () {
+                            setInitialLoadState(false);
+                            toastr.error("Failed to load fiscal date range.");
+                        });
+                    }).fail(function () {
+                        setInitialLoadState(false);
+                        toastr.error("Failed to load company related data.");
+                    });
+                },
+                error: function () {
+                    setInitialLoadState(false);
+                    toastr.error("Failed to load payment master data.");
+                }
+
+            });
+        }
+
+        function LoadPaymentDetailsRows(details) {
+            var sequence = $.Deferred().resolve().promise();
+            for (var i = 0; i < details.length; i++) {
+                (function (detail) {
+                    sequence = sequence.then(function () {
+                        var coaText = detail.AccountName || detail.AccountFullName || '';
+                        return AddRow(detail.AccountId, coaText).then(function (tr) {
+                            return GetDDlbyCOAId(tr, {
+                                costCenterId: detail.CostCenterId,
+                                refInfoId: detail.RefInfoInd,
+                                subsidiaryId: detail.SubsidoryLedgerId
+                            }).always(function () {
+                                $('#amount_' + tr).val(detail.Amount);
+                                $('#remarks_' + tr).val(detail.Remarks);
+                            });
+                        });
+                    });
+                })(details[i]);
+            }
+            return sequence;
+        }
+
+        $('input:radio[name=rbTransactionType]').change(function () {
+            if (this.value == 'Bank') {
+                // Clear and reset Cash side
+                $("#ddlCashAccount").prop("disabled", true);
+                $("#ddlCashAccount").val("0").trigger('change.select2');
+                $("#lblCashBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                $("#txtRefNo").prop("disabled", true).val("");
+                $("#txtRefDate").prop("disabled", true);
+
+                // Enable Bank side
+                $("#ddlBankAccount").prop("disabled", false);
+                $("#txtChequeNo").prop("disabled", false);
+                $("#txtChequeDate").prop("disabled", false);
+
+                if ($("#ddlBankAccount").val() && $("#ddlBankAccount").val() != "0") {
+                    LoadBankIndoById();
+                } else {
+                    $("#lblBankBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                    $('#lblBankName').html("");
+                    $('#lblBranchName').html("");
+                }
+            }
+            else if (this.value == 'Cash') {
+                // Clear and reset Bank side
+                $("#ddlBankAccount").prop("disabled", true);
+                $("#ddlBankAccount").val("0").trigger('change.select2');
+                $("#lblBankBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                $('#lblBankName').html("");
+                $('#lblBranchName').html("");
+                $("#txtChequeNo").prop("disabled", true).val("");
+                $("#txtChequeDate").prop("disabled", true);
+
+                // Enable Cash side
+                $("#ddlCashAccount").prop("disabled", false);
+                $("#txtRefNo").prop("disabled", false);
+                $("#txtRefDate").prop("disabled", false);
+
+                if ($("#ddlCashAccount").val() && $("#ddlCashAccount").val() != "0") {
+                    LoadCashInfoIndoById();
+                } else {
+                    $("#lblCashBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                }
+            }
+        });
+
+        function LoadCurrency() {
+            return $.ajax({
+                url: "/Utility/GetCurrency",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                success: function (data) {
+
+
+                    let totalCurrencyRate = 0;
+                    for (var i = 0; i < data.length; i++) {
+                        totalCurrencyRate += parseFloat(data[i].CurrencyRate) || 0;
+                    }
+
+                    // Check if totalCurrencyRate is 0
+                    if (totalCurrencyRate === 0) {
+                        toastr.options = {
+                            "closeButton": true,
+                            "progressBar": true,
+                            "positionClass": "toast-top-center",
+                            "timeOut": "5000"
+                        };
+                        toastr.warning("Today's conversion rate is not declared yet.");
+                        return; // Exit the function to prevent further execution
+                    }
+
+                    $('#ddlCurrency').empty();
+                    $('#ddlCurrency').append("<option value='0'>--Select Currency--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+                        // Store the CurrencyRate as a data attribute on the option
+                        $('#ddlCurrency').append($("<option></option>")
+                            .val(data[i].CurrencyId)
+                            .html(data[i].CurrencyName)
+                            .attr('data-rate', data[i].CurrencyRate)); // Set CurrencyRate as data-rate
+                    }
+
+                    $('#ddlCurrency').prop('selectedIndex', 1);
+
+                    // Set default conversion rate based on the selected currency
+                    let initialRate = $('#ddlCurrency option:selected').data('rate');
+                    $('#txtConversionRate').val(initialRate);
+
+                    // Change event to update txtConversionRate when the currency is changed
+                    $('#ddlCurrency').change(function () {
+                        var selectedRate = $('#ddlCurrency option:selected').data('rate');
+                        $('#txtConversionRate').val(selectedRate);
+                        CalculateAll();
+                    });
+                }
+            });
+        }
+
+        function LoadDDlbyCom(options) {
+            var settings = options || {};
+            var autoSelectFiscal = settings.autoSelectFiscal !== false;
+
+
+                $("#overlay").fadeIn(300);
+
+
+            $('#debitVoucher tbody tr').each(function () {
+
+
+
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+                $('#amount_' + id).val(0);
+                $('#remarks_' + id).val('');
+
+                $('#tr_' + id).remove();
+            });
+            bpRowSeed = 1;
+
+            var requests = [
+                LoadFinansialYear(autoSelectFiscal),
+                LoadBankAccount(),
+                LoadCashAccount()
+            ];
+
+            return $.when.apply($, requests).then(function () {
+                return AddRow();
+            }).fail(function () {
+                toastr.error("Failed to load company dependent dropdowns.");
+            }).always(function () {
+                $("#overlay").fadeOut(300);
+            });
+        }
+        function LoadFinansialYear(autoSelectFirst) {
+            var shouldAutoSelect = autoSelectFirst !== false;
+            var companyId = $("#ddlCompany").val();
+            return $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+
+                    if (data.length > 0 && shouldAutoSelect) {
+                        // Select the first real financial year (index 1)
+                        $('#ddlFinansialYear').val(data[0].FinancialYearId).trigger('change');
+                    }
+                }
+            });
+        }
+        function LoadBankAccount() {
+            var companyId = $("#ddlCompany").val();
+            return $.ajax({
+                url: "/Utility/GetBankAccountComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                success: function (data) {
+
+                    $('#ddlBankAccount').empty();
+                    $('#ddlBankAccount').append("<option value='0'>--Select Bank Account--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlBankAccount').append($("<option></option>").val(data[i].BankAccountId).html(data[i].BankAccountName));
+                    }
+                }
+            });
+        }
+        function LoadCashAccount() {
+            var companyId = $("#ddlCompany").val();
+            return $.ajax({
+                url: "/Utility/GetCashAccountComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                success: function (data) {
+
+                    $('#ddlCashAccount').empty();
+                    $('#ddlCashAccount').append("<option value='0'>--Select Cash Account--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlCashAccount').append($("<option></option>").val(data[i].CashAccountId).html(data[i].CashAccountName));
+                    }
+                }
+            });
+        }
+
+
+        function LoadDaterangebyFiscal(financialYearId) {
+            var companyId = $("#ddlCompany").val();
+            var FinancialYearId = financialYearId || $("#ddlFinansialYear").val();
+            return $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, FinancialYearId: FinancialYearId },
+                success: function (data) {
+
+                    $('#txtfrmDate').val((data.StartDate));
+                    $('#txtToDate').val((data.EndDate));
+
+                    if ($('#bankRadio').is(':checked')) {
+                        $("#lblCashBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                        if ($("#ddlBankAccount").val() && $("#ddlBankAccount").val() != "0") {
+                            LoadBankIndoById();
+                        }
+                    } else if ($('#cashRadio').is(':checked')) {
+                        $("#lblBankBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                        if ($("#ddlCashAccount").val() && $("#ddlCashAccount").val() != "0") {
+                            LoadCashInfoIndoById();
+                        }
+                    }
+                }
+            });
+        }
+
+        function LoadBankIndoById(bankAccountId) {
+            if ($('#cashRadio').is(':checked')) {
+                $("#lblBankBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                $('#lblBankName').html("");
+                $('#lblBranchName').html("");
+                return;
+            }
+
+            var CompanyID = $('#ddlCompany').val();
+            var BankAccountID = bankAccountId || $('#ddlBankAccount').val();
+            var FinancialYearID = $('#ddlFinansialYear').val();
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+            var BankNAme = $("#ddlBankAccount option:selected").text();
+            var BankBookFinancialYearStartDate = $('#txtfrmDate').val();
+
+            if (!BankAccountID || BankAccountID == "0") {
+                $("#lblBankBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                $('#lblBankName').html("");
+                $('#lblBranchName').html("");
+                return;
+            }
+
+            var urlpath = '@Url.Action("GetBankInfoMasterId", "BankPayments")';
+            return $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "Get",
+                data: { CompanyID: CompanyID, BankAccountID: BankAccountID, FinancialYearID: FinancialYearID, FromDate: FromDate, ToDate: ToDate, BankNAme: BankNAme, BankBookFinancialYearStartDate: BankBookFinancialYearStartDate},
+                success: function (data) {
+                    if ($('#cashRadio').is(':checked')) {
+                        $("#lblBankBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                        $('#lblBankName').html("");
+                        $('#lblBranchName').html("");
+                        return;
+                    }
+
+                    var blnc = parseFloat(data.BankBlnc);
+                    var displayBlnc = isNaN(blnc) ? "0.00" : blnc.toFixed(2);
+                    $("#lblBankBalance").html(displayBlnc).val(displayBlnc);
+
+                    if (isNaN(blnc) || blnc <= 0) {
+                        $("#lblBankBalance").css({
+                            "color": "#dc3545",
+                            "font-weight": "bold",
+                            "border": "1px solid #dc3545",
+                            "background-color": "#fff2f2"
+                        });
+                    } else {
+                        $("#lblBankBalance").css({
+                            "color": "#198754",
+                            "font-weight": "bold",
+                            "border": "1px solid #ced4da",
+                            "background-color": "#f8fff8"
+                        });
+                    }
+
+                    $('#lblBankName').html(data.BankName || "");
+                    $('#lblBranchName').html(data.BranchName || "");
+                }
+            });
+        }
+
+        function LoadCashInfoIndoById(cashAccountId) {
+            if ($('#bankRadio').is(':checked')) {
+                $("#lblCashBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                return;
+            }
+
+            var CompanyID = $('#ddlCompany').val();
+            var CashAccountID = cashAccountId || $('#ddlCashAccount').val();
+            var FinancialYearID = $('#ddlFinansialYear').val();
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+            var CashbookNAme = $("#ddlcashAccount option:selected").text();
+            var CashBookFinancialYearStartDate = $('#txtfrmDate').val();
+
+            if (!CashAccountID || CashAccountID == "0") {
+                $("#lblCashBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                return;
+            }
+
+            var urlpath = '@Url.Action("GetCashInfoIndoById", "BankPayments")';
+            return $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "Get",
+                data: { CompanyID: CompanyID, CashAccountID: CashAccountID, FinancialYearID: FinancialYearID, FromDate: FromDate, ToDate: ToDate, CashbookNAme: CashbookNAme, CashBookFinancialYearStartDate: CashBookFinancialYearStartDate},
+                success: function (data) {
+                    if ($('#bankRadio').is(':checked')) {
+                        $("#lblCashBalance").html("").val("").css({ "color": "", "font-weight": "", "border": "", "background-color": "" });
+                        return;
+                    }
+
+                    var blnc = parseFloat(data.BankBlnc);
+                    var displayBlnc = isNaN(blnc) ? "0.00" : blnc.toFixed(2);
+                    $("#lblCashBalance").html(displayBlnc).val(displayBlnc);
+
+                    if (isNaN(blnc) || blnc <= 0) {
+                        $("#lblCashBalance").css({
+                            "color": "#dc3545",
+                            "font-weight": "bold",
+                            "border": "1px solid #dc3545",
+                            "background-color": "#fff2f2"
+                        });
+                    } else {
+                        $("#lblCashBalance").css({
+                            "color": "#198754",
+                            "font-weight": "bold",
+                            "border": "1px solid #ced4da",
+                            "background-color": "#f8fff8"
+                        });
+                    }
+                }
+            });
+        }
+
+        function AddRow(selectedAccountId, selectedAccountText) {
+            var values = $("#debitVoucher tbody tr")
+                .map(function () { return parseInt($(this).attr('id').substring(3)); }).get();
+            if (values.length > 0) {
+                var nextFromDom = Math.max.apply(Math, values) + 1;
+                if (bpRowSeed < nextFromDom) {
+                    bpRowSeed = nextFromDom;
+                }
+            }
+            var tr = bpRowSeed++;
+            var urlpath = '@Url.Action("AddRowForCOA", "BankPayments")';
+            return $.ajax({
+                url: urlpath,
+                type: "Get",
+                dataType: 'html',
+                data: { tr: tr }
+            }).then(function (data) {
+                $('#debitVoucher tbody').append(data);
+                return $.when(LoadCoaRow("COAId_" + tr, selectedAccountId, selectedAccountText)).then(function () {
+                    InitCostCenterSelect2(tr);
+                    InitRefInfoSelect2(tr);
+                    InitSubsidiarySelect2(tr);
+
+                    SerialTable();
+                    CalculateAll();
+                    return tr;
+                });
+            });
+
+        }
+
+        function RemoveRow(id) {
+
+
+            var trLength = $('#debitVoucher tbody tr:visible').length;
+
+            if (trLength == 1) {
+                $('#COAId_' + id).val(0).trigger('change');
+                $('#CostCenter_' + id).val(0).trigger('change');
+                $('#SubsidoryLedger_' + id).val(0).trigger('change');
+
+                $('#amount_' + id).val(0);
+                $('#remarks_' + id).val('');
+
+                CalculateAll();
+
+            }
+
+            if (trLength > 1) {
+
+                var detailsId = $('#details_' + id).val();
+                if (detailsId > 0) {
+                    var glId = isNaN(parseFloat($('#COAId_' + id).val())) ? 0 : parseFloat($('#COAId_' + id).val());
+
+
+                }
+                $('#tr_' + id).remove();
+                SerialTable();
+                CalculateAll();
+
+            } else {
+                return;
+            }
+
+        }
+
+        function SerialTable() {
+            $('#debitVoucher tbody tr').each(function (index, element) {
+
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+                $('#ts_' + id).html(index + 1);
+
+
+            });
+        }
+        function CalculateAll() {
+
+            var ConversionRate = isNaN(parseFloat($('#txtConversionRate').val())) ? 0 : parseFloat($('#txtConversionRate').val());
+            var grandTotalFC = 0;
+            var grandTotal = 0;
+            var proCout = 0;
+            $('#debitVoucher tbody tr').each(function () {
+
+
+
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+
+                var amount = isNaN(parseFloat($('#amount_' + id).val())) ? 0 : parseFloat($('#amount_' + id).val());
+                var amount = isNaN(parseFloat($('#amount_' + id).val())) ? 0 : parseFloat($('#amount_' + id).val());
+
+                var amountFC = ConversionRate * amount;
+                $('#amount_FC_' + id).val(amountFC.toFixed(4));
+
+                grandTotal += amount;
+                grandTotalFC += amountFC;
+
+
+
+
+
+            });
+            $('#lblTotalAmountBDT').html(grandTotal.toFixed(4));
+            $('#lblTotalAmountFC').html(grandTotalFC.toFixed(4));
+
+            // wireframe 81: line count beside the table title, balance status + pay source in the footer
+            var lines = $('#debitVoucher tbody tr').length;
+            $('#lblLineCount').text('(' + lines + (lines == 1 ? ' line' : ' lines') + ' · all Dr)');
+            var isBank = $('#bankRadio').is(':checked');
+            var balance = parseFloat((isBank ? $('#lblBankBalance') : $('#lblCashBalance')).text()) || 0;
+            var srcName = $((isBank ? '#ddlBankAccount' : '#ddlCashAccount') + ' option:selected').text();
+            $('#lblPaySource').text(srcName && srcName.indexOf('--') !== 0 ? 'Pays from ' + srcName + ' · balance ' + balance.toFixed(2) : '');
+            var empty = grandTotal === 0;
+            var within = grandTotal > 0 && grandTotal <= balance;
+            $('#balStatus').attr('class', 'objstat ' + (empty ? 'neu' : within ? 'pos' : 'neg'))
+                .find('b').text(empty ? 'No amounts yet' : within ? 'Within balance' : 'Exceeds balance');
+            $('#balStatus use').attr('href', empty ? '#s-alert' : within ? '#s-ok' : '#s-no');
+            if ($('#simSection').is(':visible')) { RenderSimulation(); }
+        }
+
+        function InitDependentSelect2(config) {
+            var $ddl = $('#' + config.elementId);
+            if ($ddl.length === 0) {
+                return $.Deferred().resolve().promise();
+            }
+
+            if ($ddl.data('select2')) {
+                $ddl.select2('destroy');
+            }
+
+            $ddl.empty();
+            $ddl.append("<option value='0'>" + config.placeholder + "</option>");
+
+            $ddl.select2({
+                placeholder: config.placeholder,
+                width: '100%',
+                minimumInputLength: 1,
+                ajax: {
+                    url: config.autoUrl,
+                    dataType: 'json',
+                    delay: 250,
+                    cache: true,
+                    data: function (params) {
+                        return {
+                            accountId: $('#COAId_' + config.rowId).val() || 0,
+                            term: params.term || '',
+                            take: 50
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    id: item[config.valueField],
+                                    text: item[config.textField]
+                                };
+                            })
+                        };
+                    }
+                }
+            });
+
+            var selectedId = parseInt(config.selectedId, 10) || 0;
+            var accountId = parseInt($('#COAId_' + config.rowId).val(), 10) || 0;
+
+            if (selectedId <= 0 || accountId <= 0) {
+                $ddl.val('0').trigger('change.select2');
+                return $.Deferred().resolve().promise();
+            }
+
+            var requestData = { accountId: accountId };
+            requestData[config.idParam] = selectedId;
+
+            return $.ajax({
+                url: config.byIdUrl,
+                dataType: 'json',
+                type: "Get",
+                data: requestData,
+                success: function (item) {
+                    if (!item || !item[config.valueField]) {
+                        return;
+                    }
+
+                    if ((parseInt($('#COAId_' + config.rowId).val(), 10) || 0) !== accountId) {
+                        return;
+                    }
+
+                    var selectedOption = new Option(item[config.textField], item[config.valueField], true, true);
+                    $ddl.append(selectedOption).trigger('change.select2');
+                }
+            });
+        }
+
+        function InitCostCenterSelect2(rowId, selectedId) {
+            return InitDependentSelect2({
+                rowId: rowId,
+                elementId: 'CostCenter_' + rowId,
+                placeholder: '--Select Cost Center--',
+                autoUrl: '/Utility/GetCostCenterByCOAIdAuto',
+                byIdUrl: '/Utility/GetCostCenterByCOAIdById',
+                valueField: 'CostCenterId',
+                textField: 'CostCenterName',
+                idParam: 'costCenterId',
+                selectedId: selectedId
+            });
+        }
+
+        function InitRefInfoSelect2(rowId, selectedId) {
+            return InitDependentSelect2({
+                rowId: rowId,
+                elementId: 'RefInfo_' + rowId,
+                placeholder: '--Select Ref. No.--',
+                autoUrl: '/Utility/GetRefNoByCOAIdAuto',
+                byIdUrl: '/Utility/GetRefNoByCOAIdById',
+                valueField: 'ReferenceInfoId',
+                textField: 'ReferenceInfo',
+                idParam: 'referenceInfoId',
+                selectedId: selectedId
+            });
+        }
+
+        function InitSubsidiarySelect2(rowId, selectedId) {
+            return InitDependentSelect2({
+                rowId: rowId,
+                elementId: 'SubsidoryLedger_' + rowId,
+                placeholder: '--Select Subsidiary  Ledger --',
+                autoUrl: '/Utility/GetSubsidoryLedgerByCOAIdAuto',
+                byIdUrl: '/Utility/GetSubsidoryLedgerByCOAIdById',
+                valueField: 'SubsidiaryInfoId',
+                textField: 'SubsidiaryInfo',
+                idParam: 'subsidiaryInfoId',
+                selectedId: selectedId
+            });
+        }
+
+        function LoadCoaRow(elementId, selectedAccountId, selectedAccountText) {
+            var $ddl = $('#' + elementId);
+            if ($ddl.length === 0) {
+                return $.Deferred().resolve().promise();
+            }
+
+            if ($ddl.data('select2')) {
+                $ddl.select2('destroy');
+            }
+
+            $ddl.empty();
+            $ddl.append("<option value='0'>--Select GL--</option>");
+
+            $ddl.select2({
+                placeholder: '--Select GL--',
+                width: '100%',
+                minimumInputLength: 1,
+                ajax: {
+                    url: "/Utility/GetCOAALLComIdAuto",
+                    dataType: 'json',
+                    delay: 250,
+                    cache: true,
+                    data: function (params) {
+                        return {
+                            companyId: $("#ddlCompany").val(),
+                            term: params.term || '',
+                            take: 50
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    id: item.AccountId,
+                                    text: item.AccountName,
+                                    subControlName: item.SubControlName || ''
+                                };
+                            })
+                        };
+                    }
+                },
+                templateResult: function (item) {
+                    if (item.loading || !item.id) {
+                        return item.text;
+                    }
+
+                    if (!item.subControlName) {
+                        return item.text;
+                    }
+
+                    var $container = $('<div></div>');
+                    $container.append($('<div style="font-size:11px;color:#6c757d"></div>').text(item.subControlName));
+                    $container.append($('<div></div>').text(item.text));
+                    return $container;
+                },
+                templateSelection: function (item) {
+                    return item.text || '--Select GL--';
+                }
+            });
+
+            var selectedId = parseInt(selectedAccountId, 10);
+            if (selectedId > 0) {
+                var selectedText = selectedAccountText || '';
+                if (selectedText) {
+                    var selectedOption = new Option(selectedText, selectedId, true, true);
+                    $ddl.append(selectedOption).trigger('change.select2');
+                    return $.Deferred().resolve().promise();
+                } else {
+                    return $.ajax({
+                        url: "/Utility/GetCOAALLComIdByAccountId",
+                        dataType: 'json',
+                        type: "Get",
+                        data: { companyId: $("#ddlCompany").val(), accountId: selectedId },
+                        success: function (item) {
+                            if (item && item.AccountId) {
+                                var fallbackOption = new Option(item.AccountName, item.AccountId, true, true);
+                                $ddl.append(fallbackOption).trigger('change.select2');
+                            }
+                        }
+                    });
+                }
+            } else {
+                $ddl.val('0').trigger('change.select2');
+                return $.Deferred().resolve().promise();
+            }
+        }
+
+        function GetDDlbyCOAId(COAId, selectedValues) {
+            var cId = $('#COAId_' + COAId).val();
+            var selected = selectedValues || {};
+
+            if (!cId || cId === "0") {
+                InitCostCenterSelect2(COAId);
+                InitRefInfoSelect2(COAId);
+                InitSubsidiarySelect2(COAId);
+                return $.Deferred().resolve().promise();
+            }
+
+            coaDdlPendingLoads++;
+            if (coaDdlPendingLoads === 1) {
+                $("#overlay").fadeIn(300);
+            }
+
+            var costCenterRequest = InitCostCenterSelect2(COAId, selected.costCenterId);
+            var refInfoRequest = InitRefInfoSelect2(COAId, selected.refInfoId);
+            var subsidiaryRequest = InitSubsidiarySelect2(COAId, selected.subsidiaryId);
+
+            return $.when(costCenterRequest, refInfoRequest, subsidiaryRequest).always(function () {
+                coaDdlPendingLoads = Math.max(0, coaDdlPendingLoads - 1);
+                if (coaDdlPendingLoads === 0) {
+                    $("#overlay").fadeOut(300);
+                }
+            });
+        }
+
+
+           function SaveB_Payment(status) {
+               if (isInitialDataLoading) {
+                   toastr.warning("Please wait until all data is fully loaded.");
+                   return;
+               }
+
+               jrActionStatus = status || 'Posted';
+               if (jrPeriodClosed && jrActionStatus != 'Parked') {
+                   toastr.error("Posting period is closed. Park the voucher or change the posting date.");
+                   return;
+               }
+               if (Bankp_Validation(jrActionStatus == 'Parked') == true) {
+
+                   SaveBankPayment();
+
+
+            }
+        }
+
+        function SaveBankPayment() {
+
+            swal({
+                title: "Are you sure?",
+                text: jrActionStatus == 'Parked' ? "Park this voucher as a draft? It will not go for approval." : "Do you want to save this data?",
+                type: "warning",
+                showCancelButton: true,
+                cancelButtonClass: 'btn-secondary waves-effect',
+                confirmButtonClass: 'btn-success waves-effect waves-light',
+                confirmButtonText: 'Yes, Save it!',
+                cancelButtonText: 'Cancel',
+                closeOnConfirm: false, // Don't close on confirm
+                closeOnCancel: false // Don't close on cancel
+            }, function (isConfirm) {
+                if (isConfirm) {
+
+                    $('#Reject').prop('disabled', true);
+
+                    // Show the loading overlay
+                    $("#overlay").fadeIn(300);
+
+            var jsonData = {};
+
+
+            jsonData["VoucherMasterId"] = $('#masterId').val();
+            jsonData["CompanyInfoId"] = $('#ddlCompany').val();
+
+            jsonData["FinancialYearId"] = $('#ddlFinansialYear').val();
+            jsonData["PostingDate"] = $('#txtPostingDate').val();
+
+            jsonData["VoucherNo"] = $('#txtVoucherNo').val();
+            jsonData["ActionStatus"] = jrActionStatus;
+
+            var voucherType = 0;
+            var voucherType = 0;
+            if ($('#bankRadio').is(':checked')) {
+                voucherType = 1;
+            }
+            if ($('#cashRadio').is(':checked')) {
+                voucherType = 2;
+            }
+
+            jsonData["VoucherCategoryID"] = voucherType;
+
+            jsonData["CurrencyId"] = $('#ddlCurrency').val();
+
+            jsonData["CurrencyCovRate"] = $('#txtConversionRate').val();
+            jsonData["Narration"] = $('#txtNaration').val();
+
+            jsonData["TotalAmount"] = parseFloat($('#lblTotalAmountFC').html());
+            jsonData["TotalAmountBDT"] = parseFloat($('#lblTotalAmountBDT').html());
+
+            jsonData["BankAccountId"] = $('#ddlBankAccount').val();
+            jsonData["ChequeNo"] = $('#txtChequeNo').val();
+
+            jsonData["ChequeDate"] = $('#txtChequeDate').val();
+
+            jsonData["CashAccountId"] = $('#ddlCashAccount').val();
+
+            jsonData["RefNo"] = $('#txtRefNo').val();
+
+
+            jsonData["RefDate"] = $('#txtRefDate').val();
+
+
+
+
+
+            var jsonObjs = [];
+
+            ////Credit Object
+
+
+            $('#debitVoucher tbody tr').each(function () {
+
+                var theObj = {};
+
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+
+
+                var AccountId = isNaN(parseFloat($('#COAId_' + id).val())) ? 0 : parseFloat($('#COAId_' + id).val());
+
+                var CostCenterId = isNaN(parseFloat($('#CostCenter_' + id).val())) ? 0 : parseFloat($('#CostCenter_' + id).val());
+
+                var RefInfoInd = isNaN(parseFloat($('#RefInfo_' + id).val())) ? 0 : parseFloat($('#RefInfo_' + id).val());
+
+                var SubsidoryLedgerId = isNaN(parseFloat($('#SubsidoryLedger_' + id).val())) ? 0 : parseFloat($('#SubsidoryLedger_' + id).val());
+
+
+                var amount = isNaN(parseFloat($('#amount_' + id).val())) ? 0 : parseFloat($('#amount_' + id).val());
+                var amountFc = isNaN(parseFloat($('#amount_FC_' + id).val())) ? 0 : parseFloat($('#amount_FC_' + id).val());
+                var remarks = $('#remarks_' + id).val();
+
+
+
+
+                theObj["AccountId"] = AccountId;
+
+
+                theObj["DebitAmountBDT"] = amount;
+                theObj["CreditAmountBDT"] = amount;
+
+                theObj["DebitAmount"] = amountFc;
+                theObj["CreditAmount"] = amountFc;
+
+
+                theObj["CostCenterId"] = CostCenterId;
+                theObj["RefInfoInd"] = RefInfoInd;
+
+                theObj["SubsidoryLedgerId"] = SubsidoryLedgerId;
+
+
+
+                    theObj["Remarks"] = remarks;
+
+
+
+                jsonObjs.push(theObj);
+
+
+
+            });
+
+
+            jsonData["DetailsInfo"] = jsonObjs;
+                    var urlpath = '@Url.Action("SaveBankPayment", "BankPayments")';
+
+                                      $.ajax({
+                contentType: "application/json",
+                data: JSON.stringify(jsonData),
+                dataType: 'json',
+                url: urlpath,
+                type: "POST",
+                success: function (result) {
+                    // Hide the overlay and re-enable the button after success
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                        $('#Reject').prop('disabled', false); // Re-enable the button
+                    }, 500);
+
+                    if (result.pk > 0) {
+                        swal({
+                            title: "Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            window.location.href = '@Url.Action("Index", "BankPayments")';
+                        });
+                    }
+                    else {
+                        swal({
+                            title: "Not saved",
+                            text: result.msg || 'Something went wrong while saving data.',
+                            type: "error",
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function () {
+                    // In case of error, hide the overlay and re-enable the button
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                        $('#Reject').prop('disabled', false); // Re-enable the button
+                    }, 500);
+
+                    swal({
+                        title: "Error!",
+                        text: 'Something went wrong while saving data.',
+                        type: "error",
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+                } else {
+                    swal.close();
+            // If user cancels, re-enable the button and hide the loading overlay
+                    $('#Reject').prop('disabled', false);
+            $("#overlay").fadeOut(300);
+        }
+    });
+}
+     
+        function ResetValidation(fields) {
+            fields.forEach(function (field) {
+                ValidationColorChangeNew(field.id, field.div, "", false);
+            });
+        }
+        function Bankp_Validation(isPark) {
+
+            var isValid = true;
+            var message = "Some Values Required";
+            ResetValidation([
+                { id: 'ddlCompany', div: 'divCompany' },
+                { id: 'ddlFinansialYear', div: 'divFinansialYear' },
+                { id: 'txtPostingDate', div: 'divPostingDate' },
+                { id: 'txtConversionRate', div: 'divtConversionRate' },
+                { id: 'txtNaration', div: 'divNaration' },
+                { id: 'ddlBankAccount', div: 'divBankAccount' },
+                { id: 'txtChequeNo', div: 'divCheque' },
+                { id: 'txtChequeDate', div: 'divChequeDate' },
+                { id: 'ddlCashAccount', div: 'divCashAccount' },
+                { id: 'bankRadio', div: 'divTransactionType' },
+                { id: 'cashRadio', div: 'divTransactionType' }
+            ]);
+
+            // Validate Company
+            if ($('#ddlCompany').val() == 0 || $('#ddlCompany').val() == '') {
+                ValidationColorChangeNew("ddlCompany", "divCompany", "Company Required", true);
+                isValid = false;
+            }
+
+            // Validate Financial Year
+            if ($('#ddlFinansialYear').val() == 0 || $('#ddlFinansialYear').val() == '' || $('#ddlFinansialYear').val() == null) {
+                ValidationColorChangeNew("ddlFinansialYear", "divFinansialYear", "Financial Year Required", true);
+                isValid = false;
+            }
+
+            // Validate Posting Date
+            if ($('#txtPostingDate').val() == '' || $('#txtPostingDate').val() == null) {
+                ValidationColorChangeNew("txtPostingDate", "divPostingDate", "Posting Date Required", false);
+                isValid = false;
+            }
+
+            // Validate Conversion Rate
+            if ($('#txtConversionRate').val() == '' || $('#txtConversionRate').val() == null) {
+                ValidationColorChangeNew("txtConversionRate", "divtConversionRate", "Currency Rate Required", false);
+                isValid = false;
+            }
+            var ConversionRate = $('#txtConversionRate').val();
+            if (ConversionRate == 0) {
+                // Show toast notification for today's conversion rate
+
+                toastr.options = {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-bottom-right", // Shows the toastr message at the bottom-right
+                    "timeOut": "5000" // Auto-close after 5 seconds
+                };
+                ValidationColorChangeNew("txtConversionRate", "divtConversionRate", "Today's conversion rate is required.", false);
+                toastr.warning("Today's conversion rate is required.");
+                isValid = false;
+            }
+
+
+            // Validate Transaction Type (Bank or Cash)
+            var voucherType = 0;
+            if ($('#bankRadio').is(':checked')) {
+                voucherType = 1;
+            } else if ($('#cashRadio').is(':checked')) {
+                voucherType = 2;
+            }
+
+            if (voucherType == 0) {
+                ValidationColorChangeNew("bankRadio", "divTransactionType", "Transaction Type Required", false);
+                isValid = false;
+            }
+
+            // Validate Narration
+            if ($('#txtNaration').val().trim() == '' || $('#txtNaration').val().trim() == null) {
+                ValidationColorChangeNew("txtNaration", "divNaration", "Narration Required", false);
+                isValid = false;
+            }
+
+            // Bank-related validations
+            if (voucherType == 1) {
+                // Validate Bank Account
+                if ($('#ddlBankAccount').val() == 0 || $('#ddlBankAccount').val() == '' || $('#ddlBankAccount').val() == null) {
+                    ValidationColorChangeNew("ddlBankAccount", "divBankAccount", "Bank Account Required", true);
+                    isValid = false;
+                } else {
+                    var bankBlncText = $('#lblBankBalance').text() || $('#lblBankBalance').val() || "0";
+                    var bankBlncVal = parseFloat(bankBlncText);
+                    if ((isNaN(bankBlncVal) || bankBlncVal <= 0) && !isPark) {
+                        isValid = false;
+                        $('#lblBankBalance').css({ "border": "2px solid red", "color": "#dc3545" });
+                        toastr.options = { "closeButton": true, "progressBar": true, "positionClass": "toast-bottom-right", "timeOut": "5000" };
+                        toastr.error("Disbursement is not allowed! Bank closing balance is " + (isNaN(bankBlncVal) ? "0.00" : bankBlncVal.toFixed(2)) + " (0 or negative).");
+                        swal("Disbursement Not Allowed!", "Selected Bank Account closing balance is " + (isNaN(bankBlncVal) ? "0.00" : bankBlncVal.toFixed(2)) + ". Disbursement is not allowed when balance is 0 or less.", "error");
+                        return false;
+                    }
+                }
+
+                // Validate Cheque Number (not required while parking a draft)
+                if (!isPark && ($('#txtChequeNo').val().trim() == '' || $('#txtChequeNo').val().trim() == null)) {
+                    ValidationColorChangeNew("txtChequeNo", "divCheque", "Cheque No Required", false);
+                    isValid = false;
+                }
+
+                // Validate Cheque Date (not required while parking a draft)
+                if (!isPark && ($('#txtChequeDate').val().trim() == '' || $('#txtChequeDate').val().trim() == null)) {
+                    ValidationColorChangeNew("txtChequeDate", "divChequeDate", "Cheque Date Required", false);
+                    isValid = false;
+                }
+            }
+
+            // Cash-related validations
+            if (voucherType == 2) {
+                // Validate Cash Account
+                if ($('#ddlCashAccount').val() == 0 || $('#ddlCashAccount').val() == '' || $('#ddlCashAccount').val() == null) {
+                    ValidationColorChangeNew("ddlCashAccount", "divCashAccount", "Cash Account Required", true);
+                    isValid = false;
+                } else {
+                    var cashBlncText = $('#lblCashBalance').text() || $('#lblCashBalance').val() || "0";
+                    var cashBlncVal = parseFloat(cashBlncText);
+                    if ((isNaN(cashBlncVal) || cashBlncVal <= 0) && !isPark) {
+                        isValid = false;
+                        $('#lblCashBalance').css({ "border": "2px solid red", "color": "#dc3545" });
+                        toastr.options = { "closeButton": true, "progressBar": true, "positionClass": "toast-bottom-right", "timeOut": "5000" };
+                        toastr.error("Disbursement is not allowed! Cash closing balance is " + (isNaN(cashBlncVal) ? "0.00" : cashBlncVal.toFixed(2)) + " (0 or negative).");
+                        swal("Disbursement Not Allowed!", "Selected Cash Account closing balance is " + (isNaN(cashBlncVal) ? "0.00" : cashBlncVal.toFixed(2)) + ". Disbursement is not allowed when balance is 0 or less.", "error");
+                        return false;
+                    }
+                }
+            }
+
+            $('#debitVoucher tbody tr').each(function () {
+
+
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+                var AccountId = isNaN(parseFloat($('#COAId_' + id).val())) ? 0 : parseFloat($('#COAId_' + id).val());
+
+                var amount = isNaN(parseFloat($('#amount_' + id).val())) ? 0 : parseFloat($('#amount_' + id).val());
+
+                if (AccountId === 0) {
+                    isValid = false;
+                    message = "Please select GL";
+                    $('#COAId_' + id).css('border-bottom', '2px solid red');
+                    toastr.options = {
+                        "closeButton": true,
+                        "progressBar": true,
+                        "positionClass": "toast-bottom-right", // Shows the toastr message at the bottom-right
+                        "timeOut": "5000" // Auto-close after 5 seconds
+                    };
+
+                    toastr.warning("Please select GL");
+                    return;
+                }
+
+
+                if (amount === 0 && !isPark) {
+                    isValid = false;
+                    message = "Pay Amount Cannot be 0 ";
+                    $('#amount_' + id).css('border-bottom', '2px solid red');
+                    toastr.options = {
+                        "closeButton": true,
+                        "progressBar": true,
+                        "positionClass": "toast-bottom-right", // Shows the toastr message at the bottom-right
+                        "timeOut": "5000" // Auto-close after 5 seconds
+                    };
+
+                    toastr.warning("Pay Amount Cannot be 0");
+                    return;
+                }
+
+
+            });
+
+            if (!isValid) {
+                return false;
+            }
+
+            var totalAmountBDT = parseFloat($('#lblTotalAmountBDT').text()) || 0;
+            if (voucherType == 1 && !isPark) {
+                var currentBankBlnc = parseFloat($('#lblBankBalance').text() || $('#lblBankBalance').val()) || 0;
+                if (totalAmountBDT > currentBankBlnc) {
+                    isValid = false;
+                    toastr.options = { "closeButton": true, "progressBar": true, "positionClass": "toast-bottom-right", "timeOut": "5000" };
+                    toastr.error("Total payment amount (" + totalAmountBDT.toFixed(2) + ") exceeds available Bank balance (" + currentBankBlnc.toFixed(2) + ")!");
+                    swal("Disbursement Not Allowed!", "Total disbursement amount (" + totalAmountBDT.toFixed(2) + ") cannot exceed available Bank balance (" + currentBankBlnc.toFixed(2) + ").", "error");
+                    return false;
+                }
+            } else if (voucherType == 2 && !isPark) {
+                var currentCashBlnc = parseFloat($('#lblCashBalance').text() || $('#lblCashBalance').val()) || 0;
+                if (totalAmountBDT > currentCashBlnc) {
+                    isValid = false;
+                    toastr.options = { "closeButton": true, "progressBar": true, "positionClass": "toast-bottom-right", "timeOut": "5000" };
+                    toastr.error("Total payment amount (" + totalAmountBDT.toFixed(2) + ") exceeds available Cash balance (" + currentCashBlnc.toFixed(2) + ")!");
+                    swal("Disbursement Not Allowed!", "Total disbursement amount (" + totalAmountBDT.toFixed(2) + ") cannot exceed available Cash balance (" + currentCashBlnc.toFixed(2) + ").", "error");
+                    return false;
+                }
+            }
+
+            return isValid;
+
+
+        }
+
+    </script>
+
+}

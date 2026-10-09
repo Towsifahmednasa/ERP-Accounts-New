@@ -1,0 +1,258 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\ReportList.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Accounts Operation Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .email-sidebar {
+        width: 428px !important;
+        height: 100% !important;
+        position: absolute !important;
+        background: #fff !important;
+        left: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        z-index: 2 !important;
+        overflow: hidden !important;
+        border-right: 1px solid rgba(0, 0, 0, .125) !important;
+        border-top-left-radius: 0.25rem !important;
+        border-bottom-left-radius: 0.25rem !important;
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h6 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Accounts Operation Report</span>
+                                        </h6>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body" style="margin-top:10px">
+
+
+                                        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-5">
+                                            <div class="col">
+                                                <a href="/AllAccountReport/COAReport" target="_blank" class="text-decoration-none">
+                                                    <div class="card radius-10" style="border: 1px solid #ddd!important;">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <!-- Icon -->
+                                                                <div class="widgets-icons bg-light-success bg-gradient  text-success me-3">
+                                                                    <img width="45" src="~/VerticalAsset/images/Reports/barchartofaccounts.svg" />
+                                                                </div>
+                                                                <!-- Text Content -->
+                                                                <div>
+                                                                    <h6 class="my-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);">Chart of Account Report</h6>
+                                                                    @*<p class="mb-0 font-13 text-success">Description</p>*@
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+
+                                            <!-- Bank Book Report -->
+                                            <div class="col">
+                                                <a href="/AllAccountReport/BankBookReport" target="_blank" class="text-decoration-none">
+                                                    <div class="card radius-10" style="border: 1px solid #ddd!important;">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <!-- Icon -->
+                                                                <div class="widgets-icons bg-light-info bg-gradient text-success me-3">
+                                                                    <img width="45" src="~/VerticalAsset/images/Reports/bank-svgrepo-com.svg" />
+                                                                </div>
+                                                                <!-- Text Content -->
+                                                                <div>
+                                                                    <h6 class="my-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);">Bank Book Report</h6>
+                                                                    @*<p class="mb-0 font-13 text-success">Description</p>*@
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col">
+                                                <a href="/AllAccountReport/CashBookReport" target="_blank" class="text-decoration-none">
+                                                    <div class="card radius-10" style="border: 1px solid #ddd!important;">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <!-- Icon -->
+                                                                <div class="widgets-icons bg-light-warning bg-gradient text-success me-3">
+                                                                    <img width="45" src="~/VerticalAsset/images/Reports/money-cash-svgrepo-com.svg" />
+                                                                </div>
+                                                                <!-- Text Content -->
+                                                                <div>
+                                                                    <h6 class="my-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);">Cash Book Report</h6>
+                                                                    @*<p class="mb-0 font-13 text-success">Description</p>*@
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col" style="display:none">
+                                                <a href="/AllAccountReport/CashFlowReport" target="_blank" class="text-decoration-none">
+                                                    <div class="card radius-10" style="border: 1px solid #ddd!important;">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <!-- Icon -->
+                                                                <div class="widgets-icons bg-light-danger bg-gradient text-success me-3">
+                                                                    <img width="45" src="~/VerticalAsset/images/Reports/money-flow-flow-svgrepo-com.svg" />
+                                                                </div>
+                                                                <!-- Text Content -->
+                                                                <div>
+                                                                    <h6 class="my-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);">Cash Flow Report</h6>
+                                                                    @*<p class="mb-0 font-13 text-success">Description</p>*@
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col">
+                                                <a href="/AllAccountReport/LedgerReport" target="_blank" class="text-decoration-none">
+                                                    <div class="card radius-10 " style="border: 1px solid #ddd!important">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <!-- Image on the left -->
+                                                                <div class="widgets-icons bg-light-info bg-gradient text-success me-3">
+                                                                    <img width="45" src="~/VerticalAsset/images/Reports/invoice-ledger-line-svgrepo-com.svg" />
+                                                                </div>
+                                                                <!-- Text content -->
+                                                                <div>
+                                                                    <h6 class="my-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);">Ledger Report</h6>
+                                                                    <!-- Uncomment if you need a description -->
+                                                                    @*<p class="mb-0 font-13 text-success">Description</p>*@
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+
+                                            </div>
+
+                                            <div class="col">
+                                                <a href="/AllAccountReport/TrialBalanceReport" target="_blank" class="text-decoration-none">
+                                                    <div class="card radius-10 " style="border: 1px solid #ddd!important">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <!-- Image on the left -->
+                                                                <div class="widgets-icons bg-light-info bg-gradient text-success me-3">
+                                                                    <img width="45" src="~/VerticalAsset/images/Reports/money-flow-flow-svgrepo-com.svg" />
+                                                                </div>
+                                                                <!-- Text content -->
+                                                                <div>
+                                                                    <h6 class="my-1" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);">Trial Balance Report</h6>
+                                                                    <!-- Uncomment if you need a description -->
+                                                                    @*<p class="mb-0 font-13 text-success">Description</p>*@
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-5 mt-3">
+
+                                            <div class="col">
+                                                <a href="/IncomeStatementDynamicReport/Index" target="_blank" class="text-decoration-none">
+                                                    <div class="card radius-10" style="border: 1px solid #ddd!important;">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="widgets-icons bg-light-success bg-gradient text-success me-3">
+                                                                    <img width="45" src="~/VerticalAsset/images/Reports/money-cash-svgrepo-com.svg" />
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="my-1">Income Statement Report</h6>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+
+                                            <div class="col">
+                                                <a href="/BalanceSheetDynamicReport/Index" target="_blank" class="text-decoration-none">
+                                                    <div class="card radius-10" style="border: 1px solid #ddd!important;">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="widgets-icons bg-light-info bg-gradient text-success me-3">
+                                                                    <img width="45" src="~/VerticalAsset/images/Reports/invoice-ledger-line-svgrepo-com.svg"/>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="my-1">Balance Sheet Report</h6>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                            <div class="row" style="display:none">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+
+
+
+                                        <div class="email-wrapper">
+                                            <div class="email-sidebar">
+                                                
+                                                <div class="email-sidebar-content">
+                                                    <div class="email-navigation">
+                                                        <div class="list-group list-group-flush">
+                                                            <a href="/AllAccountReport/COAReport" target="_blank" class="list-group-item   d-flex align-items-center"><i class='bx bxs-inbox me-3 font-20'></i><span>  Chart of Account Report</span> <span class="badge bg-primary rounded-pill ms-auto">1</span></a>
+
+                                                            <a href="/AllAccountReport/BankBookReport" target="_blank" class="list-group-item d-flex align-items-center"><i class='bx bxs-star me-3 font-20'></i><span>Bank Book Report</span> <span class="badge bg-primary rounded-pill ms-auto">2</span></a>
+
+                                                            <a href="/AllAccountReport/CashBookReport" target="_blank" class="list-group-item d-flex align-items-center"><i class='bx bxs-alarm-snooze me-3 font-20'></i><span>Cash Book Report</span> <span class="badge bg-primary rounded-pill ms-auto">3</span></a>
+
+                                                            <a target="_blank" href="/AllAccountReport/CashFlowReport" class="list-group-item d-flex align-items-center"><i class='bx bxs-send me-3 font-20'></i><span>Cash Flow Report</span> <span class="badge bg-primary rounded-pill ms-auto">4</span></a>
+
+                                                            <a href="/AllAccountReport/LedgerReport" target="_blank" class="list-group-item d-flex align-items-center"><i class='bx bxs-file-blank me-3 font-20'></i><span>Ledger Report</span><span class="badge bg-primary rounded-pill ms-auto">5</span></a>
+                                                            <a href="/AllAccountReport/TrialBalanceReport" target="_blank" class="list-group-item d-flex align-items-center"><i class='bx bxs-bookmark me-3 font-20'></i><span>Trial Balance Report</span> <span class="badge bg-primary rounded-pill ms-auto">6</span></a>
+
+                                                            <a href="/AllAccountReport/BankReconciliationStatementReport" target="_blank" class="list-group-item d-flex align-items-center"><i class='bx bxs-message-rounded-error me-3 font-20'></i><span>Bank Reconciliation Statement</span> <span class="badge bg-primary rounded-pill ms-auto">7</span></a>
+
+
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        </div></div>

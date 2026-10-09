@@ -1,0 +1,371 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\SubControl\SubControlCeate.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Sub-Control Ledger Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center  headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Sub-Control Ledger Info</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        <a class="small blue button" href="@Url.Action("SubControlList", "SubControl")">
+                                            <span class="fa fa-share"></span> Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;" >
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Ledger Head:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divLedgerHead">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlLedgerHead"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;" >
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Control Ledger:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divControlLedger">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlControlLedger"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Sub-Control Ledger:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8"  id="divSubControlLedger">
+                                            <input type="text" id="txtSubControlLedger" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                        <div class="col-md-8">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="customSwitch1" checked>
+                                                <label class="custom-control-label" for="customSwitch1">Active</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+
+                            <div style="padding-top: 1.5%">
+
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+
+                                                <button class="small blue button" id="Reject" onclick="Save()">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div><!-- /.container-fluid -->
+            <input id="voucherId" type="number" style="display: none;" value="@ViewBag.VoucherId">
+            <input id="eflag" type="text" style="display: none;" value="@ViewBag.eflag">
+            <input type="hidden" id="FromAccClosingBalance" />
+        </div>
+    </div>
+</div>
+
+
+<input id="masterId" value="@ViewBag.Id" style="display:none" />
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        var Mode = 'E';
+        let id = $('#masterId').val();
+        $(function () {
+            if (id > 0) {
+                   Mode = 'U';
+                GetData(id);
+            } else {
+                LoadLedger();
+                Mode = 'E';
+            }
+
+        });
+
+        function LoadLedger() {
+
+            $.ajax({
+                url: "/ControlLedger/Get_Ledger_DDL",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                async: false,
+                success: function (data) {
+
+                    var result = JSON.parse(data);
+                    $('#ddlLedgerHead').empty();
+                    $('#ddlLedgerHead').append("<option value='0'>--Select Ledger Head--</option>");
+                    for (var i = 0; i < result.length; i++) {
+                        $('#ddlLedgerHead').append($("<option></option>").val(result[i].GLHeadId).html(result[i].GLName));
+                    }
+                }
+            });
+        }
+        $("#ddlLedgerHead").on("change", function (e) {
+
+            var divisionId = $("#ddlLedgerHead").val();
+            if (divisionId > 0) {
+                LoadControlLedger();
+            }
+        });
+        function LoadControlLedger() {
+            var companyId = $("#ddlLedgerHead").val();
+           
+                if (companyId > 0) {
+                    $.ajax({
+                        url: "/SubControl/Get_ControlLedger_By_Ledger_DDL",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'json',
+                        type: "Get",
+                        data: { LedgerId: companyId, mode:Mode },
+                        async: false,
+                        success: function (data) {
+                            var result = JSON.parse(data);
+                            $('#ddlControlLedger').empty();
+                            $('#ddlControlLedger').append("<option value='0'>--Select Control Ledger--</option>");
+                            for (var i = 0; i < data.length; i++) {
+                                $('#ddlControlLedger').append($("<option></option>").val(result[i].ControlLId).html(result[i].ControlLName));
+                            }
+                        }
+                    });
+                }
+        }
+
+
+        function SaveValidation() {
+
+            var isValid = true;
+
+            if ($('#ddlLedgerHead').val() == 0 || $('#ddlLedgerHead').val() == '') {
+                ValidationColorChangeNew("ddlLedgerHead", "divLedgerHead", "Ledger Head Required", true);
+
+                isValid = false;
+            }
+
+
+            if ($('#ddlControlLedger').val() == 0 || $('#ddlControlLedger').val() == '') {
+                ValidationColorChangeNew("ddlControlLedger", "divControlLedger", "Control Ledger Required", true);
+
+                isValid = false;
+            }
+
+            if ($('#txtSubControlLedger').val() == '' || $('#txtSubControlLedger').val() == null) {
+                ValidationColorChangeNew("txtSubControlLedger", "divSubControlLedger", "Sub Control Ledger Required", false);
+
+                isValid = false;
+            }
+            return isValid;
+        }
+        function Save() {
+            if (SaveValidation()) {
+                swal({
+                    title: "Are you sure?",
+                    text: " ",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, I am sure!',
+                    cancelButtonText: "No, cancel it!",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                },
+                    function (isConfirm) {
+
+                        if (isConfirm) {
+                FinalSave();
+                        } else {
+                            swal("Cancelled", " )", "error");
+                            e.preventDefault();
+                        }
+                    });
+            };
+
+        }
+        function FinalSave() {
+
+        var jsonData = {};
+        jsonData["SubsidiryLId"] = $('#masterId').val();
+        jsonData["ControlLId"] = $('#ddlControlLedger').val();
+        jsonData["SubsidiryLName"] = $('#txtSubControlLedger').val().trim();
+        jsonData["IsActive"] = $('#customSwitch1').is(':checked');
+          var urlpath = '@Url.Action("SaveSubcontrolInformation", "SubControl")';
+            $.ajax({
+                data: jsonData,
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    _open_LoadingPopUp_WithMsg("popDiv", "Please wait. Data is Saving...");
+                },
+            }).success(function (result) {
+                _close_LoadingPopUp_WithMsg();
+                    if (result.pk > 0) {
+                        swal({
+                            title: " Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+
+                            window.location.href = '@Url.Action("SubControlList", "SubControl")';
+
+                        });
+
+
+                    }
+                });
+
+        }
+
+
+        function GetData(id) {
+            var urlpath = '@Url.Action("Get_SubControlLed_ById", "SubControl")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                data: {id : id},
+                type: "Get",
+                async: true,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    Load_Ledger_ById($('#ddlLedgerHead'), 'GLHeadId', 'GLName', result[0].GLHeadId)
+                    Load_ControlLedger_ById($('#ddlControlLedger'), 'ControlLId', 'ControlLName', result[0].ControlLId, result[0].GLHeadId)
+
+
+                    $('#txtSubControlLedger').val(result[0].SubsidiryLName);
+                    if (result[0].IsActive) {
+                        $('#customSwitch1').prop('checked', true);
+                    } else {
+                        $('#customSwitch1').prop('checked', false);
+                    }
+                },
+                complete: function () {
+                    $("#btnSave").html("Update");
+                    //$('#territorySelect').attr('disabled', true);
+                }
+            });
+        }
+
+        function Load_Ledger_ById(setControlId, bindId, bindName, SetId) {
+            $.ajax({
+                url: '/ControlLedger/Get_Ledger_DDL',
+                dataType: 'json',
+                type: "Get",
+                async: true,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    setControlId.empty();
+                    setControlId.append($("<option>--Select Ledger Head--</option>").val("0"));
+                    for (var i = 0; i < result.length; i++) {
+                       setControlId.append($("<option></option>").val(result[i][bindId]).html(result[i][bindName]));
+                    }
+                },
+                complete: function () {
+                    setControlId.val(SetId);
+                    setControlId.select2();
+                }
+            });
+        }
+
+
+        function Load_ControlLedger_ById(setControlId, bindId, bindName, SetId,GetId) {
+            var companyId = GetId;
+            $.ajax({
+                url: '/SubControl/Get_ControlLedger_By_Ledger_DDL',
+                dataType: 'json',
+                type: "Get",
+                data: { LedgerId: companyId },
+                async: true,
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    setControlId.empty();
+                    setControlId.append($("<option>--Select Control Head--</option>").val("0"));
+                    for (var i = 0; i < result.length; i++) {
+                        setControlId.append($("<option></option>").val(result[i][bindId]).html(result[i][bindName]));
+                    }
+                },
+                complete: function () {
+                    setControlId.val(SetId);
+                    setControlId.select2();
+                }
+            });
+        }
+
+    </script>
+
+}
+

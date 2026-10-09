@@ -1,0 +1,57 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\ChartOfAccount\_CostCenterPartial.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+
+
+@model IEnumerable<New_Accounts.Models.Accounts.CostCenter_Ddl>
+
+
+
+
+
+
+<div class="row">
+
+    <table class="table table-borderless table-hover" id="reportTableC">
+        <thead>
+
+        </thead>
+        <tbody>
+            @{
+                int count = 1;
+
+            }
+            @foreach (var item in Model)
+            {
+                <tr id="tr_@item.CostCenterId">
+
+                    @if (item.isrefrence == 1)
+                        {
+                            <td class="text-center" style="padding-left: 20px"><input type="checkbox" class="chk" value="@item.CostCenterId" id="chkC_@item.CostCenterId" checked="checked" /></td>
+                        }
+                        else
+                    {
+                    <td class="text-center" style="padding-left: 20px"><input type="checkbox" value="@item.CostCenterId" class="chk" id="chkC_@item.CostCenterId" /></td>
+                      }
+
+
+
+                    <td class="text-left">@item.CostCenterName</td>
+                    <td class="text-left"><input type="hidden" id="isC_@item.CostCenterId" /> </td>
+
+
+
+
+
+                </tr>
+                count++;
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+
+

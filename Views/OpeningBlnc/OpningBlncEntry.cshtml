@@ -1,0 +1,522 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\OpeningBlnc\OpningBlncEntry.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Opening Balance Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Opening Balance  Entry</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        <a class="small blue button" href="@Url.Action("OpningBlncList", "OpeningBlnc")">
+                                            <span class="fa fa-share"></span>  Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Company:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divCompany">
+                                            <select class="form-select form-select-sm mb-3 select2" onchange="LoadDDlbyCom()" style="width: 100%;" id="ddlCompany"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Fiscal Year:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divFinansialYear">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFinansialYear"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Chart of Accounts:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divCoa">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCoa"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+
+
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Amount:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divExpenseAmount">
+                                            <input type="text" id="txtExpenseAmount" class="form-control form-control-sm" onkeypress="return isDecimalNumber(event)" />
+                                            <div id="errorContainer" style="color: red; margin-top: 5px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Currency:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divExpenseAmount">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCurrency"></select>
+                                            <div id="errorContainer" style="color: red; margin-top: 5px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Remarks: </label>
+                                        <div class="col-md-8">
+                                            <textarea id="txtRemarks" rows="3" cols="30" class="form-control" style="text-align:left"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+                            <div class="row mt-2" style="display:none">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                        <div class="col-md-8">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="customSwitch1" checked>
+                                                <label class="custom-control-label" for="customSwitch1">Active</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+                            <div style="padding-top: 1.5%">
+
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+
+                                                <button class="small blue button" id="btnSave" onclick="Save()">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+
+
+
+<input id="masterId" value="@ViewBag.Id" style="display:none" />
+
+@section Scripts
+{
+    <script type="text/javascript">
+        let id = $('#masterId').val();
+        $(function () {
+
+            LoadCurrency();
+            $("#ddlCurrency").val("1");
+            $("#ddlCurrency").prop("disabled", true);
+
+            if (id > 0) {
+                GetData(id);
+            } else {
+                LoadCompany('ddlCompany');
+            }
+        });
+
+        function isDecimalNumber(event) {
+            var keyCode = event.which ? event.which : event.keyCode;
+            var inputValue = document.getElementById("txtExpenseAmount").value;
+
+            if (keyCode === 46 || (keyCode >= 48 && keyCode <= 57)) {
+                if (keyCode === 46 && inputValue.indexOf(".") !== -1) {
+                    event.preventDefault();
+                    showError("Only one decimal point is allowed.");
+                } else {
+                    hideError();
+                }
+                return true;
+            }
+
+            event.preventDefault();
+            showError("Only decimal numbers are allowed.");
+            return false;
+        }
+
+        function showError(message) {
+            var errorContainer = document.getElementById("errorContainer");
+            errorContainer.textContent = message;
+        }
+
+        function hideError() {
+            var errorContainer = document.getElementById("errorContainer");
+            errorContainer.textContent = "";
+        }
+        function LoadCompany(elementId) {
+
+           $.ajax({
+                url: "/Utility/LoadCompanyInfo",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    $('#' + elementId + '').empty();
+                    $('#' + elementId + '').append("<option value='0'>--Select Company--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
+                    }
+                }
+            });
+        }
+
+        function LoadCurrency() {
+            $.ajax({
+                url: "/Utility/GetCurrency",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+                    $('#ddlCurrency').empty();
+                    $('#ddlCurrency').append("<option value='0'>--Select Currency--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlCurrency').append($("<option></option>").val(data[i].CurrencyId).html(data[i].CurrencyName));
+                    }
+                }
+            });
+        }
+
+        function SaveValidation() {
+            var isValid = true;
+            if ($('#ddlCompany').val() == 0 || $('#ddlCompany').val() == '') {
+                ValidationColorChangeNew("ddlCompany", "divCompany", "Company Required", true);
+                isValid = false;
+            }
+
+            if ($('#ddlCoa').val() == 0 || $('#ddlCoa').val() == '') {
+                ValidationColorChangeNew("ddlCoa", "divCoa", "Chart of Accounts Required", true);
+                isValid = false;
+            }
+
+            if ($('#ddlFinansialYear').val() == 0 || $('#ddlFinansialYear').val() == '') {
+                ValidationColorChangeNew("ddlFinansialYear", "divFinansialYear", "Fiscal Year Required", true);
+                isValid = false;
+            }
+ 
+            if ($('#txtExpenseAmount').val() == '' || $('#txtExpenseAmount').val() == null) {
+                ValidationColorChangeNew("txtExpenseAmount", "divExpenseAmount", "Expense Amount Required", false);
+                isValid = false;
+            }
+
+
+
+            return isValid;
+        }
+        function Save() {
+            if (SaveValidation()) {
+                swal({
+                    title: "Are you sure?",
+                    text: " ",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, I am sure!',
+                    cancelButtonText: "No, cancel it!",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                FinalSave();
+                        } else {
+                            swal("Cancelled", " )", "error");
+                            e.preventDefault();
+                        }
+                    });
+            };
+        }
+
+    function FinalSave() {
+        var jsonData = {};
+        jsonData["OpeningBalanceId"] = $('#masterId').val();
+        jsonData["CompanyId"] = $('#ddlCompany').val();
+        jsonData["ChartOfAccountId"] = $('#ddlCoa').val();
+        jsonData["FinancialYearId"] = $('#ddlFinansialYear').val();
+        jsonData["Currency"] = $('#ddlCurrency').val().trim();
+        jsonData["Amount"] = $('#txtExpenseAmount').val();
+        jsonData["Remarks"] = $('#txtRemarks').val();
+        
+
+          var urlpath = '@Url.Action("Save_OpningBlnc", "OpeningBlnc")';
+            $.ajax({
+                data: jsonData,
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    _open_LoadingPopUp_WithMsg("popDiv", "Please wait. Data is Saving...");
+                },
+            }).success(function (result) {
+                _close_LoadingPopUp_WithMsg();
+                if (result.msg != "") {
+                    if (result.pk > 0) {
+                        swal({
+                            title: " Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            window.location.href = '@Url.Action("OpningBlncList", "OpeningBlnc")';
+                        });
+                    }
+                    else {
+                         swal({
+                            title: "Already Exists",
+                            text: '',
+                             type: "warning",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Back!',
+                            closeOnConfirm: false
+                        });
+
+                    }
+                }
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                    })
+                }
+                });
+
+        }
+       
+
+
+
+
+    function GetData(id) {
+            var urlpath = '@Url.Action("Get_OpningBlnc_ById", "OpeningBlnc")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                data: { id: id },
+                type: "Get",
+                async: true,
+                success: function (data) {
+                    $("#btnSave").html("Update");
+                   // Load_Company_ById('ddlCompany');
+
+                     
+                    _LoadCompany('ddlCompany', data.CompanyId);
+                    LoadDDlbyCom(data.CompanyId);
+                    $('#ddlCoa').val(data.ChartOfAccountId);
+                    $('#ddlFinansialYear').val(data.FinancialYearId);
+                    $('#ddlCurrency').val(data.CurrencyId);
+                    $('#txtExpenseAmount').val(data.Amount);
+                    $('#txtRemarks').val(data.Remarks);
+                    
+                },
+
+
+            });
+        }
+
+
+
+
+        function _LoadCompany(elementId, SetId) {
+
+            $.ajax({
+                url: "/Utility/LoadCompanyInfo",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    $('#' + elementId + '').empty();
+                    $('#' + elementId + '').append("<option value='0'>--Select Company--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
+                    }
+                },
+
+                complete: function () {
+                    $('#' + elementId + '').val(SetId);
+
+                }
+            });
+        }
+
+
+
+
+        function Load_Company_ById(elementId) {
+
+        $.ajax({
+            url: "/Utility/LoadCompanyInfo",
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            type: "Get",
+            data: {},
+            async: false,
+            success: function (data) {
+
+                $('#' + elementId + '').empty();
+                $('#' + elementId + '').append("<option value='0'>--Select Company--</option>");
+
+                for (var i = 0; i < data.length; i++) {
+
+                    $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
+                }
+            }
+        });
+
+
+
+
+        }
+
+
+
+
+        function LoadDDlbyCom() {
+
+
+            $("#overlay").fadeIn(300);
+
+            LoadFinansialYear();
+            LoadCOAAccount();
+            $("#overlay").fadeOut(300);
+        }
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Fiscal Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                }
+            });
+        }
+        function LoadCOAAccount() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetAllCOAComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlCoa').empty();
+                    $('#ddlCoa').append("<option value='0'>--Select Chart of Accounts--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlCoa').append($("<option></option>").val(data[i].AccountId).html(data[i].AccountName));
+                    }
+                }
+            });
+        }
+
+    </script>
+
+}

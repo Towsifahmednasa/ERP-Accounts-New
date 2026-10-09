@@ -1,0 +1,504 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\BankReconciliationStatementReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = " Bank Reconciliation Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Bank Reconciliation Report </span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="card-title d-flex align-items-center">
+                                            <div>
+                                                <i class="bx bxs-filter-alt me-1 font-22 text-primary"></i>
+                                            </div>
+                                            <h5 class="mb-0 text-primary">Filtering Criteria</h5>
+                                        </div>
+
+                                        <div class="row">
+
+                                            <div class="col-md-3">
+                                                <div class="card bg-light bg-gradient">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divCompany">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlFinansialYear" class="bold col-form-label">Financial Year: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divFinansialYear">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFinansialYear" onchange="LoadDaterangebyFiscal()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtToDate" class="bold col-form-label">To Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                                                <div class="col-md-8">
+                                                                    <button class="small blue button" id="Reject" onclick="ShowReport()">
+                                                                        <i class="fa fa-print" aria-hidden="true"></i>
+                                                                        View Report
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-4" style="display:none">
+                                                <div class="card bg-light bg-gradient ">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+
+                                                            <div class="form-group">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlBankName" class="bold col-form-label">Bank Name: <span style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divBankName"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlBankName" onchange="LoadAccountNObyBankCom()"></select> </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlBankNameAccountNO" class="bold col-form-label">Bank Account NO.: <span style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divBankNameAccountNO"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlBankNameAccountNO"></select> </div>
+                                                                </div>
+
+                                                            </div>
+
+
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;display:none">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+
+                                                                <div class="col-md-8" id="divTransactionType">
+
+
+                                                                    <input type="radio" checked name="rbTransactionType" value="Monthly" id="MonthlyRadio" />
+                                                                    <label for="MonthlyRadio" style="font-weight: bold">Monthly </label>
+                                                                    <input type="radio" id="NarrationRadio" name="rbTransactionType" value="Narration">
+                                                                    <label for="NarrationRadio" style="font-weight: bold">Narration</label>
+
+                                                                </div>
+
+                                                            </div>
+
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-9">
+                                                <div class="card-body ">
+
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+
+                                                        </div>
+
+
+                                                        <div class="col-md-8">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <button id="export-btn" type="button" class="btn btn-sm btn-outline-primary rounded-pill pull-right" data-mdb-ripple-color="#000000"><i class="fa fa-file-excel-o" aria-hidden="true"></i> Excel Export </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div id="repotDiv">
+
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                            </div>
+                                                            <div class="col-md-4" style="text-align:center">
+
+                                                                <h4>
+                                                                    <label for="ddlFinansialYear" class="bold col-form-label">
+
+                                                                        Bank Reconciliation Report
+                                                                    </label><br />
+                                                                </h4>
+                                                                <h6>
+                                                                    <label id="lblPeriod" class="bold col-form-label"> Date Range: <label> @DateTime.Now.ToString("dd MMMM, yyyy") </label></label><br />
+                                                                </h6>
+
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="table table-responsive" style="overflow-x: auto; max-height: 620px ">
+
+                                                            <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>#</th>
+
+
+                                                                        <th>Company Name</th>
+                                                                        <th>Voucher Code</th>
+                                                                        <th>Voucher No</th>
+                                                                        <th>Posting Date</th>
+                                                                        <th>Voucher Type</th>
+                                                                        <th>Cheque No.</th>
+                                                                        <th>Cheque Date</th>
+                                                                        <th>Narration</th>
+                                                                        <th>Total Amount(BDT)</th>
+                                                                        <th>Status</th>
+                                                                        <th>Reconciliation Date </th>
+                                                                        <th>Approve By</th>
+                                                                        <th>Approve Date</th>
+
+
+                                                                        <th>Print</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="manuallist">
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+@section Scripts
+{
+
+    <script type="text/javascript">
+        function un(o) {
+            return o != null ? o : '';
+        }
+
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+            LoadBankName('ddlBankName');
+        });
+
+        function LoadDDlbyCom() {
+            LoadFinansialYear();
+            _loadAccountNObyBankCom();
+        }
+
+
+
+        function LoadAccountNObyBankCom() {
+            _loadAccountNObyBankCom();
+        }
+
+        function LoadDaterangebyFiscal() {
+            var companyId = $("#ddlCompany").val();
+            var FinancialYearId = $("#ddlFinansialYear").val();
+            $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, FinancialYearId: FinancialYearId },
+                async: false,
+                success: function (data) {
+
+                    $('#txtfrmDate').val((data.StartDate));
+                    $('#txtToDate').val((data.EndDate));
+                }
+            });
+        }
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                }
+            });
+        }
+
+        function _loadAccountNObyBankCom() {
+            var companyId = $("#ddlCompany").val();
+            var BankNameId = $("#ddlBankName").val();
+            $.ajax({
+                url: "/Utility/GetAccountNObyBankCom",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, BankNameId: BankNameId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlBankNameAccountNO').empty();
+                    $('#ddlBankNameAccountNO').append("<option value='0'>--Select Account NO --</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlBankNameAccountNO').append($("<option></option>").val(data[i].AccountId).html(data[i].AccountNo));
+                    }
+                }
+            });
+        }
+
+
+
+
+            function ShowReport() {
+
+                $('#lblPeriod').html( "Date Range: "+$('#txtfrmDate').val() + " to " + $('#txtToDate').val());
+             
+             var param = '';
+
+
+             var comID = $('#ddlCompany').val();
+             var finID = $('#ddlFinansialYear').val();
+                var frmD = $('#txtfrmDate').val();
+
+                var toD = $('#txtToDate').val();
+
+
+
+                 if (comID !== "0" && comID !== null) {
+                     param = param + " and mas.CompanyInfoId='" + comID + "'";
+                 }
+
+
+
+                 if (finID !== "0" && finID !== null) {
+                     param = param + " and mas.FinancialYearId='" + finID + "'";
+                 }
+
+
+
+
+
+                 if (frmD !== "" && toD !== "") {
+                     param = param + " and mas.ReconcileDate between '" + frmD + "' and '" + toD + "'";
+                 }
+
+             //if (jQuery.type(Status) === "undefined") { }
+             //else {
+             //    if (Status !== "0" && Status !== null) {
+             //        param = param + " and mas.ActionStatus='" + Status + "'";
+             //    }
+             //}
+
+            var urlpath = '@Url.Action("GetReconcileBankAccountRptAll", "ReconcileBankAccount")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { param: param},
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    data = JSON.parse(data);
+                    $("#manuallist").html("");
+
+           
+                    if (data.length > 0) {
+
+
+
+                        var row = "";
+                        var count = 1;
+                        $("#manuallist").html("");
+
+                        var count = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+
+
+                            row += "<tr>";
+                            row += "<td  >" + count + "</td>";
+                            row += "<td  >" + un(data[i].CompanyName) + "</td>";
+
+                            row += "<td  >" + un(data[i].VoucherCode) + "</td>";
+                            row += "<td  >" + un(data[i].VoucherNo) + "</td>";
+                            row += "<td  >" + un(data[i].PostingDate) + "</td>";
+
+                            row += "<td  >" + un(data[i].VoucherType) + "</td>";
+                            row += "<td  >" + un(data[i].BankCheckNo) + "</td>";
+                            row += "<td  >" + un(data[i].BankCheckDate) + "</td>";
+
+
+                            row += "<td  >" + un(data[i].Narration) + "</td>";
+
+                            row += "<td  >" + un(data[i].TotalAmountBDT) + "</td>";
+
+
+                            if (un(data[i].ActionStatus) == 'Approved') {
+                                row += "<td><span class='badge bg-success'>Approved</span></td>";
+                            }
+                            else if (un(data[i].ActionStatus) == 'Canceled') {
+                                row += "<td><span class='badge bg-danger'>Canceled</span></td>";
+                            }
+
+                            else {
+                                row += "<td><span class='badge bg-warning'>Posting</span></td>";
+                            }
+
+                            row += "<td  >" + un(data[i].ReconcileDate) + "</td>";
+                            row += "<td  >" + un(data[i].ApprovedBy) + "</td>";
+                            row += "<td  >" + un(data[i].ApprovedDate) + "</td>";
+
+
+
+
+
+                            //if (un(data[i].ActionStatus) == 'Approved') {
+                            //    row += "<td><button style='border-style:none;display:none'   onclick='editClick(" + data[i].VoucherMasterId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button> </td>";
+                            //} else {
+                            //    row += "<td><button style='border-style:none;'   onclick='editClick(" + data[i].VoucherMasterId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button> </td>";
+                            //}
+
+                            row += "<td><button style='border-style:none;'   onclick='PrintReport(" + data[i].VoucherMasterId + ")'><i class='fa fa-print' style='color:#04AA6D'></i></button> </td>";
+
+
+                            row += "</tr>";
+                            count = count + 1;
+
+                        }
+                        $("#manuallist").html(row);
+                    }
+                },
+                complete: function () {
+
+
+
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+
+          function PrintReport(MasterId)
+        {
+            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
+        var reportValue = "AllVoucherReport";
+
+        $.ajax({
+            url: urlpath,
+            data: { MasterId: MasterId, reportValue: reportValue},
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+
+
+        $(document).on('click', '#export-btn', function () {
+            // Get the HTML table data
+            var data = $('#repotDiv').html();
+
+            // Create a temporary HTML element to hold the table data
+            var table = document.createElement('table');
+            table.innerHTML = data;
+
+            // Add a border style to the table cells
+            var cells = table.getElementsByTagName('td');
+            for (var i = 0; i < cells.length; i++) {
+                cells[i].style.border = '1px solid black';
+            }
+
+            // Create a Blob object with the modified table data
+            var blob = new Blob([table.outerHTML], {
+                type: 'application/vnd.ms-excel'
+            });
+
+            // Save the file using FileSaver.js
+            saveAs(blob, 'Bank Reconciliation Report.xls');
+        });
+
+
+    </script>
+}

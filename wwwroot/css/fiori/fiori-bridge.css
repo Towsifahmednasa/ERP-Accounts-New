@@ -1,0 +1,214 @@
+/* ============================================================================
+   Fiori bridge: maps the LEGACY page vocabulary (Bootstrap 5 + Rocker theme classes used by the 84 ported
+   views: .card, .page-breadcrumb, .btn-*, .form-control, .table, select2, DataTables, SweetAlert, toastr,
+   accordion, modal) onto the SAP Fiori Horizon tokens/components in fiori.css. No colour value here is
+   new - every colour references a fiori.css token. One design system, applied to every page.
+   Loaded after fiori.css; the bootstrap theme files (app.css, dark-theme, header-colors) are NOT loaded.
+   ========================================================================== */
+
+/* ---- typography & frame: the legacy .page-wrapper/.page-content/.card nesting becomes one object section ---- */
+body{font-family:var(--f72);font-size:13.5px;color:var(--sapTextColor);background:var(--sapBackgroundColor)}
+.page-wrapper,.page-content{margin:0 !important;padding:0 !important;background:transparent}
+.page-content>.row>.col{padding:0}
+.card{background:#fff;border:0 !important;border-radius:12px !important;box-shadow:var(--sapContent_Shadow0);margin:0 0 14px !important}
+.card .card-body{padding:16px 18px}
+.card .card-body .border.p-2.rounded,.card .card-body .border.rounded{border:0 !important;padding:0 !important}
+.card .card-body .card-body{padding:12px 0 0}
+.card.border-top,.card.border-success,.card.border-info,.card.border-primary{border-top:0 !important}
+h5,h6{font-weight:600}
+.cstlfs{font-size:16px !important;font-weight:600;color:var(--sapTitleColor) !important}
+.text-dark{color:var(--sapTextColor) !important}
+
+/* ---- page header: legacy breadcrumb block with icon + h5 title + right-aligned .btn-group -> Fiori object page title + toolbar ---- */
+.page-breadcrumb{display:flex !important;align-items:center;flex-wrap:wrap;gap:8px;padding:0 0 12px;margin:0 0 16px;
+  border-bottom:1px solid var(--sapList_HeaderBorderColor) !important}
+.page-breadcrumb .breadcrumb-title{padding-right:12px}
+.page-breadcrumb .card-title{margin:0}
+.page-breadcrumb .card-title i.bx{display:none}
+.page-breadcrumb .card-title h5{font-size:20px !important;font-weight:600;letter-spacing:-.2px;margin:0;color:var(--sapTitleColor) !important}
+.page-breadcrumb .ms-auto{margin-left:auto !important;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.headerBorderBottom{border-bottom:1px solid var(--sapList_HeaderBorderColor)}
+
+/* ---- buttons: Bootstrap variants -> Fiori button types (default / emphasized / negative / transparent) ---- */
+.btn,.button{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;font-family:inherit;
+  font-size:13px;font-weight:400;line-height:1;border-radius:var(--sapElement_BorderCornerRadius);border:1px solid var(--sapButton_Border);
+  background:#fff;color:var(--sapLinkColor);cursor:pointer;white-space:nowrap;text-decoration:none;box-shadow:none;text-shadow:none;
+  background-image:none}
+.btn:hover,.button:hover{background:#ebf3fd;color:var(--sapLinkColor);border-color:var(--sapButton_Border)}
+.btn:focus,.btn:active,.btn:focus-visible{box-shadow:0 0 0 2px rgba(0,112,242,.25) !important;outline:0}
+.btn-success,.btn-primary,.btn-info,.btn-outline-success,.btn-outline-primary,.button.btnSave,.button.green,.button.blue,.button.green_New,.button.greenBtn{
+  background:var(--sapButton_Emphasized_Background) !important;border-color:var(--sapButton_Emphasized_Background) !important;color:#fff !important;font-weight:600}
+.btn-success:hover,.btn-primary:hover,.btn-info:hover,.btn-outline-success:hover,.btn-outline-primary:hover,.button.btnSave:hover,.button.green:hover,.button.blue:hover{
+  background:var(--sapButton_Emphasized_Hover) !important;border-color:var(--sapButton_Emphasized_Hover) !important}
+.btn-danger,.btn-outline-danger,.button.red,.button.redBtn_New{background:#fff !important;border-color:var(--sapNegativeColor) !important;color:var(--sapNegativeColor) !important}
+.btn-danger:hover,.btn-outline-danger:hover{background:var(--sapNegativeBg) !important}
+.btn-warning,.btn-outline-warning{background:#fff !important;border-color:var(--sapCriticalColor) !important;color:var(--sapCriticalColor) !important}
+.btn-warning:hover,.btn-outline-warning:hover{background:var(--sapCriticalBg) !important}
+.btn-secondary,.btn-outline-secondary,.btn-light,.btn-outline-info,.button.black,.button.redBtn{background:#fff !important;border-color:var(--sapButton_Border) !important;color:var(--sapLinkColor) !important}
+.btn-secondary:hover,.btn-outline-secondary:hover,.btn-outline-info:hover{background:#ebf3fd !important}
+.btn-dark{background:#fff !important;border-color:var(--sapButton_Border) !important;color:var(--sapLinkColor) !important}
+.btn-sm,.button.small{height:28px;padding:0 10px;font-size:12.5px}
+.btn-lg{height:38px;padding:0 16px;font-size:14px}
+.btn:disabled,.btn.disabled,.button[disabled]{opacity:.5;cursor:not-allowed}
+.btn-group{display:inline-flex;gap:6px;position:static !important}
+.btn-group>.btn{border-radius:var(--sapElement_BorderCornerRadius) !important}
+.btn-block{width:100%}
+.btn i.fa,.btn i.bx{font-size:13px}
+
+/* ---- forms: Bootstrap controls -> Fiori .fld/.ctl look (32px, 8px radius, label above, 12px label colour) ---- */
+label,.col-form-label,.form-label{font-size:12px !important;color:var(--sapContent_LabelColor) !important;font-weight:400 !important;padding:0 0 2px !important;line-height:1.4 !important;margin:0}
+.bold.col-form-label,.font-weight-bold.col-form-label{font-weight:400 !important}
+.required{color:var(--sapNegativeColor) !important}
+.form-control,.form-select,textarea.form-control,.form-control-sm,.form-select-sm{height:32px;min-height:32px;border:1px solid var(--sapField_BorderColor);
+  border-radius:8px;background:var(--sapField_Background);padding:0 9px;font-size:13.5px;font-family:inherit;color:var(--sapTextColor);box-shadow:none;line-height:30px}
+textarea.form-control{height:auto;min-height:64px;padding:6px 9px;line-height:1.4}
+.form-control:hover,.form-select:hover{border-color:var(--sapButton_Emphasized_Hover)}
+.form-control:focus,.form-select:focus{border-color:var(--sapButton_Emphasized_Hover);box-shadow:0 0 0 2px rgba(0,112,242,.2);outline:0}
+.form-control:disabled,.form-control[readonly],.form-select:disabled{background:#f5f6f7;color:var(--sapContent_LabelColor)}
+.form-control::placeholder{color:#889aad}
+.form-select{background-position:right 8px center;background-size:13px}
+.form-check-input{width:16px;height:16px;accent-color:var(--sapBrandColor);border-color:var(--sapField_BorderColor);margin-top:.1em}
+.form-check-input:checked{background-color:var(--sapBrandColor);border-color:var(--sapBrandColor)}
+.form-group{padding-bottom:3px}
+.mb-3{margin-bottom:.75rem !important}
+.row>[class*="col-"]{padding-top:2px;padding-bottom:2px}
+.input-group .form-control{border-radius:8px 0 0 8px}
+.input-group .input-group-text{border:1px solid var(--sapField_BorderColor);border-left:0;border-radius:0 8px 8px 0;background:#fff;height:32px;font-size:12.5px;color:var(--sapContent_LabelColor)}
+.alert{border-radius:8px;font-size:13px;padding:9px 12px}
+.alert-danger{background:var(--sapNegativeBg);border:1px solid var(--sapNegativeBorder);color:var(--sapNegativeColor)}
+.alert-warning{background:var(--sapCriticalBg);border:1px solid var(--sapCriticalBorder);color:#6b3b00}
+.alert-success{background:var(--sapPositiveBg);border:1px solid var(--sapPositiveBorder);color:var(--sapPositiveColor)}
+.alert-info{background:var(--sapInformativeBg);border:1px solid var(--sapInformativeBorder);color:#12395e}
+/* legacy ValidationColorChangeNew() marks the failed field's wrapper with inline background; keep the Fiori error border */
+.form-control.is-invalid,.form-select.is-invalid,.form-control[style*="background-color: rgb(255, 228, 225)"]{border-color:var(--sapNegativeColor);border-width:2px}
+
+/* select2 (bootstrap4 theme + default) -> .ctl */
+.select2-container--bootstrap4 .select2-selection--single,.select2-container--default .select2-selection--single,
+.select2-container--bootstrap4 .select2-selection--multiple,.select2-container--default .select2-selection--multiple{
+  height:32px !important;min-height:32px;border:1px solid var(--sapField_BorderColor) !important;border-radius:8px !important;background:#fff;font-size:13.5px}
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered,.select2-container--default .select2-selection--single .select2-selection__rendered{
+  line-height:30px !important;padding-left:9px;color:var(--sapTextColor)}
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow,.select2-container--default .select2-selection--single .select2-selection__arrow{height:30px !important}
+.select2-container--bootstrap4.select2-container--focus .select2-selection,.select2-container--default.select2-container--focus .select2-selection,
+.select2-container--bootstrap4.select2-container--open .select2-selection{border-color:var(--sapButton_Emphasized_Hover) !important;box-shadow:0 0 0 2px rgba(0,112,242,.2) !important}
+.select2-dropdown{border:1px solid var(--sapList_BorderColor) !important;border-radius:8px;box-shadow:var(--sapContent_Shadow2);font-size:13.5px}
+.select2-results__option--highlighted{background:var(--sapList_SelectionBackgroundColor) !important;color:var(--sapTextColor) !important}
+.select2-container .select2-search--dropdown .select2-search__field{border:1px solid var(--sapField_BorderColor);border-radius:6px;height:30px}
+.select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice{background:var(--sapInformativeBg);border:1px solid var(--sapInformativeBorder);border-radius:6px;font-size:12px}
+
+/* pickadate */
+.picker__holder{border-radius:10px;box-shadow:var(--sapContent_Shadow2);font-family:inherit;font-size:12.5px}
+.picker__day--selected,.picker__day--selected:hover,.picker--focused .picker__day--selected{background:var(--sapBrandColor)}
+.picker__button--today,.picker__button--clear,.picker__button--close{font-size:12px}
+.picker--opened .picker__holder{max-height:22em}
+
+/* ---- tables: Bootstrap .table -> table.sap (header row, hover, 1px list borders, tabular numerals) ---- */
+.table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;color:var(--sapTextColor);margin-bottom:0;font-variant-numeric:tabular-nums}
+.table>:not(caption)>*>*{background:transparent;box-shadow:none;border:0}
+.table th,.table thead th{text-align:left;font-weight:600;font-size:13px;color:var(--sapTextColor);padding:9px 12px;border:0;border-bottom:1px solid var(--sapList_HeaderBorderColor);
+  background:#fff;white-space:nowrap;vertical-align:middle}
+.table td{padding:8px 12px;border:0;border-bottom:1px solid var(--sapList_BorderColor);vertical-align:middle}
+.table-bordered>:not(caption)>*>*,.table-bordered td,.table-bordered th{border-width:0 0 1px 0 !important}
+.table-striped>tbody>tr:nth-of-type(odd)>*{background:transparent !important;color:inherit}
+.table-hover>tbody>tr:hover>*{background:var(--sapList_Hover_Background) !important;color:inherit}
+.table tfoot td,.table tr.total td,.table tr.tot-row td,.table tr.fw-bold td,.table td.fw-bold,.table td b{font-weight:700}
+.table tfoot td{background:#eaecee;border-top:2px solid #8b9aab}
+.table td.text-end,.table th.text-end,.table td.text-right,.table th.text-right,.table td[align="right"],.table th[align="right"],.table td.num,.table th.num{text-align:right;font-variant-numeric:tabular-nums}
+.table td input.form-control,.table td select.form-select,.table td .select2-container .select2-selection--single{height:30px !important;min-height:30px}
+.table td input.form-control{line-height:28px}
+.table-responsive{overflow-x:auto;display:block;width:100%}
+.table.table-responsive{display:table}
+/* debit / credit emphasis without changing values (wireframe: Dr/Cr columns are tabular, totals bold) */
+.table td.dr,.table td.debit,.table th.dr,.table th.debit{color:var(--sapTextColor)}
+.table td.cr,.table td.credit,.table th.cr,.table th.credit{color:var(--sapTextColor)}
+.badge{font-weight:600;font-size:11.5px;border-radius:9px;padding:2px 8px}
+.badge.bg-primary{background:var(--sapInformativeBg) !important;color:var(--sapInformativeColor) !important}
+.badge.bg-success{background:var(--sapPositiveBg) !important;color:var(--sapPositiveColor) !important}
+.badge.bg-warning{background:var(--sapCriticalBg) !important;color:var(--sapCriticalColor) !important}
+.badge.bg-danger{background:var(--sapNegativeBg) !important;color:var(--sapNegativeColor) !important}
+
+/* DataTables chrome: length/filter/buttons/info/pager -> Fiori table toolbar (legacy pages rely on these controls, so they stay visible) */
+.dataTables_wrapper .container-fluid{margin:0 0 8px !important;padding:0}
+.dataTables_wrapper .row{align-items:center}
+.dataTables_wrapper .dataTables_length label,.dataTables_wrapper .dataTables_filter label{display:inline-flex;align-items:center;gap:6px;font-size:12.5px !important;color:var(--sapContent_LabelColor) !important;margin:0}
+.dataTables_wrapper .dataTables_length select{height:28px;border:1px solid var(--sapField_BorderColor);border-radius:8px;padding:0 24px 0 8px;font-size:12.5px;background:#fff;font-family:inherit}
+.dataTables_wrapper .dataTables_filter{text-align:right !important;float:right !important;margin:0 !important}
+.dataTables_wrapper .dataTables_filter input{height:28px;border:1px solid var(--sapField_BorderColor);border-radius:8px;padding:0 9px;font-size:12.5px;width:190px;font-family:inherit;outline:0;margin-left:0}
+.dataTables_wrapper .dataTables_filter input:focus{border-color:var(--sapButton_Emphasized_Hover)}
+.dataTables_wrapper .dt-buttons{text-align:center !important;display:inline-flex;gap:4px}
+.dataTables_wrapper .dt-buttons .btn,.dataTables_wrapper .dt-button{height:28px;width:30px;padding:0;border-color:transparent;background:transparent;color:var(--sapTextColor);border-radius:8px}
+.dataTables_wrapper .dt-buttons .btn:hover,.dataTables_wrapper .dt-button:hover{background:#ebebeb;border-color:transparent}
+.dataTables_wrapper .dataTables_info{font-size:12.5px;color:var(--sapContent_LabelColor);padding-top:10px}
+.dataTables_wrapper .dataTables_paginate{padding-top:8px;display:flex;justify-content:flex-end;gap:4px;font-size:12.5px;float:right;text-align:right}
+.dataTables_wrapper .dataTables_paginate .paginate_button,.dataTables_wrapper .pagination .page-link{min-width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:8px !important;color:var(--sapLinkColor) !important;text-decoration:none;cursor:pointer;padding:0 8px;border:1px solid transparent;background:transparent;margin:0 1px;font-size:12.5px;box-shadow:none}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover,.dataTables_wrapper .pagination .page-link:hover{background:#ebf3fd;border-color:var(--sapButton_Border)}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,.dataTables_wrapper .pagination .page-item.active .page-link{background:var(--sapButton_Emphasized_Background) !important;color:#fff !important;font-weight:600;border-color:transparent}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,.dataTables_wrapper .pagination .page-item.disabled .page-link{color:#a9b4bf !important;cursor:default;background:transparent}
+.dataTables_wrapper .pagination{margin:0;float:right}
+table.dataTable thead .sorting,table.dataTable thead .sorting_asc,table.dataTable thead .sorting_desc{cursor:pointer}
+table.dataTable thead .sorting:before,table.dataTable thead .sorting:after,table.dataTable thead .sorting_asc:before,table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:before,table.dataTable thead .sorting_desc:after{opacity:.35}
+table.dataTable thead .sorting_asc:after,table.dataTable thead .sorting_desc:before{opacity:1;color:var(--sapBrandColor)}
+table.dataTable.no-footer{border-bottom:1px solid var(--sapList_BorderColor)}
+.dataTables_processing{border-radius:8px;box-shadow:var(--sapContent_Shadow2);font-size:13px}
+
+/* ---- accordion, modal, nav tabs ---- */
+.accordion-item{border:0;border-radius:12px !important;box-shadow:var(--sapContent_Shadow0);margin-bottom:12px;background:#fff;overflow:hidden}
+.accordion-button{padding:10px 14px !important;font-size:14px !important;font-weight:600;color:var(--sapTextColor) !important;background:#fff !important;box-shadow:none !important}
+.accordion-button:not(.collapsed){color:var(--sapBrandColor) !important;background:var(--sapList_SelectionBackgroundColor) !important}
+.accordion-button:focus{box-shadow:none !important}
+.accordion-body{padding:14px 16px}
+.modal-content{border:0;border-radius:12px;box-shadow:var(--sapContent_Shadow2)}
+.modal-header{padding:13px 16px;border-bottom:1px solid var(--sapList_BorderColor)}
+.modal-title{font-size:14.5px;font-weight:600}
+.modal-footer{padding:11px 16px;border-top:1px solid var(--sapList_BorderColor);background:#fafbfc}
+.nav-tabs{border-bottom:1px solid var(--sapList_HeaderBorderColor)}
+.nav-tabs .nav-link{border:0;border-bottom:3px solid transparent;color:var(--sapContent_LabelColor);font-size:13.5px;padding:10px 14px}
+.nav-tabs .nav-link.active{color:var(--sapBrandColor);border-bottom-color:var(--sapBrandColor);font-weight:600;background:transparent}
+
+/* ---- SweetAlert 1.x (116 call sites: confirm-before-save, result messages) -> Fiori dialog ---- */
+.sweet-alert{border-radius:12px;box-shadow:var(--sapContent_Shadow2);font-family:var(--f72);padding:20px 22px 18px}
+.sweet-alert h2{font-size:16px;font-weight:600;color:var(--sapTextColor);margin:10px 0 6px;line-height:1.4}
+.sweet-alert p{font-size:13.5px;color:var(--sapContent_LabelColor)}
+.sweet-alert .sa-button-container{margin-top:12px}
+.sweet-alert button{height:32px;padding:0 14px;font-size:13px;border-radius:8px !important;box-shadow:none !important;font-family:inherit;font-weight:400;margin:0 4px}
+.sweet-alert button.confirm,.sweet-alert button.btn-success{background:var(--sapButton_Emphasized_Background) !important;color:#fff !important;border:1px solid var(--sapButton_Emphasized_Background);font-weight:600}
+.sweet-alert button.confirm:hover{background:var(--sapButton_Emphasized_Hover) !important}
+.sweet-alert button.cancel,.sweet-alert button.btn-secondary{background:#fff !important;color:var(--sapLinkColor) !important;border:1px solid var(--sapButton_Border)}
+.sweet-alert .sa-icon{transform:scale(.8);margin:10px auto 0}
+.sweet-alert .sa-icon.sa-success{border-color:var(--sapPositiveBorder)}
+.sweet-alert .sa-icon.sa-success .sa-line{background-color:var(--sapPositiveColor)}
+.sweet-alert .sa-icon.sa-success .sa-placeholder{border-color:var(--sapPositiveBorder)}
+.sweet-alert .sa-icon.sa-error{border-color:var(--sapNegativeBorder)}
+.sweet-alert .sa-icon.sa-error .sa-line{background-color:var(--sapNegativeColor)}
+.sweet-alert .sa-icon.sa-warning{border-color:var(--sapCriticalBorder)}
+.sweet-alert .sa-icon.sa-warning .sa-body,.sweet-alert .sa-icon.sa-warning .sa-dot{background-color:var(--sapCriticalColor)}
+
+/* ---- toastr (89 call sites) -> Fiori message toast / strip colours ---- */
+#toast-container>div{border-radius:9px;box-shadow:var(--sapContent_Shadow2) !important;opacity:1 !important;font-family:var(--f72);font-size:13px;padding:11px 15px 11px 44px}
+#toast-container>.toast-success{background-color:var(--sapPositiveColor)}
+#toast-container>.toast-error{background-color:var(--sapNegativeColor)}
+#toast-container>.toast-warning{background-color:var(--sapCriticalColor)}
+#toast-container>.toast-info{background-color:var(--sapInformativeColor)}
+
+/* ---- loading overlay (legacy #overlay / SpinnerStyle.css) ---- */
+#overlay{display:none;position:fixed;inset:0;background:rgba(29,45,62,.35);z-index:200}
+#overlay .cv-spinner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+#overlay .alert{background:#fff !important;border:0 !important;border-radius:12px !important;box-shadow:var(--sapContent_Shadow2);padding:14px 18px !important}
+#overlay .alert h6{color:var(--sapTextColor) !important;font-weight:600}
+
+/* ---- side navigation additions: group numbers (wireframe index "Chart of Accounts 80") and the module heading ---- */
+.sidenav .navhead{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sapBrandColor);padding:10px 16px 6px}
+.sidenav .grp{display:flex;align-items:center;gap:6px}
+.sidenav .grp .nu{margin-left:auto;font-size:10.5px;font-weight:600;color:var(--sapContent_LabelColor);font-variant-numeric:tabular-nums;background:var(--sapNeutralBg);border-radius:9px;padding:0 6px;line-height:16px}
+.sap-logo{text-decoration:none}
+.shellpop .poplink{display:block;border-top:1px solid var(--sapList_BorderColor);padding:9px 14px;font-size:13px;color:var(--sapLinkColor);text-decoration:none}
+@media(max-width:1023px){.sidenav .navhead,.sidenav .grp .nu{display:none}}
+@media(max-width:599px){.sidenav .navhead{display:block}.sidenav .grp .nu{display:inline-block}}
+
+/* ---- legacy misc: print-only / hidden helpers, headings inside cards ---- */
+.card .card-title.d-flex h5{margin:0}
+hr{border-color:var(--sapList_BorderColor);opacity:1}
+.text-muted{color:var(--sapContent_LabelColor) !important}
+.font-22{font-size:16px}

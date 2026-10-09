@@ -1,0 +1,744 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\COAReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Chart of Account Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .radio-label {
+        font-weight: bold !important;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .coa-tree-table {
+        min-width: 1000px;
+    }
+
+    .coa-tree-clickable {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .coa-tree-toggle {
+        display: inline-block;
+        width: 18px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .coa-tree-toggle-empty {
+        visibility: hidden;
+    }
+
+    .coa-level-1 .coa-name { padding-left: 12px !important; }
+    .coa-level-2 .coa-name { padding-left: 36px !important; }
+    .coa-level-3 .coa-name { padding-left: 60px !important; }
+    .coa-level-4 .coa-name { padding-left: 84px !important; }
+    .coa-level-5 .coa-name { padding-left: 108px !important; }
+
+    .coa-gl-row td {
+        background: #173A5A !important;
+        color: #ffffff !important;
+        font-weight: bold;
+    }
+
+    .coa-control-row td {
+        background: #D0DFF0 !important;
+        color: #102F4F !important;
+        font-weight: bold;
+    }
+
+    .coa-sub-row td {
+        background: #EEF3FA !important;
+        color: #285B86 !important;
+        font-weight: bold;
+    }
+
+    .coa-subsub-row td {
+        background: #F7FAFD !important;
+        color: #2B4F70 !important;
+        font-weight: bold;
+    }
+
+    .coa-account-row td {
+        background: #ffffff !important;
+    }
+
+    .coa-account-row {
+        cursor: default;
+    }
+
+    .coa-copy-code {
+        cursor: pointer;
+        user-select: text;
+    }
+
+    .coa-copy-code:hover {
+        text-decoration: underline;
+    }
+
+    #expandCOAAllButton,
+    #collapseCOAAllButton,
+    #exportButton {
+        display: inline-block;
+        width: auto !important;
+        min-width: auto !important;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+</style>
+<div id="loadingSpinner" style="display:none;">
+    <div class="overlay"></div>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Chart of Account Report</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="row">
+
+                                            <div class="col-md-4">
+
+
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light bg-gradient ">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divCompany">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany"></select> </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group row" style="margin-top: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                                                <div class="col-md-8" style="margin-top: 10px !important;">
+                                                                    <button class="small blue button" id="Reject" onclick="ShowReport()">
+                                                                        <i class="fa fa-search" aria-hidden="true"></i>
+                                                                        Search
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+
+
+
+
+
+                                        <!-- Rana Code Start-->
+
+
+                                        <div class="col-12">
+
+                                            <div class="row m-2">
+                                                <div class="col-12">
+
+                                                    <div class="row mb-2">
+                                                        <div class="col-12 text-end">
+                                                            <button id="expandCOAAllButton" class="btn btn-sm btn-outline-primary me-2" type="button" style="display:none;">
+                                                                <i class="fa fa-plus-square"></i> Expand All
+                                                            </button>
+
+                                                            <button id="collapseCOAAllButton" class="btn btn-sm btn-outline-secondary me-2" type="button" style="display:none;">
+                                                                <i class="fa fa-minus-square"></i> Collapse All
+                                                            </button>
+
+                                                            <button id="exportButton" class="btn btn-sm btn-success" type="button">
+                                                                <i class="fa fa-file-excel"></i> Export to Excel
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row m-2">
+                                                    <div class="col-12">
+
+                                                        <div class="table-responsive" style="width: 99% !important; margin: 0 auto !important">
+
+                                                            <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable p-2 coa-tree-table">
+                                                                <thead>
+
+                                                                    <tr>
+                                                                        <th colspan="4" style="text-align: center; font-weight: bold; font-size: 16px; color: blue;"> <label id="lblheading"> Chart Of Account </label> </th>
+                                                                    </tr>
+
+                                                                    <tr class="jobRow" style="text-align: left;">
+                                                                        <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Company Name: </td>
+                                                                        <td style="text-align: left;">
+                                                                            <label style="font-size: 18px !important;" id="lblGetCompanyName"></label>
+                                                                        </td>
+                                                                        <td colspan="1"></td>
+                                                                    </tr>
+
+                                                                    <tr style="background-color: #285B86 !important">
+                                                                        <th style="width: 6% !important; color:white; text-align: center !important;">SL</th>
+                                                                        <th style="width: 18% !important; color:white; text-align: left !important;">Code</th>
+                                                                        <th style="width: 55% !important; color:white; text-align: left !important;">Particular Name</th>
+                                                                        <th style="width: 10% !important; color:white; text-align: center !important;">Type</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="ledgerlist">
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <!-- Rana Code End-->
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+            $('#expandCOAAllButton').hide();
+            $('#collapseCOAAllButton').hide();
+            $('#expandCOAAllButton').off('click').on('click', function () {
+                expandCOATreeAll();
+            });
+            $('#collapseCOAAllButton').off('click').on('click', function () {
+                collapseCOATreeAll();
+            });
+
+        });
+
+
+
+        function ShowReport()
+        {
+            var companyId = $('#ddlCompany').val();
+        $.ajax({
+            url: "/ChartOfAccount/GetChartofAccount_ByCompanyId",
+            data: { id: companyId },
+            dataType: 'json',
+            type: "Get",
+            beforeSend: function () {
+                // Show the full-screen loading spinner
+                $("#loadingSpinner").show();
+            },
+            success: function (data) {
+                
+                console.log('data:-' + data);
+                    data = JSON.parse(data);
+                    $("#ledgerlist").empty();
+
+                    if (data) {
+
+                        $("#lblGetCompanyName").text($('#ddlCompany option:selected').text());
+                        renderCOATreeView(data);
+
+                    }
+
+
+            }
+
+            ,
+            complete: function () {
+                setTimeout(function () {
+                    $("#loadingSpinner").hide();
+                }, 5000); 
+            }
+            });
+        }
+
+        function renderCOATreeView(data) {
+            var $tbody = $("#ledgerlist");
+            $tbody.empty();
+
+            if (!data || data.length === 0) {
+                $('#expandCOAAllButton').hide();
+                $('#collapseCOAAllButton').hide();
+                $tbody.append('<tr><td colspan="4" style="text-align:center;">No data found.</td></tr>');
+                return;
+            }
+
+            var rowId = 1;
+            var rootSL = 1;
+
+            var glGroups = groupByCOA(data, function (row) {
+                return getGroupKey(row.GLHeadId, row.GLCode, row.GLName);
+            });
+
+            $.each(glGroups, function (glKey, glRows) {
+                var firstGL = glRows[0] || {};
+                var glId = 'gl_' + rowId++;
+                var glSL = rootSL.toString();
+                var glInfo = getCodeAndName(firstGL.GLCode, firstGL.GLName, firstGL.GLHeadId);
+
+                appendCOATreeRow($tbody, {
+                    rowId: glId,
+                    parentId: '',
+                    rowClass: 'coa-gl-row',
+                    level: 1,
+                    isClickable: true,
+                    sl: glSL,
+                    code: glInfo.code,
+                    name: glInfo.name,
+                    type: 'GL Head',
+                    status: getStatusText(firstGL.GLIsActive)
+                });
+
+                var controlIndex = 1;
+                var controlGroups = groupByCOA(glRows, function (row) {
+                    return getGroupKey(row.ControlLId, row.ControlLCode, row.ControlLName);
+                });
+
+                $.each(controlGroups, function (controlKey, controlRows) {
+                    var firstControl = controlRows[0] || {};
+                    var controlId = 'control_' + rowId++;
+                    var controlSL = glSL + '.' + controlIndex;
+                    var controlInfo = getCodeAndName(firstControl.ControlLCode, firstControl.ControlLName, firstControl.ControlLId);
+
+                    appendCOATreeRow($tbody, {
+                        rowId: controlId,
+                        parentId: glId,
+                        rowClass: 'coa-control-row',
+                        level: 2,
+                        isClickable: true,
+                        sl: controlSL,
+                        code: controlInfo.code,
+                        name: controlInfo.name,
+                        type: 'Control',
+                        status: getStatusText(firstControl.ControlIsActive || firstControl.IsActive)
+                    });
+
+                    var subIndex = 1;
+                    var subGroups = groupByCOA(controlRows, function (row) {
+                        return getGroupKey(row.SubsidiryLId, row.SubsidiryLCode, row.SubsidiryLName);
+                    });
+
+                    $.each(subGroups, function (subKey, subRows) {
+                        var firstSub = subRows[0] || {};
+                        var subId = 'sub_' + rowId++;
+                        var subSL = controlSL + '.' + subIndex;
+                        var subInfo = getCodeAndName(firstSub.SubsidiryLCode, firstSub.SubsidiryLName, firstSub.SubsidiryLId);
+
+                        appendCOATreeRow($tbody, {
+                            rowId: subId,
+                            parentId: controlId,
+                            rowClass: 'coa-sub-row',
+                            level: 3,
+                            isClickable: true,
+                            sl: subSL,
+                            code: subInfo.code,
+                            name: subInfo.name,
+                            type: 'Sub Control',
+                            status: getStatusText(firstSub.SubsidiryIsActive || firstSub.IsActive)
+                        });
+
+                        var subSubIndex = 1;
+                        var subSubGroups = groupByCOA(subRows, function (row) {
+                            return getGroupKey(
+                                row.SubSubControlLedgerId,
+                                row.SubSubControlLedgerCode,
+                                row.SubSubControlLedgerName || row.SubsubsidiryLName
+                            );
+                        });
+
+                        $.each(subSubGroups, function (subSubKey, subSubRows) {
+                            var firstSubSub = subSubRows[0] || {};
+                            var subSubId = 'subsub_' + rowId++;
+                            var subSubSL = subSL + '.' + subSubIndex;
+                            var subSubInfo = getCodeAndName(
+                                firstSubSub.SubSubControlLedgerCode,
+                                firstSubSub.SubSubControlLedgerName || firstSubSub.SubsubsidiryLName,
+                                firstSubSub.SubSubControlLedgerId
+                            );
+
+                            appendCOATreeRow($tbody, {
+                                rowId: subSubId,
+                                parentId: subId,
+                                rowClass: 'coa-subsub-row',
+                                level: 4,
+                                isClickable: true,
+                                sl: subSubSL,
+                                code: subSubInfo.code,
+                                name: subSubInfo.name,
+                                type: 'Sub Sub Control',
+                                status: getStatusText(firstSubSub.SubSubControlIsActive || firstSubSub.IsActive)
+                            });
+
+                            var accountIndex = 1;
+
+                            $.each(subSubRows, function (i, row) {
+                                var accountSL = subSubSL + '.' + accountIndex;
+                                var accountInfo = getCodeAndName(row.COACode, row.AccountName, row.AccountId);
+
+                                appendCOATreeRow($tbody, {
+                                    rowId: 'acc_' + rowId++,
+                                    parentId: subSubId,
+                                    rowClass: 'coa-account-row',
+                                    level: 5,
+                                    isClickable: false,
+                                    sl: accountSL,
+                                    code: accountInfo.code,
+                                    name: accountInfo.name,
+                                    type: 'GL',
+                                    status: getStatusText(row.AccountIsActive || row.IsActive)
+                                });
+
+                                accountIndex++;
+                            });
+
+                            subSubIndex++;
+                        });
+
+                        subIndex++;
+                    });
+
+                    controlIndex++;
+                });
+
+                rootSL++;
+            });
+
+            $('#ledgerlist tr[data-parent!=""]').hide();
+            bindCOATreeClick();
+            bindCOACodeCopyClick();
+            $('#expandCOAAllButton').show();
+            $('#collapseCOAAllButton').show();
+        }
+
+        function appendCOATreeRow($tbody, opt) {
+            var toggle = opt.isClickable
+                ? '<span class="coa-tree-toggle">+</span>'
+                : '<span class="coa-tree-toggle coa-tree-toggle-empty"></span>';
+
+            $tbody.append(
+                '<tr ' +
+                    'data-id="' + htmlEncodeCOA(opt.rowId) + '" ' +
+                    'data-parent="' + htmlEncodeCOA(opt.parentId) + '" ' +
+                    'class="' + opt.rowClass + ' coa-level-' + opt.level + (opt.isClickable ? ' coa-tree-clickable' : '') + '">' +
+                    '<td style="text-align:center;">' + htmlEncodeCOA(opt.sl) + '</td>' +
+                    '<td class="coa-copy-code" data-code="' + htmlEncodeCOA(opt.code) + '" title="Click to copy" style="text-align:left;">' + htmlEncodeCOA(opt.code) + '</td>' +
+                    '<td class="coa-name" style="text-align:left;">' + toggle + htmlEncodeCOA(opt.name) + '</td>' +
+                    '<td style="text-align:center;">' + htmlEncodeCOA(opt.type) + '</td>' +
+                '</tr>'
+            );
+        }
+
+        function bindCOATreeClick() {
+            $('#ledgerlist').off('click', 'tr.coa-tree-clickable');
+
+            $('#ledgerlist').on('click', 'tr.coa-tree-clickable', function () {
+                var $row = $(this);
+                var rowId = $row.attr('data-id');
+                var isOpen = $row.hasClass('coa-tree-open');
+
+                if (isOpen) {
+                    collapseCOAChildren(rowId);
+                    $row.removeClass('coa-tree-open');
+                    $row.find('.coa-tree-toggle').first().text('+');
+                } else {
+                    showCOAChildren(rowId);
+                    $row.addClass('coa-tree-open');
+                    $row.find('.coa-tree-toggle').first().text('-');
+                }
+            });
+        }
+
+        function bindCOACodeCopyClick() {
+            $('#ledgerlist').off('click', '.coa-copy-code');
+
+            $('#ledgerlist').on('click', '.coa-copy-code', function (e) {
+                e.stopPropagation();
+
+                var code = ($(this).attr('data-code') || '').trim();
+
+                if (!code) {
+                    return;
+                }
+
+                copyCOATextToClipboard(code);
+            });
+        }
+
+        function copyCOATextToClipboard(text) {
+            if (!text) return;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function () {
+                    toastr.success('Code copied: ' + text);
+                }).catch(function () {
+                    fallbackCopyCOATextToClipboard(text);
+                });
+            } else {
+                fallbackCopyCOATextToClipboard(text);
+            }
+        }
+
+        function fallbackCopyCOATextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+
+                if (successful) {
+                    toastr.success('Code copied: ' + text);
+                } else {
+                    toastr.error('Code copy failed.');
+                }
+            } catch (err) {
+                toastr.error('Code copy failed.');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showCOAChildren(parentId) {
+            $('#ledgerlist tr[data-parent="' + parentId + '"]').show();
+        }
+
+        function collapseCOAChildren(parentId) {
+            var $children = $('#ledgerlist tr[data-parent="' + parentId + '"]');
+
+            $children.each(function () {
+                var childId = $(this).attr('data-id');
+
+                collapseCOAChildren(childId);
+
+                $(this).hide();
+                $(this).removeClass('coa-tree-open');
+                $(this).find('.coa-tree-toggle').first().text('+');
+            });
+        }
+
+        function expandCOATreeAll() {
+            $('#ledgerlist tr').show();
+
+            $('#ledgerlist tr.coa-tree-clickable').each(function () {
+                $(this).addClass('coa-tree-open');
+                $(this).find('.coa-tree-toggle').first().text('-');
+            });
+        }
+
+        function collapseCOATreeAll() {
+            $('#ledgerlist tr.coa-level-2, #ledgerlist tr.coa-level-3, #ledgerlist tr.coa-level-4, #ledgerlist tr.coa-level-5').hide();
+
+            $('#ledgerlist tr.coa-level-1').show();
+
+            $('#ledgerlist tr.coa-tree-clickable').each(function () {
+                $(this).removeClass('coa-tree-open');
+                $(this).find('.coa-tree-toggle').first().text('+');
+            });
+        }
+
+        function groupByCOA(array, keySelector) {
+            var result = {};
+
+            $.each(array, function (i, item) {
+                var key = keySelector(item) || 'N/A';
+
+                if (!result[key]) {
+                    result[key] = [];
+                }
+
+                result[key].push(item);
+            });
+
+            return result;
+        }
+
+        function getGroupKey(id, code, name) {
+            return (id || '') + '|' + (code || '') + '|' + (name || '');
+        }
+
+        function getCodeAndName(code, name, fallbackId) {
+            code = code || '';
+            name = name || '';
+
+            if (code) {
+                return {
+                    code: code,
+                    name: cleanNameOnly(name)
+                };
+            }
+
+            var parsed = extractNumericCodeAndName(name);
+
+            return {
+                code: parsed.accountCode || fallbackId || '',
+                name: parsed.nameOnly || name
+            };
+        }
+
+        function extractNumericCodeAndName(str) {
+            str = str || '';
+
+            var codeMatch = str.match(/\((\d+)\)/);
+            var accountCode = codeMatch ? codeMatch[1] : '';
+            var nameOnly = codeMatch ? str.replace(codeMatch[0], '').trim().replace(/\s{2,}/g, ' ') : str;
+
+            return {
+                accountCode: accountCode,
+                nameOnly: nameOnly
+            };
+        }
+
+        function cleanNameOnly(str) {
+            str = str || '';
+            var parsed = extractNumericCodeAndName(str);
+            return parsed.nameOnly || str;
+        }
+
+        function getStatusText(value) {
+            if (value === true || value === 1 || value === '1' || value === 'True' || value === 'true') {
+                return 'Active';
+            }
+
+            if (value === false || value === 0 || value === '0' || value === 'False' || value === 'false') {
+                return 'Inactive';
+            }
+
+            return '';
+        }
+
+        function htmlEncodeCOA(value) {
+            return $('<div/>').text(value == null ? '' : value).html();
+        }
+
+
+        $('#exportButton').click(function () {
+            expandCOATreeAll();
+
+            // Get the table element
+            var table = document.getElementById('dtTb');
+
+            // Clone the table to modify it without affecting the original
+            var clonedTable = table.cloneNode(true);
+
+            // Find and remove columns with the `.noExcel` class
+            $(clonedTable).find('tr').each(function () {
+                $(this).find('.noExcel').remove();
+            });
+
+            // Convert the modified table to a worksheet
+            var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Chart Of Account" });
+            var worksheet = workbook.Sheets["Chart Of Account"];
+
+            // Specify the column indexes (0-based) for GL Code, Debit (BDT), and Credit (BDT)
+            var glCodeColIndex = 3;       // GL Code column
+            var debitColIndex = 8;        // Debit (BDT) column
+            var creditColIndex = 9;       // Credit (BDT) column
+
+            // Convert GL Code cells to string format
+            var range = XLSX.utils.decode_range(worksheet['!ref']);
+            for (var row = range.s.r + 1; row <= range.e.r; row++) { // Skip header row
+                // Handle GL Code as string
+                var glCodeCellRef = XLSX.utils.encode_cell({ c: glCodeColIndex, r: row });
+                var glCodeCell = worksheet[glCodeCellRef];
+                if (glCodeCell && glCodeCell.v !== undefined) {
+                    glCodeCell.t = 's'; // Set cell type to string
+                    glCodeCell.v = String(glCodeCell.v); // Ensure the value is a string
+                }
+
+                // Handle Debit (BDT) as number with 4 decimal places
+                var debitCellRef = XLSX.utils.encode_cell({ c: debitColIndex, r: row });
+                var debitCell = worksheet[debitCellRef];
+                if (debitCell && debitCell.v !== undefined) {
+                    debitCell.t = 'n'; // Set cell type to number
+                    debitCell.v = parseFloat(debitCell.v).toFixed(4); // Ensure the value is a number with 4 decimal places
+                    debitCell.z = '0.0000'; // Set cell format to 4 decimal places
+                }
+
+                // Handle Credit (BDT) as number with 4 decimal places
+                var creditCellRef = XLSX.utils.encode_cell({ c: creditColIndex, r: row });
+                var creditCell = worksheet[creditCellRef];
+                if (creditCell && creditCell.v !== undefined) {
+                    creditCell.t = 'n'; // Set cell type to number
+                    creditCell.v = parseFloat(creditCell.v).toFixed(4); // Ensure the value is a number with 4 decimal places
+                    creditCell.z = '0.0000'; // Set cell format to 4 decimal places
+                }
+            }
+
+            // Generate Excel file and prompt download
+            XLSX.writeFile(workbook, 'Chart_Of_Account.xlsx');
+
+        });
+
+         @*function PrintReport() {
+            var urlpath = '@Url.Action("rptCOA", "AccountingTaskReport")';
+            var reportValue = "CoaSingleRpt";
+            var MasterId = $('#ddlCompany').val();
+            $.ajax({
+                url: urlpath,
+                data: { MasterId: MasterId, reportValue: reportValue },
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }*@
+
+    </script>
+}

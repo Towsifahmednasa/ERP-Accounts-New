@@ -1,0 +1,328 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\FinancialYear\FinancialyearCreate.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Financial year Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Financial Year</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        <a class="small blue button" href="@Url.Action("FinancialyearList", "FinancialYear")">
+                                            <span class="fa fa-share"></span>  Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" >
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Company:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divCompany">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlcompany"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+                            
+                            <div class="row mt-2">
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Start Date:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divStartDate">
+                                            <input type="text" id="txtStartDate" class="form-control form-control-sm datepicker" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">End Date:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divEndDate">
+                                            <input type="text" id="txtEndDate" class="form-control form-control-sm datepicker" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                        <div class="col-md-8">
+
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="customSwitch1" checked >
+                                                <label class="custom-control-label" for="customSwitch1">Active</label>
+                                            </div>
+                                           
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div style="padding-top: 1.5%">
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+                                                <button class="small blue button" onclick="Save()">   Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<input id="masterId" value="@ViewBag.Id" style="display:none" />
+
+@section Scripts
+{
+    <script type="text/javascript">
+        let id = $('#masterId').val();
+        $(function () {
+            if (id > 0) {
+                GetData(id);
+            } else {
+                LoadCompany('ddlcompany');
+            }
+        });
+
+        function LoadCompany(elementId) {
+           $.ajax({
+                url: "/Utility/LoadCompanyInfo",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+                    $('#' + elementId + '').empty();
+                    $('#' + elementId + '').append("<option value='0'>--Select Company--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
+                    }
+                }
+            });
+        }
+
+        function SaveValidation() {
+            var isValid = true;
+            if ($('#ddlcompany').val() == 0 || $('#ddlcompany').val() == '') {
+                ValidationColorChangeNew("ddlcompany", "divCompany", "Company Required", true);
+                isValid = false;
+            }
+
+         
+            if ($('#txtStartDate').val() == '' || $('#txtStartDate').val() == null) {
+                ValidationColorChangeNew("txtStartDate", "divStartDate", "Start Date Required", false);
+                isValid = false;
+            }
+
+            if ($('#txtEndDate').val() == '' || $('#txtEndDate').val() == null) {
+                ValidationColorChangeNew("txtEndDate", "divEndDate", "End Date Required", false);
+                isValid = false;
+            }
+
+            return isValid;
+        }
+        function Save() {
+
+        
+            if (SaveValidation()) {
+                swal({
+                    title: "Are you sure?",
+                    text: "",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, I am sure!',
+                    cancelButtonText: "No, cancel it!",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                FinalSave();
+                        } else {
+                            swal("Cancelled", ")", "error");
+                            e.preventDefault();
+                        }
+                    });
+            };
+        }
+
+    function FinalSave() {
+        var jsonData = {};
+        jsonData["FinancialYearId"] = $('#masterId').val();
+        jsonData["CompanyId"] = $('#ddlcompany').val();
+        jsonData["EndDate"] = $('#txtEndDate').val();
+        jsonData["StartDate"] = $('#txtStartDate').val();
+        var status = $('#customSwitch1').is(':checked');
+        if(status){
+            jsonData["Status"] = "Active";
+        }else{
+            jsonData["Status"] = "Inactive";
+        }
+
+          var urlpath = '@Url.Action("Save_Financialyear", "FinancialYear")';
+            $.ajax({
+                data: jsonData,
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    $("#overlay").fadeIn(300);
+                },
+            }).success(function (result) {
+                setTimeout(function () {
+                    $("#overlay").fadeOut(300);
+                }, 500);
+                if (result.msg != "") {
+                    if (result.pk > 0) {
+                        swal({
+                            title: "Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            window.location.href = '@Url.Action("FinancialyearList", "FinancialYear")';
+                        });
+                    }
+                    else {
+                         swal({
+                             title: result.msg,
+                            text: '',
+                             type: "warning",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Back!',
+                            closeOnConfirm: false
+                        });
+                    }
+                }
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                    })
+                }
+                });
+        }
+    
+    function GetData(id) {
+            var urlpath = '@Url.Action("Get_Financialyear_ById", "FinancialYear")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                data: { id: id },
+                type: "Get",
+                async: true,
+                success: function (data) {
+                    $("#btnSave").html("Update");
+                    _LoadCompany('ddlcompany', data.CompanyId);
+                    $('#txtEndDate').val(data._EndDate);
+                    $('#txtStartDate').val(data._StartDate);
+
+                    if (data.Status=="Active") {
+                        $('#customSwitch1').prop('checked', true);
+                    } else {
+
+                        alert("check");
+                        $('#customSwitch1').prop('checked', false);
+                    }
+                },
+            });
+        }
+
+        function _LoadCompany(elementId, SetId) {
+            $.ajax({
+                url: "/Utility/LoadCompanyInfo",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+                    $('#' + elementId + '').empty();
+                    $('#' + elementId + '').append("<option value='0'>--Select Company--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
+                    }
+                },
+                complete: function () {
+                    $('#' + elementId + '').val(SetId);
+                }
+            });
+        }
+
+        function Load_Company_ById(elementId) {
+        $.ajax({
+            url: "/Utility/LoadCompanyInfo",
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            type: "Get",
+            data: {},
+            async: false,
+            success: function (data) {
+
+                $('#' + elementId + '').empty();
+                $('#' + elementId + '').append("<option value='0'>--Select Company--</option>");
+
+                for (var i = 0; i < data.length; i++) {
+
+                    $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
+                }
+            }
+        });
+        }
+
+
+    </script>
+
+}
+

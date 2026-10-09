@@ -1,0 +1,6 @@
+{
+  "_comment": "Manual status overrides merged by tools/gen-migration-docs.py (keys: status, build, functional, uiqa, notes).",
+  "PAGE-001": { "status": "DONE", "build": "PASS", "functional": "PASS (login page, CSRF, failed-login message, redirect)", "uiqa": "PASS (1366x768, 1024, 500)", "notes": "Fiori login screen" },
+  "PAGE-260": { "status": "BLOCKED (Crystal Reports has no .NET 10 runtime)", "build": "-", "functional": "Blocked", "uiqa": "-", "notes": "CrystalViewerController renders an explanatory page at the same URL" },
+  "PAGE-261": { "status": "BLOCKED (Crystal Reports has no .NET 10 runtime)", "build": "-", "functional": "Blocked", "uiqa": "-", "notes": "dormant clone of PAGE-260" }
+}

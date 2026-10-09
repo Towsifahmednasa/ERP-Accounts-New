@@ -1,0 +1,83 @@
+@* FI period close (wireframe 81's "period closed" hard stop): a closed month blocks POSTING a journal
+   into that month; parked drafts are unaffected. Data: tblFiPeriodClose via JournalController. *@
+
+@{
+    ViewBag.Title = "Period Close";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="opsect">
+    <h4>FI period close</h4>
+    <div class="strip info">
+        <svg width="16" height="16" style="flex:none;margin-top:1px"><use href="#s-alert"/></svg>
+        <div>A closed month blocks posting journal vouchers into it. Parked drafts are not affected. Closing or re-opening is logged with user and time.</div>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px">
+        <div class="fld" style="min-width:260px">
+            <label for="ddlCompany">Company</label>
+            <select class="form-select form-select-sm select2" style="width:100%" id="ddlCompany" onchange="LoadPeriods()"></select>
+        </div>
+        <div class="fld" style="min-width:120px">
+            <label for="txtYear">Year</label>
+            <input type="number" id="txtYear" class="form-control form-control-sm" value="@DateTime.Now.Year" onchange="LoadPeriods()" />
+        </div>
+        <a class="btn sm" href="@Url.Action("JRCreate", "Journal")">Journal Entry</a>
+    </div>
+
+    <table class="sap" style="max-width:720px">
+        <thead><tr><th>Period</th><th>Status</th><th>Changed by</th><th>Changed on</th><th style="width:120px"></th></tr></thead>
+        <tbody id="periodBody"></tbody>
+    </table>
+</div>
+
+@section Scripts
+{
+<script type="text/javascript">
+    var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    $(document).ready(function () {
+        LoadCompany('ddlCompany');
+        setTimeout(LoadPeriods, 600);
+    });
+
+    function LoadPeriods() {
+        var comID = $('#ddlCompany').val();
+        var year = parseInt($('#txtYear').val(), 10);
+        if (!comID || comID == '0' || !year) { return; }
+        $.get('@Url.Action("PeriodCloseList", "Journal")', { companyId: comID, year: year }, function (list) {
+            var closed = {};
+            for (var i = 0; i < list.length; i++) { closed[list[i].PeriodMonth] = list[i]; }
+            var h = '';
+            for (var m = 1; m <= 12; m++) {
+                var c = closed[m];
+                h += '<tr><td>' + ('0' + m).slice(-2) + ' / ' + year + ' &middot; ' + monthNames[m - 1] + '</td>'
+                    + '<td>' + (c ? '<span class="objstat neg"><svg width="13" height="13"><use href="#s-no"/></svg>Closed</span>'
+                                  : '<span class="objstat pos"><svg width="13" height="13"><use href="#s-ok"/></svg>Open</span>') + '</td>'
+                    + '<td class="mini">' + (c && c.UpdateBy ? $('<i>').text(c.UpdateBy).html() : '&mdash;') + '</td>'
+                    + '<td class="mini">' + (c && c.UpdateDate ? c.UpdateDate.replace('T', ' ').substring(0, 16) : '&mdash;') + '</td>'
+                    + '<td><button type="button" class="btn sm" onclick="TogglePeriod(' + m + ',' + (c ? 'false' : 'true') + ')">' + (c ? 'Re-open' : 'Close') + '</button></td></tr>';
+            }
+            $('#periodBody').html(h);
+        });
+    }
+
+    function TogglePeriod(month, close) {
+        var comID = $('#ddlCompany').val();
+        var year = parseInt($('#txtYear').val(), 10);
+        swal({
+            title: "Are you sure?",
+            text: (close ? "Close " : "Re-open ") + monthNames[month - 1] + " " + year + " for posting?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+            closeOnConfirm: true
+        }, function (isConfirm) {
+            if (!isConfirm) { return; }
+            $.post('@Url.Action("SetPeriodClose", "Journal")', { companyId: comID, year: year, month: month, isClosed: close }, function (r) {
+                if (r.isSuccess) { LoadPeriods(); } else { toastr.error(r.msg || 'Change failed.'); }
+            });
+        });
+    }
+</script>
+}

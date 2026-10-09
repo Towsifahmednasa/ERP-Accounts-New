@@ -1,0 +1,1306 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\LedgerReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Ledger Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .radio-label {
+        font-weight: bold !important;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+<div id="loadingSpinner" style="display:none;">
+    <div class="overlay"></div>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
+
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Ledger Report </span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        @*<div class="card-title d-flex align-items-center">
+                                                <div>
+                                                    <i class="bx bxs-filter-alt me-1 font-22 text-primary"></i>
+                                                </div>
+                                                <h5 class="mb-0 text-primary">Filtering Criteria</h5>
+                                            </div>*@
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                            </div>
+
+                                            <div class="col-md-5">
+                                                <div class="card bg-light bg-gradient ">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+
+                                                            <div class="form-group">
+                                                                <div class="form-group">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4"><label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
+                                                                        <div class="col-md-8" id="divCompany"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select> </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-4"><label for="ddlCompany" class="bold col-form-label">Ledger Type: <span class="required"> *</span> </label>  </div>
+                                                                    <div class="col-md-8">
+
+                                                                        <input type="radio" id="COA" name="category" value="coa">
+                                                                        <label for="COA" style="font-weight: bold !important;">GL</label>
+
+                                                                        <input type="radio" id="subsidiary" name="category" value="subsidiary">
+                                                                        <label for="subsidiary" style="font-weight: bold !important;">Subsidiary</label>
+
+                                                                        <input type="radio" id="cost-center" name="category" value="cost-center">
+                                                                        <label for="cost-center" style="font-weight: bold !important;">Cost Center</label>
+
+                                                                        <input type="radio" id="reference" name="category" value="reference">
+                                                                        <label for="reference" style="font-weight: bold !important;">Reference</label>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+
+
+                                                            <div class="form-group" id="coa-div">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4"><label for="ddlcoa" class="bold col-form-label"> Chart of Account: <span id="requiredCoa" style="color: orangered !important;"> </span></label></div>
+                                                                    <div class="col-md-8" id="divcashAccount"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlcoa" onchange="GetSubsidoryorCSDDlbyCOAId()"></select> </div>
+                                                                </div>
+
+                                                            </div>
+
+
+
+                                                            <div class="form-group hidden" id="subsidiary-div">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4"><label for="ddlSubsidiaryType" class="bold col-form-label">Subsidiary Type: <span id="requiredSubsidiaryType" style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divSubsidiaryType"><select class="form-select form-select-sm mb-3 select2" onchange="GetSubsidoryByType()" style="width: 100%;" id="ddlSubsidiaryType"></select> </div>
+                                                                </div>
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4"><label for="ddlSubsidiary" class="bold col-form-label">Subsidiary: <span id="requiredSubsidiary" style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divSubsidiary">
+                                                                        <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlSubsidiary"></select>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="form-group hidden" id="reference-div">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4"><label for="ddlReferenceType" class="bold col-form-label">Reference Type: <span id="requiredReferenceType" style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divReferenceType"><select class="form-select form-select-sm mb-3 select2" onchange="GetReferenceByType()" style="width: 100%;" id="ddlReferenceType"></select> </div>
+                                                                </div>
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4"><label for="ddlReference" class="bold col-form-label">Reference: <span id="requiredReference" style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divReference">
+                                                                        <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlReference"></select>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group hidden" id="cs-div">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlcoa" class="bold col-form-label">Cost Center: <span style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divCS"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCS"></select> </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlFinansialYear" class="bold col-form-label">Financial Year: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divFinansialYear">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFinansialYear" onchange="LoadDaterangebyFiscal()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtToDate" class="bold col-form-label">To Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+
+                                                                <div class="col-md-8" id="divTransactionType">
+
+                                                                    <div class="row">
+                                                                        <diiv class="col-md-6" style="display: none">
+                                                                            <div class="form-check form-switch">
+                                                                                <input class="form-check-input" checked type="checkbox" id="customSwitch1">
+                                                                                <label class="custom-control-label" for="customSwitch1">Monthly</label>
+                                                                            </div>
+
+                                                                        </diiv>
+                                                                        <diiv class="col-md-6" style="display:none">
+                                                                            <div class="form-check form-switch">
+                                                                                <input class="form-check-input" onchange="NarationHideShow()" type="checkbox" id="chkNarration">
+                                                                                <label class="custom-control-label" for="chkNarration">Narration</label>
+                                                                            </div>
+                                                                        </diiv>
+                                                                    </div>
+
+
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+
+                                                                <div class="col-md-8" id="divTransactionType" style="display:none">
+
+
+                                                                    <div class="form-check form-switch">
+                                                                        <input class="form-check-input" type="checkbox" id="chkAllCompany">
+                                                                        <label class="custom-control-label" for="chkAllCompany">All Company</label>
+                                                                    </div>
+
+
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                                                <div class="col-md-8">
+                                                                    <button style="display:none" class="small blue button" id="Reject" onclick="PrintReport()">
+                                                                        <i class="fa fa-search" aria-hidden="true"></i>
+                                                                        Search
+                                                                    </button>
+
+                                                                    <button class="small blue button" onclick="GetDetailLedgerReport()">
+                                                                        <i class="fa fa-search" aria-hidden="true"></i>
+                                                                        Search
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <br />
+
+
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-12">
+
+                                        <div class="row m-2">
+                                            <div class="col-12">
+
+                                                <div class="row">
+
+                                                    <div class="col-11"></div>
+
+                                                    <div class="col-1">
+
+                                                        <button id="exportButton" class="btn btn-sm btn-success mb-3 btn-block">
+                                                            <i class="fa fa-file-excel"></i> Export to Excel
+                                                        </button>
+
+
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="row m-2">
+                                                <div class="col-12">
+
+                                                    <div class="table-responsive" style="width: 99% !important; margin: 0 auto !important">
+
+                                                        <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable p-2">
+                                                            <thead>
+
+                                                                <tr>
+                                                                    <th colspan="10" style="text-align: center; font-weight: bold; font-size: 16px; color: blue;"> <label id="lblheading"> LEDGER ACCOUNT </label> </th>
+                                                                </tr>
+
+                                                                <tr class="jobRow">
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Job Type: </td>
+                                                                    <td style="text-align: left;">
+                                                                        <label style="font-size: 18px !important;" id="lblJobType"></label>
+                                                                    </td>
+                                                                    <td colspan="4"></td>
+                                                                    <td colspan="2"></td>
+                                                                </tr>
+                                                                <tr class="jobRow" style="text-align: left;">
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Job Code: </td>
+                                                                    <td style="text-align: left;">
+                                                                        <label style="font-size: 18px !important;" id="lblJobCode"></label>
+                                                                    </td>
+                                                                    <td colspan="4"></td>
+                                                                    <td colspan="2"></td>
+                                                                </tr>
+
+
+                                                                <tr>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Business Unit: </td>
+                                                                    <td>
+                                                                        <label style="font-size: 18px !important;" id="lblBusinessUnit"></label>
+                                                                    </td>
+                                                                    <td colspan="4"></td>
+                                                                    <td style="font-weight: bold; font-size: 18px !important;"> From Date: </td>
+                                                                    <td colspan="2">
+                                                                        <label style="font-size: 18px !important;" id="lblFromDate"></label>
+                                                                    </td>
+
+
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Financial Year: </td>
+                                                                    <td>
+                                                                        <label style="font-size: 18px !important;" id="lblFinancialYear"></label>
+                                                                    </td>
+                                                                    <td colspan="4"></td>
+                                                                    <td style="font-weight: bold; font-size: 18px !important;"> To Date: </td>
+                                                                    <td colspan="2">
+                                                                        <label style="font-size: 18px !important;" id="lblToDate"></label>
+                                                                    </td>
+                                                                </tr>
+
+
+
+                                                                <tr>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Currency: </td>
+                                                                    <td>
+                                                                        <label style="font-size: 18px !important;" id="lblCurrency"></label>
+                                                                    </td>
+                                                                    <td colspan="4"></td>
+                                                                    <td style="font-weight: bold; font-size: 18px !important; color: forestgreen !important; "> Opening Balance: </td>
+                                                                    <td colspan="2">
+                                                                        <label style="font-weight: bold; font-size: 18px !important; color: forestgreen !important; " id="lblOpeningBalance">  </label>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="10"></td>
+                                                                </tr>
+                                                                <tr style="background-color: #285B86 !important">
+                                                                    <th style="width: 2% !important; color:white; text-align: center !important;"> # SL</th>
+                                                                    <th style="width: 8% !important; color:white; text-align: center !important;"> Date </th>
+                                                                    <th style="width: 6% !important; color:white; text-align: center !important;"> Voucher No </th>
+                                                                    <th style="width: 10% !important; color:white; text-align: center !important;"> GL Code </th>
+                                                                    <th style="width: 10% !important; color:white;  text-align: center !important;"> GL </th>
+                                                                    <th style="width: 36% !important; color:white;  text-align: center !important;"> Narration </th>
+                                                                    <th style="width: 3% !important; color:white; text-align: center !important;"> Voucher Type </th>
+                                                                    @*<th style="width: 5% !important; color:white; text-align: center !important;"> Currency </th>*@
+                                                                    <th style="width: 10% !important; color:white;  text-align: center !important;"> Debit </th>
+                                                                    <th style="width: 10% !important; color:white;  text-align: center !important;"> Credit  </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="ledgerlist">
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $(".jobRow").hide();
+            LoadCompany('ddlCompany');
+            // Load Subsidiary Type
+
+            GetSubsidaryType();
+            GetReferenceType();
+
+            $('#subsidiary-div').hide();
+            $('#cs-div').hide();
+
+            $('input[name="category"]').change(function () {
+                GetSubsidoryorCSDDlbyCOAId();
+            });
+
+            //$('#dtTb').DataTable();
+
+        });
+
+
+        $('#exportButton').click(function () {
+            // Show the loading spinner
+            $("#loadingSpinner").show();
+
+            // Use a small timeout to allow spinner to render before blocking operation
+            setTimeout(function () {
+                var table = document.getElementById('dtTb');
+                var html = table.outerHTML;
+
+                var now = new Date();
+                var day = ("0" + now.getDate()).slice(-2);
+                var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                var month = monthNames[now.getMonth()];
+                var year = now.getFullYear();
+
+                var hour = ("0" + now.getHours()).slice(-2);
+                var minute = ("0" + now.getMinutes()).slice(-2);
+                var second = ("0" + now.getSeconds()).slice(-2);
+
+                var dateTime = day + "-" + month + "-" + year + " " + hour + "-" + minute + "-" + second;
+                var fileName = 'Ledger Report ' + dateTime + '.xls';
+
+                var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                link.click();
+
+                // Hide the spinner after export
+                $("#loadingSpinner").hide();
+
+            }, 3000); // Slight delay for smoother UX
+        });
+
+
+
+        function NarationHideShow() {
+
+            var rows = $('#ledgerlist tr');
+
+            rows.each(function () {
+
+                var row = $(this);
+
+                if ($('#chkNarration').is(':checked')) {
+
+                    $(row).find('.nested-table-container').show();
+
+                } else {
+
+                    $(row).find('.nested-table-container').hide();
+                }
+
+            })
+
+
+
+        }
+
+        function formatDateToMMMDDYYYY(dateStr) {
+
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var dateObj = new Date(dateStr);
+
+            var day = dateObj.getDate(); // Get day of the month (1-31)
+            var month = months[dateObj.getMonth()]; // Get month (0-11, hence we use it as an index for the months array)
+            var year = dateObj.getFullYear(); // Get the full year (e.g., 2024)
+
+            // Return the formatted date as "26 - Aug - 2024"
+            return `${day} - ${month} - ${year}`;
+
+        }
+
+
+        function GetDetailLedgerReport() {
+
+            // Retrieve values from form elements or set default values
+
+            $("#loadingSpinner").show();
+            setTimeout(function () {
+ 
+
+            $('#lblheading').text('');
+
+            $('#lblOpeningBalance').text('');
+            $('#lblOpeningBalance').text('');
+            $('#lblBusinessUnit').text('');
+            $('#lblFinancialYear').text('');
+            $('#lblFromDate').text('');
+            $('#lblToDate').text('');
+            $('#lblChartofAccountName').text('');
+            $("#ledgerlist").empty();
+
+
+
+            var categoryrb = $('input[name="category"]:checked').val();
+            var companyId = $("#ddlCompany").val() || 2;
+            var coaId = $("#ddlcoa").val() || 0;
+            var financialYearId = $("#ddlFinansialYear").val() || 25;
+            var fromDate = $("#txtfrmDate").val();
+            var toDate = $("#txtToDate").val();
+            var company = $("#ddlCompany").val();
+            var company = $("#ddlCompany option:selected").text();
+            var monthly = $("#chkMonthly").is(':checked') || true;
+            var narration = true;
+            var financialYearText = $("#ddlFinansialYear option:selected").text();
+            var bankBookBankName = '';
+            var ledgerOtherCurrency = false;
+            var typeSubCS = 'subsidiary';
+
+            var subsidiaryId = $("#ddlSubsidiary").val() || 0;
+            var subsidiaryTypeId = $("#ddlSubsidiary").val() || 0;
+            var subsidiaryName = $("#ddlSubsidiary option:selected").text();
+            var referenceType = $("#ddlReferenceType option:selected").text();
+            var referenceTypeId = $("#ddlReferenceType").val() || 0;
+            var referenceName = $("#ddlReference option:selected").text();
+            var referenceId = $("#ddlReference").val() || 0;
+            var csId = 0;
+
+            var heading = 'LEDGER REPORT ';// + $("#ddlSubsidiary option:selected").text();
+            $('#lblheading').text(heading);
+
+
+            $('#lblBusinessUnit').text(company);
+            $('#lblFinancialYear').text(financialYearText);
+            $('#lblFromDate').text(fromDate);
+            $('#lblToDate').text(toDate);
+             
+
+            if (referenceId != 0) {
+                $('#lblJobCode').text(referenceName);
+            }
+            if (referenceTypeId != 0) {
+                $('#lblJobType').text(referenceType);
+            }
+
+
+
+
+            let _OpeningBalance;
+            let _closingBlnc;
+
+            let _glHead;
+
+
+                var urlpathOpnBlnc = '@Url.Action("GetLedgerReportOpeningBlnc", "AllAccountReport")';
+
+    // Perform an AJAX call to fetch data from your API
+    $.ajax({
+        url: urlpathOpnBlnc,
+        dataType: 'json', // Change this to 'json' if your API returns JSON
+        type: "GET",
+        data: {
+            CompanyID: companyId,
+            coaID: coaId,
+            FinancialYearID: financialYearId,
+            FromDate: fromDate,
+            ToDate: toDate,
+            Company: company,
+            Monthly: true,
+            Narration: '',
+            FinancialYearText: financialYearText,
+            BankBookBankNAme: '',
+            LedgerOtherCurrency: false,
+            TypeSubCS: 'subsidiary',
+            SubsidiaryID: subsidiaryId,
+            category: categoryrb,
+            referenceId: referenceId
+        },
+        async: false,
+        beforeSend: function () {
+            // Show the full-screen loading spinner
+         
+        },
+        success: function (result) {
+            data = JSON.parse(result);
+            if (data && data.length > 0) {
+                $.each(data, function (index, item) {
+                    if (item.OpeningBalance !== undefined) {
+                          formattedOpeningBalance = parseFloat(item.OpeningBalance).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+                        $('#lblOpeningBalance').text(formattedOpeningBalance);
+                        _OpeningBalance = item.OpeningBalance;
+                        _glHead = item.GLName;
+                    } else {
+                        console.log("OpeningBalance field not found in the item");
+                    }
+                });
+            } else {
+                console.log("No data returned or data is empty.");
+            }
+        },
+       
+        
+        error: function (xhr, status, error) {
+            console.log("Error in retrieving ledger data:", error);
+        }
+    });
+            $(".jobRow").hide();
+            if (  categoryrb == 'reference') {
+
+                $(".jobRow").show();
+
+            }
+
+            var urlpath = '@Url.Action("GetLedgerReport", "AllAccountReport")';
+
+            // Perform an AJAX call to fetch data from your API
+            $.ajax({
+                url: urlpath,
+                dataType: 'json', // Change this to 'json' if your API returns JSON
+                type: "GET",
+                data: {
+                    CompanyID: companyId,
+                    coaID: coaId,
+                    FinancialYearID: financialYearId,
+                    FromDate: fromDate,
+                    ToDate: toDate,
+                    Company: company,
+                    Monthly: true,
+                    Narration: '',
+                    FinancialYearText: financialYearText,
+                    BankBookBankNAme: '',
+                    LedgerOtherCurrency: false,
+                    TypeSubCS: 'subsidiary',
+                    SubsidiaryID: subsidiaryId,
+                    CsID: 0,
+                    category: categoryrb,
+                    referenceId: referenceId
+                },
+                async: false,
+                beforeSend: function () {
+                    // Show loading overlay or spinner if needed
+
+                },
+                success: function (result) {
+
+                    data = JSON.parse(result);
+                    console.log("Ledger Data:");
+                    console.log(data);
+
+                    var debitAmountBDT = 0;
+                    var creditAmountBDT = 0;
+                    var OpeningBalance = 0;
+                    var closingBalance = 0;
+
+                    // Process the data returned by your API
+
+                    $("#ledgerlist").empty();
+
+                    if (data) {
+
+
+
+                        $.each(data, function (index, item) {
+
+                         var   formattedOpeningBalance = parseFloat(OpeningBalance).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+
+                            //var heading = 'LEDGER ACCOUNT OF ' + $("#ddlSubsidiary option:selected").text();
+                            //$('#lblheading').text(heading);
+
+                            //$('#lblOpeningBalance').text(formattedOpeningBalance);
+                            //$('#lblOpeningBalance').text(formattedOpeningBalance);
+                            //$('#lblBusinessUnit').text(item.CompanyName);
+                            //$('#lblFinancialYear').text(item.FinancialYearDesc);
+                            //$('#lblFromDate').text(formatDateToMMMDDYYYY(item.FromDate));
+                            //$('#lblToDate').text(formatDateToMMMDDYYYY(item.Todate));
+                            //$('#lblChartofAccountName').text(item.ChartofAccountName);
+
+                            // Calculate debit and credit amounts
+
+                            var debitAdjustment = item.GLName === "Assets" || item.GLName === "Expenses"
+                                ? parseFloat(OpeningBalance) + parseFloat(item.DebitAmountBDT)
+                                : parseFloat(item.DebitAmountBDT);
+
+                            var creditAdjustment = item.GLName === "Liability" || item.GLName === "Revenue/Income"
+                                ? parseFloat(item.CreditAmountBDT)
+                                : parseFloat(OpeningBalance) + parseFloat(item.CreditAmountBDT);
+
+                            debitAmountBDT += debitAdjustment;
+                            creditAmountBDT += creditAdjustment;
+
+                            // Format debit and credit amounts with commas
+                            var formattedDebitAmount = parseFloat(item.DebitAmountBDT).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+                            var formattedCreditAmount = parseFloat(item.CreditAmountBDT).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+
+                            var row = `
+                                    <tr>
+                                        <td style='text-align: center !important;'>${index + 1}</td>
+                                        <td style='text-align: center !important;'>${formatDateToMMMDDYYYY(item.PostingDate)}</td>
+                                        <td style='text-align:center'>
+                                            <a data-bs-toggle='modal' onclick='PrintVoucherReport(${item.VoucherMasterId})' style='text-decoration: underline; cursor: pointer;' class='link-primary bold popupLink'>${item.VoucherCode}</a>
+                                        </td>
+                                        <td style='text-align: center !important;'>${item.AccountCode}</td>
+                                        <td style='text-align: left !important;'>${item.AccountName}</td>
+                                        <td style='word-wrap: break-word; white-space: normal;'>
+
+                                            <span class='narration-full'>${item.Narration}</span>
+
+                                        </td>
+                                        <td style='text-align: center !important;'>${item.VoucherType}</td>
+                                        
+                                        <td style='text-align: right !important;'>${formattedDebitAmount}</td>
+                                        <td style='text-align: right !important;'>${formattedCreditAmount}</td>
+                                    </tr>`;
+
+                            // Append row to tbody
+                            $('#lblCurrency').text(item.CurrencyName);
+
+
+                            $("#ledgerlist").append(row);
+                        });
+
+                       
+                        //<td style='text-align: center !important;'>${item.CurrencyName}</td>
+                       
+                        //${
+                        //    item.Narration.length > 50 ? `
+                        //                        <span class='narration-short noExcel'>${item.Narration.substring(0, 50)}...</span>
+
+                        //                        <a href='#' class='narration-toggle noExcel' onclick='toggleNarration(this); return false;'>Read More</a>
+                        //                    ` : `
+                        //                        <span class='narration-short'>${item.Narration}</span>
+                        //                    `}
+
+                        closingBalance = creditAmountBDT - debitAmountBDT;
+
+                        var formattedDebitAmount = parseFloat(debitAmountBDT).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+                        var formattedCreditAmount = parseFloat(creditAmountBDT).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+
+                        var formattedclosingBalance = parseFloat(closingBalance).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+
+                        _myclosCheck = 0;
+                        if (categoryrb == 'subsidiary' || categoryrb == 'reference') {
+                            _closingBlnc = (_OpeningBalance + debitAmountBDT) - creditAmountBDT;
+                            _myclosCheck = (_OpeningBalance + debitAmountBDT) - creditAmountBDT;
+
+                            // Check if _closingBlnc is NaN, and if so, set it to 0
+                            if (isNaN(_closingBlnc)) {
+                                _closingBlnc = 0;
+                            }
+                            if (isNaN(_myclosCheck)) {
+                                _myclosCheck = 0;
+                            }
+                            // Format the result to 4 decimal places
+                            _closingBlnc = _closingBlnc.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+                        }
+                        if (categoryrb == 'coa') {
+
+                            if (_glHead == 'Assets' || _glHead == 'Expenses') {
+
+                                _closingBlnc = (_OpeningBalance + debitAmountBDT) - creditAmountBDT;
+                                _myclosCheck = (_OpeningBalance + debitAmountBDT) - creditAmountBDT;
+
+                                // Check if _closingBlnc is NaN, and if so, set it to 0
+                                if (isNaN(_closingBlnc)) {
+                                    _closingBlnc = 0;
+                                }
+                                if (isNaN(_myclosCheck)) {
+                                    _myclosCheck = 0;
+                                }
+                                // Format the result to 4 decimal places
+                                _closingBlnc = _closingBlnc.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+                            }
+                            else {
+                                _closingBlnc = (_OpeningBalance + creditAmountBDT) - debitAmountBDT;
+                                _myclosCheck = (_OpeningBalance + creditAmountBDT) - debitAmountBDT;
+
+                                // Check if _closingBlnc is NaN, and if so, set it to 0
+                                if (isNaN(_closingBlnc)) {
+                                    _closingBlnc = 0;
+                                }
+
+                                if (isNaN(_myclosCheck)) {
+                                    _myclosCheck = 0;
+                                }
+
+                                // Format the result to 4 decimal places
+                                _closingBlnc = _closingBlnc.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+                            }
+                        }
+
+
+                       // alert(_myclosCheck);
+
+                        if (_myclosCheck == 0) {
+                            _closingBlnc = _OpeningBalance;
+                        }
+
+                        console.log('_closingBlnc:', _closingBlnc);
+
+                        var footerRow1 = "<tr>" +
+                            "<td colspan='7' style='text-align: right !important; font-weight: bold;'>Total</td>" +
+                            "<td style='text-align: right !important; font-weight: bold;'>" + formattedDebitAmount + "</td>" +
+                            "<td style='text-align: right !important; font-weight: bold;'>" + formattedCreditAmount + "</td>" +
+                            "</tr>";
+
+                        var footerRow2 = "<tr>" +
+                            "<td colspan='7' style='text-align: right !important; font-weight: bold; font-size: 18px !important; color: forestgreen !important;'>Closing Balance</td>" +
+                            "<td colspan='2' style='text-align: right !important; font-weight: bold; font-size: 18px !important; color: forestgreen !important;'>" + _closingBlnc + "</td>" +
+                            "</tr>";
+
+                        // Append the footer rows to your table
+
+                        var row = footerRow1 + footerRow2;
+
+                        $("#ledgerlist").append(row);
+
+                        NarationHideShow();
+
+
+                    }
+                }
+               , complete: function () {
+                    setTimeout(function () {
+                        $("#loadingSpinner").hide();
+                    }, 5000);
+                }
+            });
+
+                $("#loadingSpinner").hide(); // Hide spinner
+            }, 3000);
+        }
+
+        // Function to toggle between short and full narration
+
+        function toggleNarration(element) {
+            var shortText = $(element).siblings('.narration-short');
+            var fullText = $(element).siblings('.narration-full');
+
+            if (shortText.is(':visible')) {
+                shortText.hide();
+                fullText.show();
+                $(element).text('Read Less');
+            } else {
+                fullText.hide();
+                shortText.show();
+                $(element).text('Read More');
+            }
+        }
+
+        function PrintVoucherReport(MasterId)
+        {
+            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
+            var reportValue = "AllVoucherReport";
+
+        $.ajax({
+            url: urlpath,
+            data: { MasterId: MasterId, reportValue: reportValue},
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+
+
+        function LoadDDlbyCom() {
+
+            LoadFinansialYear();
+
+            _loadCOAbyCom();
+
+            var selectedValue = $('input[name="category"]:checked').val();
+
+            if (selectedValue === "reference") {
+                $('#ddlReference').empty().append("<option value='0'>--Select--</option>");
+                GetReferenceByType();
+            } else if (selectedValue === "cost-center") {
+                $('#ddlCS').empty().append("<option value='0'>--Select Cost Center--</option>");
+                GetCostCenterList();
+            } else if (selectedValue === "subsidiary") {
+                $('#ddlSubsidiary').empty().append("<option value='0'>--Select Subsidiary --</option>");
+                GetSubsidoryByType();
+            }
+        }
+
+        function GetSubsidoryorCSDDlbyCOAId() {
+
+            $('#subsidiary-div').hide();
+            $('#cs-div').hide();
+            $('#coa-div').hide();
+
+
+            $('#reference-div').hide();
+
+
+            var selectedValue = $('input[name="category"]:checked').val();
+
+            if (selectedValue === "coa") {
+
+
+
+                //GetSubsidoryDDlbyCOAId();
+
+                $('#coa-div').show();
+
+            }
+            if (selectedValue === "subsidiary") {
+                $('#subsidiary-div').show();
+                GetSubsidoryByType();
+
+            }
+
+            else if (selectedValue === "cost-center")
+            {
+                $('#cs-div').show();
+                GetCostCenterList();
+            }
+            else if (selectedValue === "reference")
+            {
+                $('#reference-div').show();
+                GetReferenceByType();
+
+            }
+
+
+
+        }
+
+
+        function GetSubsidoryByType() {
+            var $ddlSubsidiary = $('#ddlSubsidiary');
+
+            $ddlSubsidiary.empty().append("<option value='0'>--Select Subsidiary --</option>").val('0');
+
+            if ($.fn.select2 && $ddlSubsidiary.hasClass("select2-hidden-accessible")) {
+                $ddlSubsidiary.select2('destroy');
+            }
+
+            $ddlSubsidiary.select2({
+                placeholder: '--Select Subsidiary--',
+                allowClear: true,
+                width: '100%',
+                minimumInputLength: 1,
+                ajax: {
+                    url: "/Utility/GetSubsidoryLedgerBySupplierTypeId",
+                    dataType: 'json',
+                    delay: 300,
+                    data: function (params) {
+                        return {
+                            SupplierTypeId: $("#ddlSubsidiaryType").val() || 0,
+                            SearchText: params.term || ''
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data || [], function (item) {
+                                return {
+                                    id: item.id != null ? item.id : item.SubsidiryLId,
+                                    text: item.text != null ? item.text : item.SubsidiryLName
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            });
+        }
+
+
+
+        function GetReferenceByType() {
+            var $ddlReference = $('#ddlReference');
+
+            $ddlReference.empty().append("<option value='0'>--Select--</option>").val('0');
+
+            if ($.fn.select2 && $ddlReference.hasClass("select2-hidden-accessible")) {
+                $ddlReference.select2('destroy');
+            }
+
+            $ddlReference.select2({
+                placeholder: '--Select--',
+                allowClear: true,
+                width: '100%',
+                minimumInputLength: 1,
+                ajax: {
+                    url: "/Utility/GetReferenceByReferenceTypeComWiseIdSearch",
+                    dataType: 'json',
+                    delay: 300,
+                    data: function (params) {
+                        return {
+                            ReferenceTypeId: $("#ddlReferenceType").val() || 0,
+                            BusinessUnitId: $("#ddlCompany").val() || 0,
+                            SearchText: params.term || ''
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data || []
+                        };
+                    },
+                    cache: true
+                }
+            });
+        }
+
+
+
+        function GetSubsidoryDDlbyCOAId() {
+
+
+            //$('#subsidiary-div').hide();
+            //$('#cs-div').hide();
+
+            var cId = $("#ddlcoa").val();
+            $.ajax({
+                url: "/Utility/GetSubsidoryLedgerByCOAId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { AccountId: cId },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    $('#ddlSubsidiary').empty();
+                    $('#ddlSubsidiary').append("<option value='0'>--Select Subsidiary --</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlSubsidiary').append($("<option></option>").val(data[i].SubsidiaryInfoId).html(data[i].SubsidiaryInfo));
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+        function GetSubsidaryType() {
+
+/*            var cId = $("#ddlcoa").val();*/
+
+            $.ajax({
+                url: "/Utility/LoadSubsidaryType",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    $("#ddlSubsidiaryType").empty();
+                    $("#ddlSubsidiaryType").append("<option value='0'>--Select--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $("#ddlSubsidiaryType").append($("<option></option>").val(data[i].SubsidiryTypeId).html(data[i].SubsidiryTypeName));
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+
+        function GetReferenceType() {
+
+/*            var cId = $("#ddlcoa").val();*/
+
+            $.ajax({
+                url: "/Utility/LoadReferenceType",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    $("#ddlReferenceType").empty();
+                    $("#ddlReferenceType").append("<option value='0'>--Select--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $("#ddlReferenceType").append($("<option></option>").val(data[i].ReferenceTypeId).html(data[i].ReferenceType));
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+
+        function GetCSDDlbyCOAId() {
+
+
+
+
+            var cId = $("#ddlcoa").val();
+            $.ajax({
+                url: "/Utility/GetCostCenterByCOAId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { AccountId: cId },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    $("#ddlCS").empty();
+                    $("#ddlCS").append("<option value='0'>--Select Cost Center--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $("#ddlCS").append($("<option></option>").val(data[i].CostCenterId).html(data[i].CostCenterName));
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+        function GetCostCenterList() {
+            var $ddlCostCenter = $('#ddlCS');
+
+            $ddlCostCenter.empty().append("<option value='0'>--Select Cost Center--</option>").val('0');
+
+            if ($.fn.select2 && $ddlCostCenter.hasClass("select2-hidden-accessible")) {
+                $ddlCostCenter.select2('destroy');
+            }
+
+            $ddlCostCenter.select2({
+                placeholder: '--Select Cost Center--',
+                allowClear: true,
+                width: '100%',
+                minimumInputLength: 1,
+                ajax: {
+                    url: "/Utility/GetProfitCenterListSearch",
+                    dataType: 'json',
+                    delay: 300,
+                    data: function (params) {
+                        return {
+                            BusinessUnitId: $("#ddlCompany").val() || 0,
+                            SearchText: params.term || ''
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data || []
+                        };
+                    },
+                    cache: true
+                }
+            });
+        }
+
+
+        function LoadDaterangebyFiscal() {
+            var companyId = $("#ddlCompany").val();
+            var FinancialYearId = $("#ddlFinansialYear").val();
+            $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, FinancialYearId: FinancialYearId },
+                async: false,
+                success: function (data) {
+
+                    $('#txtfrmDate').val((data.StartDate));
+                    $('#txtToDate').val((data.EndDate));
+                }
+            });
+        }
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                    if (data.length > 0) {
+                        // Select the first real financial year (index 1)
+                        $('#ddlFinansialYear').val(data[0].FinancialYearId).trigger('change');
+                    }
+                }
+            });
+        }
+
+        function _loadCOAbyCom() {
+
+
+            var companyId = $("#ddlCompany").val();
+
+            $.ajax({
+                url: "/Utility/GetCOAComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlcoa').empty();
+                    $('#ddlcoa').append("<option value='0'>--Select  Chart of Account  --</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlcoa').append($("<option></option>").val(data[i].AccountId).html(data[i].AccountName));
+                    }
+                }
+            });
+        }
+
+          function PrintReport()
+        {
+            var urlpath = '@Url.Action("rptLedgerReport", "AccountingTaskReport")';
+              var reportValue = "LedgerRpt";
+
+
+
+
+              var CompanyID = $('#ddlCompany').val();
+              var Company = $("#ddlCompany option:selected").text();
+
+              var coaID = $('#ddlcoa').val();
+              var FinancialYearID = $('#ddlFinansialYear').val();
+              var  FinancialYearText = $("#ddlFinansialYear option:selected").text();
+
+              var FromDate = $('#txtfrmDate').val();
+              var ToDate = $('#txtToDate').val();
+              var BankBookBankNAme = $("#ddlcashAccount option:selected").text();
+              var Monthly = "";
+              var Narration = "";
+              if ($('#customSwitch1').is(':checked')) {
+                  Monthly = "True";
+              }
+              if ($('#chkNarration').is(':checked')) {
+                  Narration = "True";
+              }
+              var LedgerOtherCurrency = false;
+              if ($('#chkNarration').is(':checked')) {
+                  Narration = "True";
+              }
+
+              var SubsidiaryID = 0;
+              var CsID = 0;
+              var selectedValue = $('input[name="category"]:checked').val();
+
+
+              if (selectedValue === "subsidiary") {
+
+                    SubsidiaryID = $('#ddlSubsidiary').val();
+              } else if (selectedValue === "cost-center") {
+
+                    CsID = $('#ddlCS').val();
+              }
+
+              if (selectedValue == 'undefined') {
+                  selectedValue = "";
+              }
+              var prm = "CompanyID=" + CompanyID + "&coaID=" + coaID + "&FinancialYearID=" + FinancialYearID + "&FromDate=" + FromDate + "&ToDate=" + ToDate + "&Company=" + Company + "&Monthly=" + Monthly + "&Narration=" + Narration + "&FinancialYearText=" + FinancialYearText + "&BankBookBankNAme=" + BankBookBankNAme + "&LedgerOtherCurrency=" + LedgerOtherCurrency + "&TypeSubCS=" + selectedValue + "&SubsidiaryID=" + SubsidiaryID + "&CsID=" + CsID;
+
+
+        $.ajax({
+            url: urlpath,
+            data: { MasterId: 0, reportValue: reportValue},
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx?" + prm+ "", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+
+    </script>
+}

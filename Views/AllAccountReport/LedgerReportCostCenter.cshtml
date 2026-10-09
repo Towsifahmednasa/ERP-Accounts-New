@@ -1,0 +1,355 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\LedgerReportCostCenter.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Cost Center Wise Ledger Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Cost Center Wise Ledger Report </span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="card-title d-flex align-items-center">
+                                            <div>
+                                                <i class="bx bxs-filter-alt me-1 font-22 text-primary"></i>
+                                            </div>
+                                            <h5 class="mb-0 text-primary">Filtering Criteria</h5>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-1">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light bg-gradient">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divCompany">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light bg-gradient ">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+
+                                                            <div class="form-group">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlcoa" class="bold col-form-label">Chart of Account: <span style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divcashAccount"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlcoa"  onchange="GetCSDDlbyCOAId()"></select> </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlcoa" class="bold col-form-label">Cost Center: <span style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divCS"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCS"></select> </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlFinansialYear" class="bold col-form-label">Financial Year: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divFinansialYear">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFinansialYear" onchange="LoadDaterangebyFiscal()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtToDate" class="bold col-form-label">To Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+
+                                                                <div class="col-md-8" id="divTransactionType" style="display:none">
+
+                                                                    <div class="row">
+                                                                        <diiv class="col-md-6">
+                                                                            <div class="form-check form-switch">
+                                                                                <input class="form-check-input" checked type="checkbox" id="customSwitch1">
+                                                                                <label class="custom-control-label" for="customSwitch1">Monthly</label>
+                                                                            </div>
+
+                                                                        </diiv>
+                                                                        <diiv class="col-md-6" style="display:none">
+                                                                            <div class="form-check form-switch">
+                                                                                <input class="form-check-input" type="checkbox" id="chkNarration">
+                                                                                <label class="custom-control-label" for="chkNarration">Narration</label>
+                                                                            </div>
+                                                                        </diiv>
+                                                                    </div>
+
+
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+
+                                                                <div class="col-md-8" id="divTransactionType" style="display:none">
+
+
+                                                                    <div class="form-check form-switch">
+                                                                        <input class="form-check-input" type="checkbox" id="chkAllCompany">
+                                                                        <label class="custom-control-label" for="chkAllCompany">All Company</label>
+                                                                    </div>
+
+
+                                                                </div>
+
+                                                            </div>
+
+                                                            <br />
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                                                <div class="col-md-8">
+                                                                    <button class="small blue button" id="Reject" onclick="PrintReport()">
+                                                                        <i class="fa fa-print" aria-hidden="true"></i>
+                                                                        View Report
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+
+        });
+
+        function LoadDDlbyCom() {
+            LoadFinansialYear();
+            _loadCOAbyCom();
+        }
+
+
+
+
+
+        function LoadDaterangebyFiscal() {
+            var companyId = $("#ddlCompany").val();
+            var FinancialYearId = $("#ddlFinansialYear").val();
+            $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, FinancialYearId: FinancialYearId },
+                async: false,
+                success: function (data) {
+
+                    $('#txtfrmDate').val((data.StartDate));
+                    $('#txtToDate').val((data.EndDate));
+                }
+            });
+        }
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                }
+            });
+        }
+
+        function _loadCOAbyCom() {
+            var companyId = $("#ddlCompany").val();
+
+            $.ajax({
+                url: "/Utility/GetCOAComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlcoa').empty();
+                    $('#ddlcoa').append("<option value='0'>--Select  Chart of Account  --</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlcoa').append($("<option></option>").val(data[i].AccountId).html(data[i].AccountName));
+                    }
+                }
+            });
+        }
+
+
+        function GetCSDDlbyCOAId() {
+
+
+
+
+            var cId = $("#ddlcoa").val();
+            $.ajax({
+                url: "/Utility/GetCostCenterByCOAId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { AccountId: cId },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    $("#ddlCS").empty();
+                    $("#ddlCS").append("<option value='0'>--Select Cost Center--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $("#ddlCS").append($("<option></option>").val(data[i].CostCenterId).html(data[i].CostCenterName));
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+          function PrintReport()
+        {
+            var urlpath = '@Url.Action("rptLedgerReportCostCenter", "AccountingTaskReport")';
+              var reportValue = "CostCenterLedgerRpt";
+
+
+
+
+              var CompanyID = $('#ddlCompany').val();
+              var Company = $("#ddlCompany option:selected").text();
+
+              var coaID = $('#ddlcoa').val();
+              var CsID = $('#ddlCS').val();
+              var FinancialYearID = $('#ddlFinansialYear').val();
+              var  FinancialYearText = $("#ddlFinansialYear option:selected").text();
+
+              var FromDate = $('#txtfrmDate').val();
+              var ToDate = $('#txtToDate').val();
+              var BankBookBankNAme = $("#ddlcashAccount option:selected").text();
+              var Monthly = "";
+              var Narration = "";
+              if ($('#customSwitch1').is(':checked')) {
+                  Monthly = "True";
+              }
+              if ($('#chkNarration').is(':checked')) {
+                  Narration = "True";
+              }
+              var LedgerOtherCurrency = false;
+              if ($('#chkNarration').is(':checked')) {
+                  Narration = "True";
+              }
+
+              var prm = "CompanyID=" + CompanyID + "&coaID=" + coaID + "&FinancialYearID=" + FinancialYearID + "&FromDate=" + FromDate + "&ToDate=" + ToDate + "&Company=" + Company + "&Monthly=" + Monthly + "&Narration=" + Narration + "&FinancialYearText=" + FinancialYearText + "&BankBookBankNAme=" + BankBookBankNAme + "&LedgerOtherCurrency=" + LedgerOtherCurrency + "&CsID=" + CsID;
+
+
+        $.ajax({
+            url: urlpath,
+            data: { MasterId: 0, reportValue: reportValue},
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx?" + prm+ "", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+
+
+
+    
+
+    </script>
+}
+

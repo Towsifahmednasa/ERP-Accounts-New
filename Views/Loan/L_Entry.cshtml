@@ -1,0 +1,1965 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Loan\L_Entry.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Loan Info Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .font-weight-bold {
+        font-weight: bold;
+    }
+
+    .error-message {
+        font-size: 0.875rem; /* Small font for error message */
+
+        color: red; /* Red color for error message */
+    }
+</style>
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Loan Info Entry</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        <a class="small blue button" href="@Url.Action("L_List", "Loan")">
+                                            <span class="fa fa-share"></span>  Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:10px">
+                                <!-- Column 1 -->
+                                <div class="col-md-4">
+
+                                </div>
+                                <div class="col-md-4">
+                                    <!-- Business Unit -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlCompany" class="font-weight-bold col-form-label">Business Unit: <span class="required" style="color: red;"> *</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlCompany" style="width: 100%;"></select>
+                                                <div id="divCompany" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- Profit Center -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlProfitCenter" class="font-weight-bold col-form-label">Profit Center: <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlProfitCenter" style="width: 100%;"></select>
+                                                <div id="divProfitCenter" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Supplier Type -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlSupplierType" class="font-weight-bold col-form-label">Supplier Type: <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" onchange="LoadTypewiseSupplier(0)" id="ddlSupplierType" style="width: 100%;"></select>
+                                                <div id="divSupplierType" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Supplier -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlSupplier" class="font-weight-bold col-form-label">Supplier: <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlSupplier" style="width: 100%;"></select>
+                                                <div id="divSupplier" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- LC No -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlLCNo" class="font-weight-bold col-form-label">LC No: <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" onchange="GetCINoByLCNo(0)" id="ddlLCNo" style="width: 100%;"></select>
+                                                <div id="divLCNo" class="error-message" style="display: none;"></div>
+                                                <a href="#" class="" style="display: none; margin-left: 10px;" id="lcLink" target="_blank">#</a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- CI No -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlCINo" class="font-weight-bold col-form-label">CI No:</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlCINo" style="width: 100%;"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- LC Open Date -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="LCOpenDate" class="font-weight-bold col-form-label">LC Open Date:</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="text" class="form-control form-control-sm" readonly id="LCOpenDate" style="width: 100%;" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+
+
+
+                            <div class="row" style="margin-top:10px;padding:10px">
+                                <div class="form-group mb-2">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h5 style="font-size: 1.125em; margin: 0 !important; margin-left: 0% !important; padding: 10px !important; color: #5b42f3 !important;"> <i class="fa fa-cube" aria-hidden="true"></i> Loan Information </h5>
+                                            <hr style="margin: 0 !important;" />
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <!-- Column 1 -->
+                                <div class="col-md-4">
+                                    <!-- Loan Issuing Bank -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlLCIssuingBank" class="font-weight-bold col-form-label">Loan Issuing Bank:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" onchange="LoadBankWiseBranch(0)" id="ddlLCIssuingBank" style="width: 100%;"></select>
+                                                <div id="divLCIssuingBank" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Loan Issuing Branch -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlBranch" class="font-weight-bold col-form-label">Loan Issuing Branch:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlBranch" style="width: 100%;"></select>
+                                                <div id="divBranch" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Currency -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlCurrency" class="font-weight-bold col-form-label">Currency:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlCurrency" style="width: 100%;"></select>
+                                                <div id="divCurrency" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Conversion Rate -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ConversionRate" class="font-weight-bold col-form-label">Conversion Rate:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="number" step="0.01" id="ConversionRate" class="form-control form-control-sm" style="width: 100%;" />
+                                                <div id="divConversionRate" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Loan No -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="LoanNo" class="font-weight-bold col-form-label">Loan No:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="text" id="LoanNo" class="form-control form-control-sm" style="width: 100%;" />
+
+                                                <div id="divLoanNo" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Loan Tenor (Days) -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="LoanTenorDays" class="font-weight-bold col-form-label">Loan Tenor (Days):  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="number" id="LoanTenorDays" class="form-control form-control-sm" style="width: 100%;" />
+
+                                                <div id="divLoanTenorDays" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Loan Category -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlLoanCategory" class="font-weight-bold col-form-label">Loan Type:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlLoanCategory" style="width: 100%;"></select>
+                                                <div id="divLoanCategory" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Loan Create Date -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="LoanCreateDate" class="font-weight-bold col-form-label">Loan Create Date:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="date" id="LoanCreateDate" class="form-control form-control-sm" style="width: 100%;" />
+                                                <div id="divLoanCreateDate" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Loan Effective Date -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="LoanEffectiveDate" class="font-weight-bold col-form-label">Loan Effective Date:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="date" id="LoanEffectiveDate" class="form-control form-control-sm" style="width: 100%;" />
+
+                                                <div id="divLoanEffectiveDate" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+                                <!-- Column 2 -->
+                                <div class="col-md-4">
+
+                                    <!-- Loan Create Date -->
+                                    <!-- Loan Amount -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="LoanAmount" class="font-weight-bold col-form-label">Loan Amount:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="number" step="0.01" id="LoanAmount" class="form-control form-control-sm" style="width: 100%;" />
+
+                                                <div id="divLoanAmount" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Grace Period (Days) -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="GracePeriodDays" class="font-weight-bold col-form-label">Grace Period (Days): <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="number" id="GracePeriodDays" class="form-control form-control-sm" style="width: 100%;" />
+                                                <div id="divGracePeriodDays" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Advanced Interest Payment (Checkbox) -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label class="font-weight-bold col-form-label" style="width: 40%;"></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="form-check">
+                                                    <input type="checkbox" id="AdvancedInterestPayment" class="form-check-input me-2" />
+                                                    <label for="AdvancedInterestPayment" class="form-check-label font-weight-bold">Advanced Interest Payment?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Interest Type -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlInterestType" class="font-weight-bold col-form-label">Interest Type:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlInterestType" style="width: 100%;"></select>
+                                                <div id="divInterestType" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Interest Method -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="ddlInterestMethod" class="font-weight-bold col-form-label">Interest Method:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <select class="form-select form-select-sm select2" id="ddlInterestMethod" style="width: 100%;"></select>
+                                                <div id="divInterestMethod" class="error-message" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Installment No -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="InstallmentNo" class="font-weight-bold col-form-label">Installment No:  <span style="color: red;">*</span></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="number" id="InstallmentNo" class="form-control form-control-sm" style="width: 100%;" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Funded (Checkbox) -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label class="font-weight-bold col-form-label" style="width: 40%;"></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="form-check">
+                                                    <input type="checkbox" id="Funded" class="form-check-input me-2" />
+                                                    <label for="Funded" class="form-check-label font-weight-bold">Funded</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Loan Agreement (Checkbox) -->
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label class="font-weight-bold col-form-label" style="width: 40%;"></label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="form-check">
+                                                    <input type="checkbox" id="LoanAgreement" class="form-check-input me-2" />
+                                                    <label for="LoanAgreement" class="form-check-label font-weight-bold">Loan Agreement?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Column 3 -->
+                                <div class="col-md-4">
+                                    <!-- Interest and Agreement Information -->
+
+
+
+                                    <div class="form-group d-flex align-items-center mb-3">
+                                        <label asp-for="ReimbursementBank" class="font-weight-bold me-2" style="width: 40%;">Reimbursement Bank:</label>
+                                        <select class="form-select form-select-sm select2" style="width: 60%;" id="ddlReimbursementBank"></select>
+                                    </div>
+
+                                    <!-- Margin Adjusted -->
+                                    <div class="form-group d-flex align-items-center mb-3">
+                                        <label asp-for="MarginAdjusted" class="font-weight-bold me-2" style="width: 40%;">Margin Adjusted:</label>
+                                        <input asp-for="MarginAdjusted" id="MarginAdjusted" class="form-control form-control-sm" type="number" step="0.01" style="width: 60%;" />
+                                    </div>
+
+                                    <!-- Interest Rate -->
+                                    <div class="form-group d-flex align-items-center mb-3">
+                                        <label asp-for="InterestRate" class="font-weight-bold me-2" style="width: 40%;">Interest Rate:</label>
+                                        <input asp-for="InterestRate" id="InterestRate" class="form-control form-control-sm" type="number" step="0.01" style="width: 60%;" />
+                                    </div>
+
+                                    <!-- Loan Purpose -->
+                                    <div class="form-group d-flex align-items-center mb-3">
+                                        <label asp-for="LoanPurpose" class="font-weight-bold me-2" style="width: 40%;">Loan Purpose:  <span style="color: red;">*</span></label>
+                                        <textarea asp-for="LoanPurpose" id="LoanPurpose" class="form-control form-control-sm" style="width: 60%;"></textarea>
+
+                                    </div>
+
+                                    <div class="form-group d-flex align-items-center mb-3" id="ddivLoanPurpose" style="display: none;">
+                                        <label asp-for="divLoanPurpose" class="font-weight-bold me-2" style="width: 40%;">  </label>
+
+                                        <div id="divLoanPurpose" class="error-message" style="width: 60%;display: none;"></div>
+                                    </div>
+
+                                    <!-- Interest Amount -->
+                                    <div class="form-group d-flex align-items-center mb-3">
+                                        <label asp-for="InterestAmount" class="font-weight-bold me-2" style="width: 40%;">Interest Amount:</label>
+                                        <input asp-for="InterestAmount" id="InterestAmount" class="form-control form-control-sm" type="number" step="0.01" style="width: 60%;" />
+                                    </div>
+
+                                    <!-- Total Charge Amount -->
+                                    <div class="form-group d-flex align-items-center mb-3">
+                                        <label asp-for="TotalChargeAmount" class="font-weight-bold me-2" style="width: 40%;">Total Charge Amount:</label>
+                                        <input asp-for="TotalChargeAmount" id="TotalChargeAmount" class="form-control form-control-sm" type="number" step="0.01" style="width: 60%;" />
+                                    </div>
+
+                                    <!-- Total Expense -->
+                                    <div class="form-group d-flex align-items-center mb-3">
+                                        <label asp-for="TotalExpense" class="font-weight-bold me-2" style="width: 40%;">Total Expense:</label>
+                                        <input asp-for="TotalExpense" id="TotalExpense" class="form-control form-control-sm" type="number" step="0.01" style="width: 60%;" />
+                                    </div>
+
+                                    <!-- Total Payable Amount -->
+                                    <div class="form-group d-flex align-items-center mb-3">
+                                        <label asp-for="TotalPayableAmount" class="font-weight-bold me-2" style="width: 40%;">Total Payable Amount:</label>
+                                        <input asp-for="TotalPayableAmount" id="TotalPayableAmount" class="form-control form-control-sm" type="number" step="0.01" style="width: 60%;" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div style="padding-top: 1.5%">
+                                    <div class="wrapper">
+                                        <div class="row">
+                                            <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                                <div class="form-group">
+                                                    <button class="small blue button" id="btnSave" onclick="Save()">   Submit</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="poLargeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl" style="max-width: 1460px !important;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> LC Report </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row" id="repotDiv">
+
+                    <div class="col-md-12">
+
+
+                        <div class="row mt-2 mb-2">
+
+
+                            <table class="table table-bordered table-striped" style=" width: 97% !important; margin: auto !important;">
+                                <tr>
+                                    <th colspan="8">
+                                        <span style="color: #5b42f3 !important; font-size: 18px !important; text-align: left !important"> 01) LC (Letter of Credit) Info </span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td colspan="8">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> LC No: </td>
+                                    <td style="width: 18%;"> <label id="lblLCNo_p"> &nbsp; </label> </td>
+
+
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Central Bank Ref: </td>
+                                    <td style="width: 18%;"><label id="lblCentralBankRefNo_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Currency: </td>
+                                    <td style="width: 18%;"> <label id="lblCurrency_p"> &nbsp; </label> </td>
+                                </tr>
+                                <!-- Adding new fields with labels -->
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> LC Preparation Date: </td>
+                                    <td style="width: 18%;"><label id="lblLCDate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> LC Expiry Date: </td>
+                                    <td style="width: 18%;"><label id="lblLCExpiryDate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Reference No: </td>
+                                    <td style="width: 18%;"><label id="lblReferenceNo_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Initiate Date: </td>
+                                    <td style="width: 18%;"><label id="lblLcInitiate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Request Date: </td>
+                                    <td style="width: 18%;"><label id="lblLcRequestDate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Application Date: </td>
+                                    <td style="width: 18%;"><label id="lblLcApplicationDate_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Last Shipment Date: </td>
+                                    <td style="width: 18%;"><label id="lblLastShipmentDate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> E.T.D Date: </td>
+                                    <td style="width: 18%;"><label id="lblETDDate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Tenor: </td>
+                                    <td style="width: 18%;"><label id="lblTenor_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Tolerance (%): </td>
+                                    <td style="width: 18%;"><label id="lblTolerance_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> LC Type: </td>
+                                    <td style="width: 18%;"><label id="lblLCType_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> LC Issuing Bank: </td>
+                                    <td style="width: 18%;"><label id="lblLCIssuingBank_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Branch Name: </td>
+                                    <td style="width: 18%;"><label id="lblBranch_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Insurance Company: </td>
+                                    <td style="width: 18%;"><label id="lblInsurCompany_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Insurance Cover Note No.: </td>
+                                    <td style="width: 18%;"><label id="lblInsCoverNoteNo_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Insurance Cover Note Date: </td>
+                                    <td style="width: 18%;"><label id="lblInsCoverNoteDate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Reimbursement Bank: </td>
+                                    <td style="width: 18%;"><label id="lblReimbursementBank_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Advising Bank: </td>
+                                    <td style="width: 18%;"><label id="lblAdvisingBank_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Negotiating Bank: </td>
+                                    <td style="width: 18%;"><label id="lblNegotiatingBank_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Mode of Transport: </td>
+                                    <td style="width: 18%;"><label id="lblModeOfTransport_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Port of Loading: </td>
+                                    <td style="width: 18%;"><label id="lblPortofLoading_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Port of Discharge: </td>
+                                    <td style="width: 18%;"><label id="lblPortofDischarge_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Inco Term: </td>
+                                    <td style="width: 18%;"><label id="lblIncoTerm_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Country of Origin: </td>
+                                    <td style="width: 18%;"><label id="lblCountryofOrigin_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> IP No: </td>
+                                    <td style="width: 18%;"><label id="lblIPNo_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> IP Date: </td>
+                                    <td style="width: 18%;"><label id="lblIPDate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> IP Expiry Date: </td>
+                                    <td style="width: 18%;"><label id="lblIPExpiryDate_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Maturity From: </td>
+                                    <td style="width: 18%;"><label id="lblMaturityFromDate_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Insurance Cover Conditions: </td>
+                                    <td style="width: 18%;"><label id="lblInsurCoverNoteCondition_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Internal File No: </td>
+                                    <td style="width: 18%;"><label id="lblInternalFileNo_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Ins. Refund (%): </td>
+                                    <td style="width: 18%;"><label id="lblInsuComRefund_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Freight Charge (FC): </td>
+                                    <td style="width: 18%;"><label id="lblFreightChargeFc_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> LC Amount (FC): </td>
+                                    <td style="width: 18%;"><label id="lblLCValueFC_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> LC Amount (BDT): </td>
+                                    <td style="width: 18%;"><label id="lblLCValue_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Margin Amount (BDT): </td>
+                                    <td style="width: 18%;"><label id="lblMarginAmount_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Conversion Rate: </td>
+                                    <td style="width: 18%;"><label id="lblConvertionRate_p"> &nbsp; </label> </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Net Insurance Amount: </td>
+                                    <td style="width: 18%;"><label id="lblNetInsuranceAmount_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;"> Freight Charge (BDT): </td>
+                                    <td style="width: 18%;"><label id="lblFreightCharge_p"> &nbsp; </label> </td>
+
+                                    <td style="width: 15%; font-weight: bold !important; text-align: right !important;">  </td>
+                                    <td style="width: 18%;">  </td>
+                                </tr>
+                            </table>
+
+
+                        </div>
+
+                        <br />
+
+                        <div class="row mt-2">
+
+                            <div class="table-responsive" style="width: 99% !important; margin: 0 auto !important">
+
+                                <table class="table table-bordered table-striped" style=" width: 97% !important; margin: auto !important;">
+                                    <tr>
+                                        <th colspan="14"> <span style="color: #5b42f3 !important; font-size: 18px !important;"> 02) LC Item Details </span> </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="21"> &nbsp; </td>
+                                    </tr>
+
+                                    <tbody id="piDetails">
+                                    </tbody>
+
+
+                                </table>
+
+
+                            </div>
+                        </div>
+
+                        <br />
+
+                        <div class="row mt-2">
+
+
+                            <div class="table-responsive" style="width: 99% !important; margin: 0 auto !important">
+
+                                <table class="table table-bordered table-striped" style=" width: 99% !important; margin: auto !important;">
+
+                                    <tr>
+                                        <th colspan="5"> <span style="color: #5b42f3 !important; font-size: 18px !important;"> 03) LC Charges </span> </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="5"> &nbsp; </td>
+                                    </tr>
+
+                                    <tbody id="table_Charge_HeadBody">
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                        </div>
+
+                        <br />
+
+                        @*<div class="row mt-2">
+
+                                <table style=" width: 97% !important; margin: auto !important;">
+
+                                    <tr>
+                                        <th colspan="11"> <span style="color: #5b42f3 !important; font-size: 18px !important;"> 04) Landed Cost </span> </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="11"> &nbsp; </td>
+                                    </tr>
+
+                                    <tbody id="table_Landed_CostBody">
+                                    </tbody>
+
+                                </table>
+
+                            </div>*@
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<input id="LoanInfoID" value="@ViewBag.Id" style="display:none" />
+@section Scripts
+{
+
+    <script type="text/javascript">
+
+            $(document).ready(function () {
+                var today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+                $('#LoanCreateDate').val(today); // Set value of LoanCreateDate input field
+
+            LoadCompany('ddlCompany');
+            //GetSupplier();
+            GetSupplierType();
+            GetInterestTypes();
+            GetInterestMethods();
+            GetLoanCategories();
+            GetCurrencyList();
+            GetProfitCenters();
+            LoadBankName("ddlLCIssuingBank");
+            LoadReimbursementBank("ddlReimbursementBank");
+        });
+
+        let id = $('#LoanInfoID').val();
+        $(function () {
+            if (id > 0) {
+                GetData(id);
+            } else {
+
+            }
+        });
+
+
+        function GetData(id) {
+            var urlpath = '@Url.Action("Get_LoanById", "Loan")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                data: {id : id},
+                type: "Get",
+                async: true,
+                success: function (data) {
+                    var result = JSON.parse(data);
+
+
+
+
+
+                    $('#ddlCompany').val(result[0].BusinessUnitId).change();;
+                    $('#ddlProfitCenter').val(result[0].ProfitCenterID).change();;
+                    $('#ddlSupplier').val(result[0].SupplierID).change();;
+                    $('#ddlLCNo').val(result[0].LCNoId).change();
+                    $('#ddlCINo').val(result[0].CINoId).change();
+                    $('#LCOpenDate').val(result[0].LCOpenDate);
+                    $('#ddlLCIssuingBank').val(result[0].LoanIssuingBankId).change();;
+                    $('#ddlBranch').val(result[0].LoanIssuingBranchId).change();;
+                    $('#ddlCurrency').val(result[0].CurrencyId).change();;
+                    $('#ConversionRate').val(result[0].ConversionRate);
+                    $('#LoanNo').val(result[0].LoanNo);
+                    $('#LoanTenorDays').val(result[0].LoanTenorDays);
+                    $('#ddlLoanCategory').val(result[0].LoanCategoryID).change();;
+                    $('#LoanCreateDate').val(result[0].LoanCreateDate);
+                    $('#LoanEffectiveDate').val(result[0].LoanEffectiveDate);
+                    $('#LoanAmount').val(result[0].LoanAmount);
+                    $('#GracePeriodDays').val(result[0].GracePeriodDays);
+                    $('#AdvancedInterestPayment').prop('checked', result[0].AdvancedInterestPayment === true);
+                    $('#ddlInterestType').val(result[0].InterestTypeId).change();;
+                    $('#ddlInterestMethod').val(result[0].InterestMethodId).change();;
+                    $('#InstallmentNo').val(result[0].InstallmentNo);
+                    $('#Funded').prop('checked', result[0].Funded === true);
+                    $('#LoanAgreement').prop('checked', result[0].LoanAgreement === true);
+                    $('#ddlReimbursementBank').val(result[0].ReimbursementBank).change();;
+                    $('#MarginAdjusted').val(result[0].MarginAdjusted);
+                    $('#InterestRate').val(result[0].InterestRate);
+                    $('#LoanPurpose').val(result[0].LoanPurpose);
+                    $('#InterestAmount').val(result[0].InterestAmount);
+                    $('#TotalChargeAmount').val(result[0].TotalChargeAmount);
+                    $('#TotalExpense').val(result[0].TotalExpense);
+                    $('#TotalPayableAmount').val(result[0].TotalPayableAmount);
+
+
+
+                },
+                complete: function () {
+                    $("#btnSave").html("Update");
+                    //$('#territorySelect').attr('disabled', true);
+                }
+            });
+        }
+
+        //function GetSupplier() {
+
+        //    $.ajax({
+        //        url: "/Utility/SupplierTypewiseSupplier",
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: 'json',
+        //        type: "Get",
+
+        //        async: false,
+        //        beforeSend: function () {
+
+
+        //        },
+        //        success: function (data) {
+
+        //            $('#ddlSupplier').empty();
+        //            $('#ddlSupplier').append("<option value='0'>--Select From List --</option>");
+
+        //            for (var i = 0; i < data.length; i++) {
+
+        //                $('#ddlSupplier').append($("<option></option>").val(data[i].SupplierId).html(data[i].SupplierName));
+        //            }
+        //        },
+        //        complete: function () {
+
+
+        //        }
+        //    });
+        //    }
+
+
+
+            function LoadTypewiseSupplier(setId) {
+
+                var ddlSupplierTypeID = $('#ddlSupplierType').val();
+
+                $.ajax({
+                    url: "/Utility/SupplierTypewiseSupplier",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { SupplierTypeID: ddlSupplierTypeID },
+                    async: false,
+                    success: function (data) {
+
+                        $('#ddlSupplier').empty();
+                        $('#ddlSupplier').append("<option value='0'> Select from list </option>");
+
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlSupplier').append($("<option></option>").val(data[i].SupplierId).html(data[i].SupplierName));
+                        }
+                        $('#ddlSupplier').val(setId);
+                    }
+                });
+            }
+
+
+
+            function SupplierwiseLC(setId) {
+
+                var ddlSupplierID = $('#ddlSupplier').val();
+
+                $.ajax({
+                    url: "/Utility/SupplierwiseLC",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { SupplierID: ddlSupplierID },
+                    async: false,
+                    success: function (data) {
+
+                        $('#ddlLCNo').empty();
+                        $('#ddlLCNo').append("<option value='0'> Select from list </option>");
+
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlLCNo').append($("<option></option>").val(data[i].SupplierId).html(data[i].SupplierName));
+                        }
+                        $('#ddlLCNo').val(setId);
+                    }
+                });
+            }
+
+
+
+            function GetCINoByLCNo(setId) {
+
+                var LCNoID = $('#ddlLCNo').val();
+
+                $.ajax({
+                    url: "/Utility/LoadCINoByLCNo",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { LCNoID: LCNoID },
+                    async: false,
+                    success: function (data) {
+
+                        $('#ddlCINo').empty();
+                        $('#ddlCINo').append("<option value='0'> Select from list </option>");
+
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlCINo').append($("<option></option>").val(data[i].ValueId).html(data[i].ValueText));
+                        }
+                        $('#ddlCINo').val(setId);
+                    }
+                });
+            }
+
+
+
+
+        function GetSupplierType() {
+                $.ajax({
+                    url: "/Utility/LoadSupplierType",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+
+                    async: false,
+                    beforeSend: function () {
+                    },
+                    success: function (data) {
+
+                        $('#ddlSupplierType').empty();
+                        $('#ddlSupplierType').append("<option value='0'>--Select From List --</option>");
+
+                        for (var i = 0; i < data.length; i++) {
+
+                            $('#ddlSupplierType').append($("<option></option>").val(data[i].SupplierTypeId).html(data[i].SupplierTypeName));
+                        }
+                    },
+                    complete: function () {
+                    }
+                });
+            }
+
+        function GetInterestTypes() {
+            $.ajax({
+                url: "/Utility/LoadInterestTypeList",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "GET",
+                async: false,
+                beforeSend: function () {
+                    // Optional: Show loading indicator
+                },
+                success: function (data) {
+                    $('#ddlInterestType').empty();
+                    $('#ddlInterestType').append("<option value='0'>--Select Interest Type--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlInterestType').append($("<option></option>").val(data[i].ValueId).html(data[i].ValueText));
+                    }
+                },
+                complete: function () {
+                    // Optional: Hide loading indicator
+                }
+            });
+        }
+
+        function GetInterestMethods() {
+            $.ajax({
+                url: "/Utility/LoadInterestMethodList",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "GET",
+                async: false,
+                beforeSend: function () {
+                    // Optional: Show loading indicator
+                },
+                success: function (data) {
+                    $('#ddlInterestMethod').empty();
+                    $('#ddlInterestMethod').append("<option value='0'>--Select Interest Method--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlInterestMethod').append($("<option></option>").val(data[i].ValueId).html(data[i].ValueText));
+                    }
+                },
+                complete: function () {
+                    // Optional: Hide loading indicator
+                }
+            });
+        }
+        function GetLoanCategories() {
+            $.ajax({
+                url: "/Utility/LoadLoanCategoryList", // Adjust the URL as necessary
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "GET",
+                async: false,
+                beforeSend: function () {
+                    // Optional: Show loading indicator
+                },
+                success: function (data) {
+                    $('#ddlLoanCategory').empty();
+                    $('#ddlLoanCategory').append("<option value='0'>--Select Loan Type--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlLoanCategory').append($("<option></option>").val(data[i].ValueId).html(data[i].ValueText));
+                    }
+                },
+                complete: function () {
+                    // Optional: Hide loading indicator
+                }
+            });
+        }
+
+        function GetCurrencyList() {
+            $.ajax({
+                url: "/Utility/LoadCurrencyList", // Adjust the URL as necessary
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "GET",
+                async: false,
+                beforeSend: function () {
+                    // Optional: Show loading indicator
+                },
+                success: function (data) {
+                    $('#ddlCurrency').empty();
+                    $('#ddlCurrency').append("<option value='0'>--Select --</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlCurrency').append($("<option></option>").val(data[i].ValueId).html(data[i].ValueText));
+                    }
+                },
+                complete: function () {
+                    // Optional: Hide loading indicator
+                }
+            });
+        }
+
+        function LoadReimbursementBank(elementId) {
+            $.ajax({
+                url: "/Utility/GetBankNameforLoan",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                async: false,
+                success: function (data) {
+
+                    $('#' + elementId + '').empty();
+                    $('#' + elementId + '').append("<option value='0'> Select from list </option>");
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#' + elementId + '').append($("<option></option>").val(data[i].BankId).html(data[i].BankName));
+                    }
+                }
+            });
+        }
+        $('#ddlCompany, #ddlSupplier').change(function () {
+
+            //$('#ddlPO').empty();
+            //$('#ddlPI').empty();
+
+            Load_Reference_Number("ddlLCNo");
+
+        });
+
+        function Load_Reference_Number(elementId) {
+            var purchaseOrder = $('#ddlCompany').val() || 0;
+            var supplierId = $('#ddlSupplier').val() || 0;
+
+            if (purchaseOrder > 0 && supplierId > 0) {
+                $.ajax({
+                    url: "/Loan/Load_LC_Reference_Number",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "GET",
+                    data: { companyId: purchaseOrder, supplierId: supplierId },
+                    async: false,
+                    success: function (data) {
+                        // Clear existing options and add a default option
+                        $('#' + elementId).empty();
+                        $('#' + elementId).append("<option value='0'>Select from list</option>");
+
+                        // Populate the LCNo dropdown with data from the response
+                        for (var i = 0; i < data.length; i++) {
+                            $('#' + elementId).append(
+                                $("<option></option>")
+                                    .val(data[i].LCPreparationId)
+                                    .html(data[i].ReferenceNo)
+                                    .attr("data-lcdate", data[i].LCDate) // Store LCDate in data attribute
+                            );
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred while loading LC reference numbers.");
+                    }
+                });
+            }
+        }
+
+        // Attach a change event to ddlLCNo once to update LCOpenDate
+            $('#ddlLCNo').on('change', function () {
+
+                $('#lcLink').hide();
+
+            // Retrieve the LCDate from the selected option
+
+
+            var selectedDate = $(this).find('option:selected').data('lcdate');
+
+            // Set the LCOpenDate input field with the selected LCDate
+            $('#LCOpenDate').val(selectedDate || ''); // Show selected date or clear if none
+
+
+            var selectedValue = $(this).val(); // Get the selected value
+            var selectedText = $(this).find("option:selected").text(); // Get the selected text
+
+            if (selectedValue == "0") {
+                // Hide the link and reset the width of the dropdown
+                $('#lcLink').hide();
+              /*  $(this).css('width', '70%');*/
+               /* $(this).next('.select2-container').css('width', '70%');*/
+            } else {
+                // Adjust the width of the dropdown to 80%
+                //$(this).css('width', '50%');
+                //$(this).next('.select2-container').css('width', '50%');
+
+                // Get the last 3 characters of the selected text
+                var lastThreeChars = selectedText.slice(-3).trim();
+
+                // Create a dynamic link based on the selected value/text
+                var hrefLink = 'https://example.com/lc-reference/' + selectedValue;
+
+                // Set the new href link in the anchor element
+                $('#lcLink').attr('href', hrefLink);
+
+                // Update the link text to show the last 3 characters
+                $('#lcLink').text('# ' + lastThreeChars);
+
+                // Add tooltip (full selected text) to the link
+                $('#lcLink')
+                    .attr('data-bs-toggle', 'modal') // Add Bootstrap modal toggle
+                    .attr('data-bs-target', '#poLargeModal') // Target the modal by ID
+                    .attr('data-id', selectedValue) // Set data-id with selectedValue
+                    .attr('style', 'text-decoration: underline; cursor: pointer; white-space: nowrap; color: #03560F; font-weight: bold; margin-left: 10px;') // Styling for the link
+                    .addClass('pipopupLink') // Add CSS classes dynamically
+                    .text('View Details') // Set the link text to "View Details"
+                    .attr('title', selectedText) // Add tooltip with full selected text
+                    .show(); // Show the link
+
+                // Show the link
+                $('#lcLink').show();
+
+            }
+            });
+
+
+
+        function LoadBankWiseBranch(setId) {
+
+            var ddlLCIssuingBankId = $('#ddlLCIssuingBank').val();
+
+            $.ajax({
+                url: "/Utility/LoadBankWiseBranch",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { bankId: ddlLCIssuingBankId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlBranch').empty();
+                    $('#ddlBranch').append("<option value='0'> Select from list </option>");
+
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlBranch').append($("<option></option>").val(data[i].BankBranchId).html(data[i].BranchName));
+                    }
+                    $('#ddlBranch').val(setId);
+                }
+            });
+        }
+
+
+
+
+        function LoadBankName(elementId) {
+            $.ajax({
+                url: "/Utility/GetBankNameforLoan",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                async: false,
+                success: function (data) {
+
+                    $('#' + elementId + '').empty();
+                    $('#' + elementId + '').append("<option value='0'> Select from list </option>");
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#' + elementId + '').append($("<option></option>").val(data[i].BankId).html(data[i].BankName));
+                    }
+
+                }
+            });
+        }
+
+        function GetProfitCenters() {
+            $.ajax({
+                url: "/Utility/getLoadProfitCenterList", // Adjust the URL based on your route
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "GET",
+                async: false,
+                beforeSend: function () {
+                    // Optional: Show loading indicator
+                },
+                success: function (data) {
+                    $('#ddlProfitCenter').empty();
+                    $('#ddlProfitCenter').append("<option value='0'>--Select Profit Center--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlProfitCenter').append($("<option></option>").val(data[i].ValueId).html(data[i].ValueText));
+                    }
+                },
+                complete: function () {
+                    // Optional: Hide loading indicator
+                }
+            });
+        }
+
+        function SaveData() {
+            var dataToSave = {};
+
+                dataToSave["LoanInfoID"] = $('#LoanInfoID').val();
+            dataToSave["BusinessUnitId"] = $('#ddlCompany').val();
+            dataToSave["ProfitCenterID"] = $('#ddlProfitCenter').val();
+            dataToSave["SupplierID"] = $('#ddlSupplier').val();
+            dataToSave["LCNoId"] = $('#ddlLCNo').val();
+            dataToSave["CINoId"] = $('#ddlCINo').val();
+    dataToSave["LCOpenDate"] = $('#LCOpenDate').val();
+            dataToSave["LoanIssuingBankId"] = $('#ddlLCIssuingBank').val();
+            dataToSave["LoanIssuingBranchId"] = $('#ddlBranch').val();
+            dataToSave["CurrencyId"] = $('#ddlCurrency').val();
+    dataToSave["ConversionRate"] = $('#ConversionRate').val();
+    dataToSave["LoanNo"] = $('#LoanNo').val();
+    dataToSave["LoanTenorDays"] = $('#LoanTenorDays').val();
+            dataToSave["LoanCategoryID"] = $('#ddlLoanCategory').val();
+    dataToSave["LoanCreateDate"] = $('#LoanCreateDate').val();
+    dataToSave["LoanEffectiveDate"] = $('#LoanEffectiveDate').val();
+    dataToSave["LoanAmount"] = $('#LoanAmount').val();
+    dataToSave["GracePeriodDays"] = $('#GracePeriodDays').val();
+    dataToSave["AdvancedInterestPayment"] = $('#AdvancedInterestPayment').is(':checked');
+    dataToSave["InterestTypeId"] = $('#ddlInterestType').val();
+    dataToSave["InterestMethodId"] = $('#ddlInterestMethod').val();
+    dataToSave["InstallmentNo"] = $('#InstallmentNo').val();
+    dataToSave["Funded"] = $('#Funded').is(':checked');
+    dataToSave["LoanAgreement"] = $('#LoanAgreement').is(':checked');
+    dataToSave["ReimbursementBank"] = $('#ddlReimbursementBank').val();
+    dataToSave["MarginAdjusted"] = $('#MarginAdjusted').val();
+    dataToSave["InterestRate"] = $('#InterestRate').val();
+    dataToSave["LoanPurpose"] = $('#LoanPurpose').val();
+    dataToSave["InterestAmount"] = $('#InterestAmount').val();
+    dataToSave["TotalChargeAmount"] = $('#TotalChargeAmount').val();
+    dataToSave["TotalExpense"] = $('#TotalExpense').val();
+    dataToSave["TotalPayableAmount"] = $('#TotalPayableAmount').val();
+
+    var saveUrl = '@Url.Action("InsUpLoanInfo", "Loan")'; // Adjust accordingly
+    $.ajax({
+        data: dataToSave,
+        url: saveUrl,
+        type: "POST",
+        beforeSend: function () {
+            $("#overlay").fadeIn(300);
+        },
+        success: function (result) {
+            setTimeout(function () {
+                $("#overlay").fadeOut(300);
+            }, 500);
+            if (result.msg != "") {
+                if (result.pk > 0) {
+                    swal({
+                        title: "Data Saved Successfully!",
+                        text: '',
+                        type: "success",
+                        confirmButtonClass: 'btn-success waves-effect waves-light',
+                        confirmButtonText: 'OK',
+                        closeOnConfirm: false
+                    }, function () {
+                        window.location.href = '@Url.Action("L_Entry", "Loan")'; // Adjust as needed
+                    });
+                } else {
+                    swal({
+                        title: result.msg,
+                        text: '',
+                        type: "warning",
+                        confirmButtonClass: 'btn-success waves-effect waves-light',
+                        confirmButtonText: 'Back',
+                        closeOnConfirm: false
+                    });
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong!',
+                });
+            }
+        }
+    });
+        }
+        function SaveValidation() {
+            var isValid = true;
+
+            $('#divCompany').hide();
+            if ($('#ddlCompany').val() == 0 || $('#ddlCompany').val() == '') {
+                ValidationColorChangeNew("ddlCompany", "divCompany", "Company Required", true);
+                $('#divCompany').show();
+                isValid = false;
+            }
+
+            if ($('#ddlProfitCenter').val() == 0 || $('#ddlProfitCenter').val() == '') {
+                ValidationColorChangeNew("ddlProfitCenter", "divProfitCenter", "Profit Center is required", true);
+                $('#divProfitCenter').show();
+                isValid = false;
+            } else {
+                $('#divProfitCenter').hide();
+            }
+
+            // Supplier Type Validation
+            if ($('#ddlSupplierType').val() == 0 || $('#ddlSupplierType').val() == '') {
+                ValidationColorChangeNew("ddlSupplierType", "divSupplierType", "Supplier Type is required", true);
+                $('#divSupplierType').show();
+                isValid = false;
+            } else {
+                $('#divSupplierType').hide();
+            }
+
+            // Supplier Validation
+            if ($('#ddlSupplier').val() == 0 || $('#ddlSupplier').val() == '') {
+                ValidationColorChangeNew("ddlSupplier", "divSupplier", "Supplier is required", true);
+                $('#divSupplier').show();
+                isValid = false;
+            } else {
+                $('#divSupplier').hide();
+            }
+
+            // LC No Validation
+            if ($('#ddlLCNo').val() == 0 || $('#ddlLCNo').val() == '') {
+                ValidationColorChangeNew("ddlLCNo", "divLCNo", "LC No is required", true);
+                $('#divLCNo').show();
+                isValid = false;
+            } else {
+                $('#divLCNo').hide();
+            }
+
+
+            if ($('#ddlLCIssuingBank').val() == 0 || $('#ddlLCIssuingBank').val() == '') {
+                ValidationColorChangeNew("ddlLCIssuingBank", "divLCIssuingBank", "Loan Issuing Bank is required", true);
+                $('#divLCIssuingBank').show();
+                isValid = false;
+            } else {
+                $('#divLCIssuingBank').hide();
+            }
+
+            // Loan Issuing Branch Validation
+            if ($('#ddlBranch').val() == 0 || $('#ddlBranch').val() == '') {
+                ValidationColorChangeNew("ddlBranch", "divBranch", "Loan Issuing Branch is required", true);
+                $('#divBranch').show();
+                isValid = false;
+            } else {
+                $('#divBranch').hide();
+            }
+
+            // Currency Validation
+            if ($('#ddlCurrency').val() == 0 || $('#ddlCurrency').val() == '') {
+                ValidationColorChangeNew("ddlCurrency", "divCurrency", "Currency is required", true);
+                $('#divCurrency').show();
+                isValid = false;
+            } else {
+                $('#divCurrency').hide();
+            }
+
+            // Conversion Rate Validation
+            if ($('#ConversionRate').val() == '' || parseFloat($('#ConversionRate').val()) <= 0) {
+                ValidationColorChangeNew("ConversionRate", "divConversionRate", "Conversion Rate is required", true);
+                $('#divConversionRate').show();
+                isValid = false;
+            } else {
+                $('#divConversionRate').hide();
+            }
+
+            // Loan No Validation
+            if ($('#LoanNo').val() == '') {
+                ValidationColorChangeNew("LoanNo", "divLoanNo", "Loan No is required", true);
+                $('#divLoanNo').show();
+                isValid = false;
+            } else {
+                $('#divLoanNo').hide();
+            }
+
+            // Loan Tenor Validation
+            if ($('#LoanTenorDays').val() == '' || parseInt($('#LoanTenorDays').val()) <= 0) {
+                ValidationColorChangeNew("LoanTenorDays", "divLoanTenorDays", "Loan Tenor (Days) is required", true);
+                $('#divLoanTenorDays').show();
+                isValid = false;
+            } else {
+                $('#divLoanTenorDays').hide();
+            }
+
+            // Loan Category Validation
+            if ($('#ddlLoanCategory').val() == 0 || $('#ddlLoanCategory').val() == '') {
+                ValidationColorChangeNew("ddlLoanCategory", "divLoanCategory", "Loan Type is required", true);
+                $('#divLoanCategory').show();
+                isValid = false;
+            } else {
+                $('#divLoanCategory').hide();
+            }
+
+            // Loan Create Date Validation
+            if ($('#LoanCreateDate').val() == '') {
+                ValidationColorChangeNew("LoanCreateDate", "divLoanCreateDate", "Loan Create Date is required", true);
+                $('#divLoanCreateDate').show();
+                isValid = false;
+            } else {
+                $('#divLoanCreateDate').hide();
+            }
+
+            // Loan Effective Date Validation
+            if ($('#LoanEffectiveDate').val() == '') {
+                ValidationColorChangeNew("LoanEffectiveDate", "divLoanEffectiveDate", "Loan Effective Date is required", true);
+                $('#divLoanEffectiveDate').show();
+                isValid = false;
+            } else {
+                $('#divLoanEffectiveDate').hide();
+            }
+
+
+            if ($('#LoanAmount').val() == '' || parseFloat($('#LoanAmount').val()) <= 0) {
+                ValidationColorChangeNew("LoanAmount", "divLoanAmount", "Loan Amount is required", true);
+                $('#divLoanAmount').show();
+                isValid = false;
+            } else {
+                $('#divLoanAmount').hide();
+            }
+
+            // Grace Period (Days) Validation
+            if ($('#GracePeriodDays').val() == '' || parseInt($('#GracePeriodDays').val()) < 0) {
+                ValidationColorChangeNew("GracePeriodDays", "divGracePeriodDays", "Grace Period (Days) is required", true);
+                $('#divGracePeriodDays').show();
+                isValid = false;
+            } else {
+                $('#divGracePeriodDays').hide();
+            }
+
+            // Interest Type Validation
+            if ($('#ddlInterestType').val() == 0 || $('#ddlInterestType').val() == '') {
+                ValidationColorChangeNew("ddlInterestType", "divInterestType", "Interest Type is required", true);
+                $('#divInterestType').show();
+                isValid = false;
+            } else {
+                $('#divInterestType').hide();
+            }
+
+            // Interest Method Validation
+            if ($('#ddlInterestMethod').val() == 0 || $('#ddlInterestMethod').val() == '') {
+                ValidationColorChangeNew("ddlInterestMethod", "divInterestMethod", "Interest Method is required", true);
+                $('#divInterestMethod').show();
+                isValid = false;
+            } else {
+                $('#divInterestMethod').hide();
+            }
+
+            // Installment No Validation
+            if ($('#InstallmentNo').val() == '' || parseInt($('#InstallmentNo').val()) <= 0) {
+                ValidationColorChangeNew("InstallmentNo", "divInstallmentNo", "Installment No is required", true);
+                $('#divInstallmentNo').show();
+                isValid = false;
+            } else {
+                $('#divInstallmentNo').hide();
+            }
+
+            if ($('#LoanPurpose').val() == '' || parseInt($('#LoanPurpose').val()) <= 0) {
+                ValidationColorChangeNew("LoanPurpose", "divLoanPurpose", "Loan Purpose is required", true);
+                $('#divLoanPurpose').show();
+                $('#ddivLoanPurpose').show();
+                isValid = false;
+            } else {
+                $('#ddivLoanPurpose').hide();
+            }
+
+
+            return isValid;
+        }
+
+        function Save() {
+
+
+            if (SaveValidation()) {
+                swal({
+                    title: "Are you sure?",
+                    text: "",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes, I am sure!',
+                    cancelButtonText: "No, cancel it!",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            SaveData();
+                        } else {
+                            swal("Cancelled", ")", "error");
+                            e.preventDefault();
+                        }
+                    });
+            };
+        }
+
+
+            $(document).on('click', '.pipopupLink', function () {
+
+
+                var LCPreparationId = $(this).data('id');
+
+                // alert(LCPreparationId);
+
+                // Clear all the label values initially
+                $('#lblLCNo_p').text('');
+                $('#lblLCDate_p').text('');
+                $('#lblLCExpiryDate_p').text('');
+                $('#lblLCPreparationDate_p').text('');
+                $('#lblLCApplicationDate_p').text('');
+                $('#lblCentralBankRefNo_p').text('');
+                $('#lblLCType_p').text('');
+                $('#lblLCIssuingBank_p').text('');
+                $('#lblBranch_p').text('');
+                $('#lblInsurCompany_p').text('');
+                $('#lblCurrency_p').text('');
+                $('#lblConvertionRate_p').text('');
+                $('#lblFreigthChargeFc_p').text('');
+                $('#lblLCValueFC_p').text('');
+                $('#lblMarginPercentage_p').text('');
+                $('#lblVATPercentage_p').text('');
+                $('#lblTAXPercentage_p').text('');
+                $('#lblNetInsuranceAmount_p').text('');
+                $('#lblTenor_p').text('');
+                $('#lblTolerance_p').text('');
+                $('#lblInsCoverNoteNo_p').text('');
+                $('#lblInsCoverNoteDate_p').text('');
+                $('#lblReimbursementBank_p').text('');
+                $('#lblAdvisingBank_p').text('');
+                $('#lblNegotiatingBank_p').text('');
+                $('#lblModeOfTransport_p').text('');
+                $('#lblPortofLoading_p').text('');
+                $('#lblPortofDischarge_p').text('');
+                $('#lblIncoTerm_p').text('');
+                $('#lblCountryofOrigin_p').text('');
+                $('#lblLCValue_p').text('');
+                $('#lblMarginAmount_p').text('');
+                $('#lblFreightChargeBDT_p').text('');
+                $('#lblLCValueBDT_p').text('');
+                $('#lblTAXAmount_p').text('');
+                $('#lblVATAmount_p').text('');
+                $('#lblInsuCoverAmount_p').text('');
+
+                $('#lblIPNo_p').text('');
+                $('#lblIPDate_p').text('');
+                $('#lblIPExpiryDate_p').text('');
+                $('#lblMaturityFromDate_p').text('');
+                $('#lblInsurCoverNoteCondition_p').text('');
+                $('#lblInternalFileNo_p').text('');
+                $('#lblInsuComRefund_p').text('');
+                $('#lblFreightChargeFc_p').text('');
+                $('#lblFreightCharge_p').text('');
+
+
+
+
+                $.ajax({
+                    url: "/LCReport/LCPreparationMasterReport",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "GET",  // Use uppercase 'GET'
+                    data: { LCPreparationId: LCPreparationId },
+                    async: false,  // Consider using asynchronous operations to improve performance
+                    success: function (result) {
+
+                        var data = JSON.parse(result);
+
+                        $.each(data, function (index, firstData) {
+
+                            $('#lblLCNo_p').text(firstData.LetterofCreditNo);
+                            $('#lblLCDate_p').text(firstData.LetterofCreditDate);
+
+
+                            $('#lblLcInitiate_p').text(firstData.LCInitiateDate);
+                            $('#lblLcRequestDate_p').text(firstData.LCInitiateDate);
+                            $('#lblReferenceNo_p').text(firstData.ReferenceNo);
+
+
+                            $('#lblLCExpiryDate_p').text(firstData.LCExpiryDate);
+                            $('#lblLCPreparationDate_p').text(firstData.LCDate);
+                            $('#lblLcApplicationDate_p').text(firstData.ApplicationDate);
+                            $('#lblLastShipmentDate_p').text(firstData.LastShipmentDate);
+                            $('#lblETDDate_p').text(firstData.EstimateDeliveryDate);
+                            $('#lblCentralBankRefNo_p').text(firstData.CentralBankReferenceNo);
+                            $('#lblLCType_p').text(firstData.LCType);
+                            $('#lblLCIssuingBank_p').text(firstData.BankName);
+                            $('#lblBranch_p').text(firstData.BranchName);
+                            $('#lblInsurCompany_p').text(firstData.InsuranceCompanyName);
+                            $('#lblCurrency_p').text(firstData.CurrencyName);
+                            $('#lblConvertionRate_p').text(parseFloat(firstData.ConversionRate).toFixed(4));
+                            $('#lblFreigthChargeFc_p').text(firstData.TotalFreightCharge);
+                            $('#lblLCValueFC_p').text(firstData.LCValue);
+                            $('#lblMarginPercentage_p').text(firstData.MarginPercentage);
+                            $('#lblVATPercentage_p').text(firstData.VatPercentage);
+                            $('#lblTAXPercentage_p').text(firstData.TaxPercentage);
+                            $('#lblNetInsuranceAmount_p').text(firstData.NetInsuranceAmount);
+                            $('#lblTenor_p').text(firstData.Tenor);
+                            $('#lblTolerance_p').text(firstData.TolerancePercentage);
+                            $('#lblInsCoverNoteNo_p').text(firstData.InsurCoverNoteNo);
+                            $('#lblInsCoverNoteDate_p').text(firstData.InsurCoverNoteDate);
+                            $('#lblReimbursementBank_p').text(firstData.ReimbursementBank);
+                            $('#lblAdvisingBank_p').text(firstData.AdvisingBank);
+                            $('#lblNegotiatingBank_p').text(firstData.NegotiatingBank);
+                            $('#lblModeOfTransport_p').text(firstData.ModeOfTransport);
+                            $('#lblPortofLoading_p').text(firstData.PortOfLoading);
+                            $('#lblPortofDischarge_p').text(firstData.PortOfDischarge);
+                            $('#lblIncoTerm_p').text(firstData.IncoTerm);
+                            $('#lblCountryofOrigin_p').text(firstData.CountryOfOrigin);
+                            $('#lblLCValue_p').text(firstData.LCValueBDT);
+                            $('#lblMarginAmount_p').text(firstData.MarginAmountBDT);
+                            $('#lblFreightChargeBDT_p').text(firstData.FreightChargeBDT);
+                            $('#lblLCValueBDT_p').text(firstData.LCValueBDT);
+                            $('#lblTAXAmount_p').text(firstData.TaxAmount);
+                            $('#lblVATAmount_p').text(firstData.VatAmount);
+                            $('#lblInsuCoverAmount_p').text(firstData.InsuranceCoverAmount);
+
+
+                            $('#lblIPNo_p').text(firstData.IPNo);
+                            $('#lblIPDate_p').text(firstData.IPDate);
+                            $('#lblIPExpiryDate_p').text(firstData.IPExpiryDate);
+                            $('#lblMaturityFromDate_p').text(firstData.MaturityFrom);
+                            $('#lblInsurCoverNoteCondition_p').text(firstData.InsurCoverNoteCondition);
+                            $('#lblInternalFileNo_p').text(firstData.InternalFileNo);
+                            $('#lblInsuComRefund_p').text(firstData.InsurCompanyRefundPercentage);
+                            $('#lblFreightChargeFc_p').text(firstData.FreightChargeFc);
+                            $('#lblFreightCharge_p').text(firstData.FreightChargeBDT);
+
+                        });
+
+                    }
+                });
+
+                // Load PI
+
+                $('#piDetails').empty();
+
+                $.ajax({
+                    url: "/LCReport/LoadLCPreparation_PIItem",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "GET",  // Use uppercase 'GET'
+                    data: { LCPreparationId: LCPreparationId },
+                    async: false,  // Consider using asynchronous operations to improve performance
+                    success: function (result) {
+
+                        var data = JSON.parse(result);
+
+                        var row = "";
+
+                        row += `<tr style="background: #BECFD9 !important;">
+              <th style="padding:4px !important; text-align:center!important; width: 2%;"> #SL</th>
+              <th style="padding:4px !important; text-align:center!important; width: 5%;"> PO Code </th>
+              <th style="padding:4px !important; text-align:center!important; width: 5%;"> PI No</th>
+              <th style="padding:4px !important; text-align:center!important; width: 7%;"> Item Code </th>
+              <th style="padding:4px !important; text-align:center!important; width: 7%;"> Item Name </th>
+              <th style="padding:4px !important; text-align:center!important; width: 4%;"> HS Code </th>
+              <th style="padding:4px !important; text-align:center!important; width: 3%;"> UOM </th>
+              <th style="padding:4px !important; text-align:center!important; width: 3%;"> PI Qty </th>
+              <th style="padding:4px !important; text-align:center!important; width: 4%;"> PI Unit Price <span style="color: darkviolet"> (FC)</span> </th>
+              <th style="padding:4px !important; text-align:center!important; width: 4%;"> PI Unit Price <span style="color: forestgreen"> (BDT)</span> </th>
+             <th style="padding:4px !important; text-align:center!important; width: 6%;"> PI Freigth Charge <span style="color: darkviolet"> (FC)</span> </th>
+              <th style="padding:4px !important; text-align:center!important; width: 6%;"> PI Freigth Charge <span style="color: forestgreen"> (BDT)</span> </th>
+ <th style="padding:4px !important; text-align:center!important; width: 6%;"> PI Amount <span style="color: darkviolet"> (FC)</span> </th>
+ <th style="padding:4px !important; text-align:center!important; width: 6%;"> PI Amount (BDT) <span style="color: forestgreen"> (BDT)</span></th>
+
+                  <th style="padding:4px !important; text-align:center!important; width: 3%;"> LC Qty </th>
+              <th style="padding:4px !important; text-align:center!important; width: 4%;"> LC Unit Price <span style="color: darkviolet"> (FC)</span> </th>
+              <th style="padding:4px !important; text-align:center!important; width: 4%;"> LC Unit Price <span style="color: forestgreen"> (BDT)</span> </th>
+             <th style="padding:4px !important; text-align:center!important; width: 6%;"> LC Freigth Charge <span style="color: darkviolet"> (FC)</span> </th>
+              <th style="padding:4px !important; text-align:center!important; width: 6%;"> LC Freigth Charge <span style="color: forestgreen"> (BDT)</span> </th>
+                  <th style="padding:4px !important; text-align:center!important; width: 6%;"> LC Amount <span style="color: darkviolet"> (FC)</span> </th>
+ <th style="padding:4px !important; text-align:center!important; width: 6%;"> LC Amount (BDT) <span style="color: forestgreen"> (BDT)</span></th>
+          </tr>`;
+
+                        var count = 1;
+
+                        var piTotalFreightCharge = 0;
+                        var piTotalFreightChargeFc = 0;
+                        var piAmount = 0;
+                        var piAmountFc = 0;
+
+                        //for lc
+
+                        var lcTotalFreightCharge = 0;
+                        var lcTotalFreightChargeFc = 0;
+                        var lcAmount = 0;
+                        var lcAmountFc = 0;
+
+                        $.each(data, function (index, firstData) {
+
+                            row += `<tr>
+              <td style="padding:3px !important; text-align:center!important;">${count}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.PurchaseOrderLocalCode}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.PINo}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.ItemDescriptionCode}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.ItemDescription}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.HSCode}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.UOMDetails}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${firstData.PIQuantity}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.PiUnitPriceFc).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.UnitPrice).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.PiFreightChargeFc).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.PiFreightCharge).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.PiAmountFc).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.PiAmount).toFixed(4)}</td>
+
+              <td style="padding: 3px !important; text-align: center !important;">${firstData.LCQuantity}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.PiUnitPriceFc).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.UnitPrice).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.FreightChargeFc).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.PiFreightCharge).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.TotalAmountFc).toFixed(4)}</td>
+              <td style="padding: 3px !important; text-align: center !important;">${parseFloat(firstData.LCAmount).toFixed(4)}</td>
+
+          </tr>`;
+
+                            piTotalFreightCharge += parseFloat(firstData.PiFreightCharge);
+                            piTotalFreightChargeFc += parseFloat(firstData.PiFreightChargeFc);
+                            piAmount += parseFloat(firstData.PiAmount);
+                            piAmountFc += parseFloat(firstData.PiAmountFc);
+
+
+                            // Lc
+
+                            lcTotalFreightCharge += parseFloat(firstData.PiFreightCharge);
+                            lcTotalFreightChargeFc += parseFloat(firstData.FreightChargeFc);
+                            lcAmount += parseFloat(firstData.LCAmount);
+                            lcAmountFc += parseFloat(firstData.TotalAmountFc);
+
+                            count++;
+
+                        });
+
+                        row += `
+          <tr style="padding: 2px !important; ">
+              <td colspan="9" style="text-align: center !important; vertical-align: middle; font-size: 18px !important; font-weight: bold !important;"> &nbsp; </td>
+              <td style="color: #5b42f3 !important; text-align: center !important; vertical-align: middle; font-size: 18px !important; font-weight: bold !important;"> Total: </td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(piTotalFreightChargeFc).toFixed(4)}</td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(piTotalFreightCharge).toFixed(4)}</td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(piAmountFc).toFixed(4)}</td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(piAmount).toFixed(4)}</td>
+
+             <td colspan="3" style="text-align: center !important; vertical-align: middle; font-size: 18px !important; font-weight: bold !important;"> &nbsp; </td>
+             <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(lcTotalFreightChargeFc).toFixed(4)}</td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(lcTotalFreightCharge).toFixed(4)}</td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(lcAmountFc).toFixed(4)}</td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(lcAmount).toFixed(4)}</td>
+
+          </tr>
+        `;
+
+                        $('#piDetails').append(row);
+
+
+                    }
+                });
+
+
+                // Load Charges
+
+                $('#table_Charge_HeadBody').empty();
+
+                $.ajax({
+                    url: "/LCReport/LoadLCPreparationChargeInfo",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "GET",  // Use uppercase 'GET'
+                    data: { LCPreparationId: LCPreparationId },
+                    async: false,  // Consider using asynchronous operations to improve performance
+                    success: function (result) {
+
+                        var data = JSON.parse(result);
+
+                        var row = "";
+
+                        row += `<tr style="background: #BECFD9 !important;">
+           <th style="padding:4px !important; text-align: center !important; width: 2%;"> # SL </th>
+           <th style="padding:4px !important; text-align: center !important; width: 15%;"> Charge Head </th>
+           <th style="padding:4px !important; text-align: center !important; width: 15%;"> GL Name </th>
+           <th style="padding:4px !important; text-align: center !important; width: 7%;">  Charge Type </th>
+           <th style="padding:4px !important; text-align: center !important; width: 7%;">  Amount (BDT) </th>
+          </tr>`;
+
+                        var count = 1;
+
+                        var totalCharge = 0;
+
+                        $.each(data, function (index, firstData) {
+
+                            row += `<tr>
+              <td style="padding:3px !important; text-align:center!important;">${count}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.ChargeHeadName}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.AccountName}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.HeadType}</td>
+              <td style="padding:3px !important; text-align:center!important;">${parseFloat(firstData.Amount).toFixed(4)}</td>
+
+          </tr>`;
+
+                            totalCharge += parseFloat(firstData.Amount);
+
+                            count++;
+
+                        });
+
+                        row += `
+          <tr style="padding: 2px !important;">
+              <td colspan="3" style="text-align: center !important; vertical-align: middle; font-size: 18px !important; font-weight: bold !important;"> &nbsp; </td>
+              <td style="color: #5b42f3 !important; text-align: center !important; vertical-align: middle; font-size: 18px !important; font-weight: bold !important;"> Total: </td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(totalCharge).toFixed(4)}</td>
+          </tr>
+        `;
+
+                        $('#table_Charge_HeadBody').append(row);
+
+
+                    }
+                });
+
+
+                // Load Landed Cost
+
+                $('#table_Landed_CostBody').empty();
+
+                $.ajax({
+                    url: "/LCReport/LoadLandedCostInfo",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "GET",  // Use uppercase 'GET'
+                    data: { lcId: lCNoId },
+                    async: false,  // Consider using asynchronous operations to improve performance
+                    success: function (result) {
+
+                        var data = JSON.parse(result);
+
+                        var row = "";
+
+                        row += `<tr style="background: #BECFD9 !important;">
+         <th style="padding:4px !important; text-align:center !important; width: 2%;"># SL</th>
+         <th style="padding:4px !important; text-align:center !important; width: 5%;">PO No</th>
+         <th style="padding:4px !important; text-align:center !important; width: 5%;">PI No</th>
+         <th style="padding:4px !important; text-align:center !important; width: 7%;"> Item Code </th>
+         <th style="padding:4px !important; text-align:center !important; width: 7%;"> Item Name </th>
+         <th style="padding:4px !important; text-align:center !important; width: 5%;">PI Quantity </th>
+         <th style="padding:4px !important; text-align:center !important; width: 5%;">LC Quantity </th>
+         <th style="padding:4px !important; text-align:center !important; width: 5%;"> Total Price (TP) </th>
+         <th style="padding:4px !important; text-align:center !important; width: 6%;"> Charge Amount (CA)  </th>
+         <th style="padding:4px !important; text-align:center !important; width: 6%;"> Total Cost (TP + CA) </th>
+         <th style="padding:4px !important; text-align:center !important; width: 7%;"> Cost Per Unit (BDT) </th>
+     </tr>`;
+
+                        var count = 1;
+
+                        var lcTotalPrice = 0;
+                        var chargeAmount = 0;
+                        var totalLandedCost = 0;
+
+                        $.each(data, function (index, firstData) {
+
+                            row += `<tr>
+              <td style="padding:3px !important; text-align:center!important;">${count}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.PurchaseOrderLocalCode}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.PINo}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.ItemDescriptionCode}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.ItemDescription}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.PIQuantity}</td>
+              <td style="padding:3px !important; text-align:center!important;">${firstData.LCQuantity}</td>
+              <td style="padding:3px !important; text-align:center!important;">${parseFloat(firstData.LcTotalPrice).toFixed(4)}</td>
+              <td style="padding:3px !important; text-align:center!important;">${parseFloat(firstData.ChargeAmount).toFixed(4)}</td>
+              <td style="padding:3px !important; text-align:center!important;">${parseFloat(firstData.TotalLandedCost).toFixed(4)}</td>
+              <td style="padding:3px !important; text-align:center!important;">${parseFloat(firstData.LandedCostPerUnit).toFixed(4)}</td>
+          </tr>`;
+
+
+                            lcTotalPrice += parseFloat(firstData.LcTotalPrice);
+                            chargeAmount += parseFloat(firstData.ChargeAmount);
+                            totalLandedCost += parseFloat(firstData.TotalLandedCost);
+
+                            count++;
+
+                        });
+
+                        row += `
+          <tr style="padding: 2px !important; background-color: #BECFD9 !important;">
+              <td colspan="6" style="text-align: center !important; vertical-align: middle; font-size: 18px !important; font-weight: bold !important;"> &nbsp; </td>
+              <td style="color: #5b42f3 !important; text-align: center !important; vertical-align: middle; font-size: 18px !important; font-weight: bold !important;"> Total: </td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(lcTotalPrice).toFixed(4)}</td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(chargeAmount).toFixed(4)}</td>
+              <td style="color: #5b42f3 !important; padding: 3px !important; text-align: center !important; font-size: 18px !important; font-weight: bold !important;">${parseFloat(totalLandedCost).toFixed(4)}</td>
+              <td style="text-align: center !important; vertical-align: middle; font-size: 18px !important; font-weight: bold !important;"> &nbsp; </td>
+         </tr>
+        `;
+
+                        $('#table_Landed_CostBody').append(row);
+
+
+                    }
+                });
+
+                $('#piLargeModal').modal('show');
+            });
+
+
+    </script>
+}

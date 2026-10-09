@@ -1,0 +1,963 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Test\Create.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Add Voucher";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+   
+</style>
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center  headerBorderBottom"  >
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            Voucher Info
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+
+                                        <a class="small blue button" href="@Url.Action("Index", "Test")">
+                                            <span class="fa fa-share"></span> Back to List
+
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+                          
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                            <div class="col-md-12" style="margin-top:5px;">
+
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group" id="divCompany">
+                                            <label for="ddlCompany" class="bold col-form-label">Company</label>
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadBusinessUnit()"></select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group" id="divBusinessUnit">
+                                            <label class="bold col-form-label" for="ddlBusinessUnit">Business Unit</label>
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlBusinessUnit"></select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group" id="divVoucherDate">
+                                            <label class="bold col-form-label" for="txtVoucherDate">Voucher Date</label>
+                                            <input type="text" id="txtVoucherDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-2">
+                                        <div class="form-group" id="divCurrencyRate">
+                                            <label class="bold col-form-label" for="txtCurrencyRate">Currency Rate</label>
+                                            <input type="text" id="txtCurrencyRate" class="form-control form-control-sm mb-3" value="1" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="bold col-form-label" for="cashRadio">Payment Type</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-success d-inline col-md-6">
+                                                <input type="radio" id="bankRadio" name="paymentType" value="1" checked="">
+                                                <label for="bankRadio">Bank</label>
+                                            </div>
+                                            <div class="icheck-success d-inline col-md-6">
+                                                <input type="radio" id="cashRadio" name="paymentType" value="2">
+                                                <label for="cashRadio">Cash</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row table-responsive" style="padding-top:10px">
+                                    <div class="col-md-12">
+                                        <div class="card-body">
+                                            <table class="table table-bordered table-striped table-hover" id="debitVoucher">
+                                                <thead>
+                                                    <tr>
+
+                                                        <th style="width: 320px">Country</th>
+
+                                                        <th style="width: 180px">City</th>
+
+
+                                                        <th style="width: 100px">Amount</th>
+                                                        <th>Remarks</th>
+                                                        <th class="action">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-top:10px">
+                                    <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-6">
+
+                                        <div class="form-group row">
+                                            <div class="col-sm-2">
+                                            </div>
+                                            <label for="lblRestAmount" class="col-sm-2 bold col-form-label">Total Amount :</label>
+                                            <div class="col-sm-3">
+                                                <label class="bold col-form-label" id="lblTotalAmountAmount">0</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-top:10px">
+                                    <div class="col-md-3">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group row">
+                                            <label for="lblNarration" class="col-sm-2 bold col-form-label">Narration :</label>
+                                            <div class="col-sm-3" id="divNarration">
+                                                <textarea id="txtaNarration" rows="4" cols="50" style="text-align:left"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <br />
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+
+                                                <button class="small blue button" onclick="SaveDebitVoucher()">Submit</button>
+
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div><!-- /.container-fluid -->
+            <input id="TestMasterId" type="number" style="display: none;" value="@ViewBag.VoucherId">
+            <input id="eflag" type="text" style="display: none;" value="@ViewBag.eflag">
+            <input type="hidden" id="FromAccClosingBalance" />
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+
+    <script>
+         
+        var CountryList = {};
+        var DeleteGLDetails = [];
+        var DeleteGLDetailsTransaction = [];
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+            $("#ddlCompany").val("1");
+            LoadBusinessUnit();
+
+
+            LoadDate('#txtVoucherDate');
+
+            GetCountry();
+          
+
+
+
+
+            var TestMasterId = $('#TestMasterId').val();
+            if (TestMasterId > 0) {
+                GetVoucherMaster(TestMasterId);
+            } else {
+                AddRow();
+            }
+           
+        });
+
+
+
+        function PaymentValue() {
+            var lblAmount = isNaN(parseFloat($('#lblTotalAmountAmount').html())) ? 0 : parseFloat($('#lblTotalAmountAmount').html());
+
+            
+            $('#txtPaymentAmount').val(pv);
+        }
+
+
+        function BankWishEffect() {
+             
+            if ($('#bankRadio').is(':checked')) {
+                $("#ddlBank").prop("disabled", true);
+                $("#ddlBranch").prop("disabled", true);
+                $("#txtChequeNo").prop("disabled", false);
+                $("#txtChequeDate").prop("disabled", false);
+                $("#txtRefNo").prop("disabled", true);
+                $("#txtRefDate").prop("disabled", true);
+
+                $("#txtRefNo").val('');
+                $("#txtRefDate").val('');
+
+
+                $.ajax({
+                    url: "/Utility/GetGLBankAccounts",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: {},
+                    async: false,
+                    success: function (data) {
+
+                        $('#ddlFromAccount').empty();
+                        $('#ddlFromAccount').append("<option value='0'>--Select From Account--</option>");
+
+                        for (var i = 0; i < data.length; i++) {
+
+                            $('#ddlFromAccount').append($("<option></option>").val(data[i].CALayerSevenId).html(data[i].AccountNo));
+                        }
+                    }
+                });
+            }
+        }
+        $("#ddlFromAccount").change(function () {
+
+            var glId = $("#ddlFromAccount").val();
+            var urlpath1 = '@Url.Action("GetClosingBalanceOfGL", "JournalVoucher")';
+            $.ajax({
+                url: urlpath1,
+                type: "Get",
+                dataType: 'json',
+                data: { glId: glId, refdetailid: null },
+                async: false,
+                success: function (data) {
+                     
+
+                    $('#FromAccClosingBalance').val(data.Balance.toFixed(2));
+                    $('#ClosingBalance').html("(Closing Balance:" + data.Balance.toFixed(2) + ")");
+
+
+                }
+            });
+        });
+        function CashWishEffect() {
+             
+            if ($('#cashRadio').is(':checked')) {
+                $("#ddlBank").prop("disabled", true);
+                $("#ddlBranch").prop("disabled", true);
+                $("#txtChequeNo").prop("disabled", true);
+                $("#txtChequeDate").prop("disabled", true);
+                $("#txtRefNo").prop("disabled", false);
+                $("#txtRefDate").prop("disabled", false);
+
+                $("#ddlBank").val(0);
+                $("#ddlBranch").val(0);
+                $("#txtChequeNo").val('');
+                $("#txtChequeDate").val('');
+
+
+                $.ajax({
+                    url: "/Utility/GetGLCashAccounts",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: {},
+                    async: false,
+                    success: function (data) {
+                        $('#ddlFromAccount').empty();
+                        $('#ddlFromAccount').append("<option value='0'>--Select From Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlFromAccount').append($("<option></option>").val(data[i].CALayerSevenId).html(data[i].AccountName));
+                        }
+                    }
+                });
+            }
+        }
+
+        function LoadBankBranchInfo() {
+            var CALayerSevenId = $("#ddlFromAccount").val();
+            var urlpath = '@Url.Action("GetBankBranch", "DebitVoucher")';
+            $.ajax({
+                url: urlpath,
+                type: "Get",
+                dataType: 'json',
+                data: { CALayerSevenId: CALayerSevenId },
+                async: false,
+                success: function (data) {
+                     
+                    if ($('#bankRadio').is(':checked')) {
+                        $('#ddlBank').val(data.BankId);
+                        LoadBankBranch('ddlBranch', data.BankId);
+                        $('#ddlBranch').val(data.BranchId);
+                    } else {
+                        $('#ddlBank').val(0);
+                        $('#ddlBranch').val(0);
+                    }
+
+                }
+            });
+
+        }
+
+
+        function LoadBusinessUnit() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/LoadBusinessUnit",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlBusinessUnit').empty();
+                    $('#ddlBusinessUnit').append("<option value='0'>--Select Business Unit--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlBusinessUnit').append($("<option></option>").val(data[i].BUId).html(data[i].Name));
+                    }
+                }
+            });
+        }
+
+        function LoadCurrency() {
+            $.ajax({
+                url: "/Utility/GetCurrency",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    $('#ddlCurrency').empty();
+                    $('#ddlCurrency').append("<option value='0'>--Select Currency--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlCurrency').append($("<option></option>").val(data[i].CurrencyId).html(data[i].CurrencyCode));
+                    }
+                }
+            });
+        }
+
+        function GetVoucherMaster(id) {
+
+            var urlpath = '@Url.Action("GetVoucherByMasterId", "DebitVoucher")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "Get",
+                data: { id: id },
+                async: false,
+                success: function (data) {
+                    $("#ddlCompany").val(data.CompanyId).trigger('change');
+                    $("#ddlCompany").prop("disabled", true);
+                    LoadBusinessUnit();
+                    $("#ddlBusinessUnit").val(data.BUId).trigger('change');
+                    $("#ddlBusinessUnit").prop("disabled", true);
+                    $("#ddlFiscalYear").val(data.FinancialYearId).trigger('change');
+                    $("#ddlFiscalYear").prop("disabled", true);
+                    $('#txtVoucherDate').val(ToJavaScriptDate(data.VoucherDate));
+                    $("#txtVoucherDate").prop("disabled", true);
+                    $("#ddlCurrency").val(data.CurrencyId).trigger('change');
+                    $("#ddlCurrency").prop("disabled", true);
+                    $('#txtCurrencyRate').val(data.CurrencyConRate);
+                    $("#txtCurrencyRate").prop("disabled", true);
+
+                    if (data.VoucherTypeId == 3)
+                    {
+                        $('#bankRadio').prop('checked', true);
+                    }
+                    if (data.VoucherTypeId == 4) {
+                        $('#cashRadio').prop('checked', true);
+                    }
+                    $("#bankRadio").prop("disabled", true);
+                    $("#cashRadio").prop("disabled", true);
+                    $("#ddlFromAccount").prop("disabled", true);
+
+                    LoadBankName('ddlBank');
+                    $('#ddlBank').val(data.BankId);
+                    $("#ddlBank").prop("disabled", true);
+                    LoadBankBranch('ddlBranch', data.BankId);
+                    $('#ddlBranch').val(data.BranchId);
+                    $("#ddlBranch").prop("disabled", true);
+
+                    $('#txtChequeNo').val(data.ChequeNo);
+                    if (data.ChequeDate != "" && data.ChequeDate != null)
+                    {
+                        $('#txtChequeDate').val(ToJavaScriptDate(data.ChequeDate));
+                    }
+
+
+                    $('#txtRefNo').val(data.RefNo);
+                    if (data.RefDate != "" && data.RefDate != null)
+                    {
+                        $('#txtRefDate').val(ToJavaScriptDate(data.RefDate));
+                    }
+
+                    $('#lblTotalAmountAmount').html(data.TotalAmount);
+                    $('#txtaNarration').val(data.Narration);
+
+
+                    BankWishEffect()
+                    CashWishEffect()
+
+                    $('#txtChequeNo').val(data.ChequeNo);
+                    if (data.ChequeDate != "" && data.ChequeDate != null) {
+                        $('#txtChequeDate').val(ToJavaScriptDate(data.ChequeDate));
+                    }
+
+
+                    $('#txtRefNo').val(data.RefNo);
+                    if (data.RefDate != "" && data.RefDate != null) {
+                        $('#txtRefDate').val(ToJavaScriptDate(data.RefDate));
+                    }
+                     
+                    //GetProducts();
+                    //var typeid = $("#ddlCustomerType").val();
+
+                    for (var i = 0; i < data.VoucherDetails.length; i++) {
+                         
+                        var tr = $('#debitVoucher tbody tr').length + 1;
+                        AddRow();
+                        if (data.VoucherDetails[i].DrCr == "Cr")
+                        {
+                            var glId = isNaN(parseFloat(data.VoucherDetails[i].CALayerSevenId)) ? 0 : parseFloat(data.VoucherDetails[i].CALayerSevenId);
+                            if (glId != 1268 && glId != 1083)
+                            {
+                                $("#SevenLayerCr_" + tr).val(data.VoucherDetails[i].CALayerSevenId);
+                                $('#ddlFromAccount').val(data.VoucherDetails[i].CALayerSevenId).trigger('change');
+                                $('#txtPaymentAmounthidden').val(data.VoucherDetails[i].CALayerSevenId)
+                               // $('#amount_' + tr).val(data.VoucherDetails[i].CrAmt.toFixed(2));
+                                $('#txtPaymentAmount').val(data.VoucherDetails[i].CrAmt.toFixed(2));
+                                $('#details_' + tr).val(data.VoucherDetails[i].VoucherDetailId);
+                                $('#details_transaction_' + tr).val(data.VoucherDetails[i].VoucherTransectionId);
+                                $('#DrCr_' + tr).val(data.VoucherDetails[i].DrCr);
+                                $("#tr_" + tr).css("display", "none");
+                            }
+                            if (glId == 1268) {
+                                $("#SevenLayerCr_" + tr).val(data.VoucherDetails[i].CALayerSevenId);
+                                $('#txtDiscounthidden').val(data.VoucherDetails[i].CALayerSevenId)
+                                //$('#ddlFromAccount').val(data.VoucherDetails[i].CALayerSevenId).trigger('change');
+                                //$('#amount_' + tr).val(data.VoucherDetails[i].CrAmt.toFixed(2));
+                                $('#txtDiscount').val(data.VoucherDetails[i].CrAmt.toFixed(2));
+                                $('#details_' + tr).val(data.VoucherDetails[i].VoucherDetailId);
+                                $('#details_transaction_' + tr).val(data.VoucherDetails[i].VoucherTransectionId);
+                                $('#DrCr_' + tr).val(data.VoucherDetails[i].DrCr);
+                                $("#tr_" + tr).css("display", "none");
+                            }
+                            if (glId == 1083) {
+                                $("#SevenLayerCr_" + tr).val(data.VoucherDetails[i].CALayerSevenId);
+                                $('#txtTaxhidden').val(data.VoucherDetails[i].CALayerSevenId)
+                                //$('#ddlFromAccount').val(data.VoucherDetails[i].CALayerSevenId).trigger('change');
+                               // $('#amount_' + tr).val(data.VoucherDetails[i].CrAmt.toFixed(2));
+                                $('#txtTax').val(data.VoucherDetails[i].CrAmt.toFixed(2));
+                                $('#details_' + tr).val(data.VoucherDetails[i].VoucherDetailId);
+                                $('#details_transaction_' + tr).val(data.VoucherDetails[i].VoucherTransectionId);
+                                $('#DrCr_' + tr).val(data.VoucherDetails[i].DrCr);
+                                $("#tr_" + tr).css("display", "none");
+                            }
+
+                        }
+                        if (data.VoucherDetails[i].DrCr == "Dr")
+                        {
+
+
+                            $("#glId_" + tr).val(data.VoucherDetails[i].CALayerSevenId).trigger('change');
+                            $('#glId_' + tr).prop("disabled", true);
+                            $("#costCenter_" + tr).val(data.VoucherDetails[i].CostCenterId).trigger('change');
+                            $("#referenceNo_" + tr).val(data.VoucherDetails[i].RefDetailsId).trigger('change');
+                            $('#amount_' + tr).val(data.VoucherDetails[i].DrAmt.toFixed(2));
+                            $('#remarks_' + tr).val(data.VoucherDetails[i].Remarks);
+
+                            $('#details_' + tr).val(data.VoucherDetails[i].VoucherDetailId);
+                            $('#details_transaction_' + tr).val(data.VoucherDetails[i].VoucherTransectionId);
+                            $('#DrCr_' + tr).val(data.VoucherDetails[i].DrCr);
+
+                        }
+
+                        if (data.IsPage == false) {
+                            $('#costCenter_' + tr).prop("disabled", true);
+                            $('#referenceNo_' + tr).prop("disabled", true);
+                            $('#amount_' + tr).prop("disabled", true);
+                            $('#remarks_' + tr).prop("disabled", true);
+                            $('#txtaNarration').prop("disabled", true);
+                            $("#btnAdd_" + tr).css("display", "none");
+                            $("#btnRemove_" + tr).css("display", "none");
+                            $('#Reject').hide();
+                        } else {
+                            $('#costCenter_' + tr).prop("disabled", false);
+                            $('#referenceNo_' + tr).prop("disabled", false);
+                            $('#amount_' + tr).prop("disabled", false);
+                            $('#remarks_' + tr).prop("disabled", false);
+                            $('#txtaNarration').prop("disabled", false);
+                            $("#btnAdd_" + tr).css("display", "block");
+                            $("#btnRemove_" + tr).css("display", "block");
+                            $('#Reject').show();
+                        }
+
+                    }
+
+                }
+            });
+        }
+
+
+
+
+
+
+
+        function SaveDebitVoucher() {
+
+            if (SaveValidation() == true) {
+               
+                    SaveDebitVoucherFinal();
+
+                
+            }
+        }
+
+        function SaveDebitVoucherFinal() {
+             
+            var jsonData = {};
+
+            jsonData["TestMasterId"] = $('#TestMasterId').val();
+            jsonData["CompanyId"] = $('#ddlCompany').val();
+            jsonData["UnitId"] = $('#ddlBusinessUnit').val();
+            
+
+            jsonData["VoucherDate"] = $('#txtVoucherDate').val();
+          
+            jsonData["CurrencyRate"] = $('#txtCurrencyRate').val();
+
+            var voucherType = 0;
+            if ($('#bankRadio').is(':checked')) {
+                voucherType = 'Bank';
+            }
+            if ($('#cashRadio').is(':checked')) {
+                voucherType = 'Cash';
+            }
+            jsonData["PaymentType"] = voucherType; 
+         
+            jsonData["TotalAmount"] = parseFloat($('#lblTotalAmountAmount').html());
+            jsonData["Narration"] = $('#txtaNarration').val().trim();
+          
+
+
+            var jsonObjs = [];
+
+            ////Credit Object
+         
+
+            $('#debitVoucher tbody tr').each(function () {
+
+                var theObj = {};
+                var transactionObj = {};
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+           
+
+                var ConId = isNaN(parseFloat($('#ConId_' + id).val())) ? 0 : parseFloat($('#ConId_' + id).val());
+
+                var City = isNaN(parseFloat($('#city_' + id).val())) ? 0 : parseFloat($('#city_' + id).val());
+               
+                
+                var amount = isNaN(parseFloat($('#amount_' + id).val())) ? 0 : parseFloat($('#amount_' + id).val());
+                var remarks = $('#remarks_' + id).val();
+             
+
+                if (detailsId == 0) {
+                    theObj["TestDetailId"] = detailsId;
+                    theObj["CountryId"] = ConId;
+                    theObj["CityId"] = City;
+                  
+                    theObj["Amount"] = amount;
+                    
+                   
+                    theObj["Remarks"] = remarks;
+                  
+                     
+                }
+                
+
+                jsonObjs.push(theObj);
+
+            });
+
+
+            alert(jsonObjs);
+
+            jsonData["TestDetails"] = jsonObjs;
+
+            var urlpath = '@Url.Action("SaveTest", "Test")';
+            $.ajax({
+                contentType: "application/json",
+                data: JSON.stringify(jsonData),
+                dataType: 'json',
+                url: urlpath,
+                type: "POST"
+            })
+                .success(function (result) {
+
+                    if (result.pk > 0) {
+                        @*swal({
+                            title: " Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            var eflag = $('#eflag').val();
+                            if (eflag == "ed") {
+                                window.location.href = '@Url.Action("Index", "DebitVoucher")';
+                            } else {*@
+                                window.location.href = '@Url.Action("DebitVoucherApproval", "DebitVoucher")';
+                           /* }*/
+
+
+                       /* });*/
+
+
+                    }
+                });
+
+
+        }
+
+        function SaveValidation() {
+
+             
+            var isValid = true;
+            var message = "Some Values Required";
+            if ($('#ddlCompany').val() == 0 || $('#ddlCompany').val() == '') {
+                ValidationColorChangeNew("ddlCompany", "divCompany", "Company Required", true);
+                isValid = false;
+            }
+            if ($('#ddlBusinessUnit').val() == 0 || $('#ddlBusinessUnit').val() == '') {
+                ValidationColorChangeNew("ddlBusinessUnit", "divBusinessUnit", "Business Unit Required", true);
+                isValid = false;
+            }
+            
+            if ($('#txtVoucherDate').val() == '' || $('#txtVoucherDate').val() == null) {
+                ValidationColorChangeNew("txtVoucherDate", "divVoucherDate", "Voucher Date Required", false);
+                isValid = false;
+            }
+
+            
+            if ($('#txtCurrencyRate').val() == '' || $('#txtCurrencyRate').val() == null) {
+                ValidationColorChangeNew("txtCurrencyRate", "divCurrencyRate", "Currency Rate Required", false);
+                isValid = false;
+            }
+
+          
+
+             
+
+ 
+
+
+            if ($('#txtaNarration').val().trim() == '' || $('#txtaNarration').val().trim() == null) {
+                ValidationColorChangeNew("txtaNarration", "divNarration", "Narration Required", false);
+                isValid = false;
+            }
+
+           
+
+            $('#debitVoucher tbody tr').each(function () {
+
+              
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+                var conId = isNaN(parseFloat($('#ConId_' + id).val())) ? 0 : parseFloat($('#ConId_' + id).val());
+                alert(conId);
+                var cityId = isNaN(parseFloat($('#city_' + id).val())) ? 0 : parseFloat($('#city_' + id).val());
+                var amount = isNaN(parseFloat($('#amount_' + id).val())) ? 0 : parseFloat($('#amount_' + id).val());
+               
+                if (conId === 0) {
+                    isValid = false;
+                    message = "Please select Country";
+                    $('#ConId_' + id).css('border-bottom', '2px solid red');
+                    return;
+                }
+
+
+                if (cityId === 0) {
+                    isValid = false;
+                    message = "Please select City";
+                    $('#city_' + id).css('border-bottom', '2px solid red');
+                    return;
+                }
+                if (amount === 0) {
+                    isValid = false;
+                    message = "Pay Amount Cannot be 0 ";
+                    $('#amount_' + id).css('border-bottom', '2px solid red');
+                    return;
+                }
+
+
+            });
+             
+            return isValid;
+
+
+        }
+
+        function CalculateAll() {
+
+             
+            var grandTotal = 0;
+            var proCout = 0;
+            $('#debitVoucher tbody tr').each(function () {
+
+
+                 
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+               
+                var amount = isNaN(parseFloat($('#amount_' + id).val())) ? 0 : parseFloat($('#amount_' + id).val());
+
+                grandTotal += amount;
+               
+
+
+                
+
+            });
+            $('#lblTotalAmountAmount').html(grandTotal.toFixed(2));
+        }
+
+      
+        function GetCitybyCountryId(ConId) {
+             
+
+            //if (customertype == 0) {
+            //    swal("At first select customer type");
+            //    $('#pro_' + prodId).val('0').trigger("change");
+            //    return;
+            //}
+
+            var cId = $('#ConId_' + ConId).val();
+
+             
+            $.ajax({
+                url: "/Utility/LoadCitybyCountry",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: cId },
+                async: false,
+                success: function (data) {
+                  
+                    $('#city_' + ConId).empty();
+                    $('#city_' + ConId).append("<option value='0'>--Select City--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#city_' + ConId).append($("<option></option>").val(data[i].CityId).html(data[i].CityName));
+                    }
+                }
+            });
+
+      
+        }
+
+    
+        function RemoveRow(id) {
+           
+
+            var trLength = $('#debitVoucher tbody tr:visible').length;
+         
+            if (trLength == 1) {
+                $('#ConId_' + id).val(0).trigger('change');
+                $('#city_' + id).val(0).trigger('change');
+               
+                $('#amount_' + id).val(0);
+                $('#remarks_' + id).val('');
+               
+                CalculateAll();
+                 
+            }
+
+            if (trLength > 1) {
+
+                var detailsId = $('#details_' + id).val();
+                if (detailsId > 0) {
+                    var glId = isNaN(parseFloat($('#ConId_' + id).val())) ? 0 : parseFloat($('#ConId_' + id).val());
+ 
+
+                }
+                $('#tr_' + id).remove();
+                SerialTable();
+                CalculateAll();
+                
+            } else {
+                return;
+            }
+
+        }
+
+        function AddRow() {
+             
+            var tr = $('#debitVoucher tbody tr').length + 1;
+            var values = $("#debitVoucher tbody tr")
+                .map(function () { return parseInt($(this).attr('id').substring(3)); }).get();
+            var index = values.indexOf(tr);
+            if (index >= 0) {
+                tr = Math.max.apply(Math, values) + 1;
+            }
+            var urlpath = '@Url.Action("AddRowForCountry", "Test")';
+            $.ajax({
+                url: urlpath,
+                type: "Get",
+                dataType: 'html',
+                data: { tr: tr },
+                async: false,
+                success: function (data) {
+
+                    $('#debitVoucher tbody').append(data);
+                    LoadCountryRow("ConId_" + tr);
+
+
+                }
+            });
+            $('#ConId_' + tr).select2();
+            $('#city_' + tr).select2();
+          
+            SerialTable();
+           
+            
+        }
+
+        function SerialTable() {
+            $('#debitVoucher tbody tr').each(function (index, element) {
+
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+                $('#ts_' + id).html(index + 1);
+
+
+            });
+        }
+
+        function LoadCountryRow(elementId) {
+
+            $('#' + elementId + '').append("<option value='0'>--Select Country--</option>");
+            for (var i = 0; i < CountryList.length; i++) {
+
+                $('#' + elementId + '').append($("<option></option>").val(CountryList[i].CountryId).html(CountryList[i].CountryName));
+            }
+
+
+        }
+
+
+
+
+        function GetCountry() {
+
+
+            var urlpath = '@Url.Action("LoadCountry", "Utility")';
+            $.ajax({
+                url: urlpath,
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    CountryList = data;
+
+                }
+            });
+        }
+
+
+        function Reject() {
+
+            swal({
+                title: "Are you sure?",
+                text: "",
+                type: "success",
+                showCancelButton: true,
+                cancelButtonClass: 'btn-secondary waves-effect',
+                confirmButtonClass: 'btn-success waves-effect waves-light',
+                confirmButtonText: 'Yes!',
+                closeOnConfirm: false
+            }, function () {
+                $('.confirm').prop("disabled", true);
+                $('.cancel').prop("disabled", true);
+                RejectFinal();
+            });
+
+        }
+        function RejectFinal() {
+
+
+
+            var id = $('#voucherId').val();
+             
+            var urlpath = '@Url.Action("Reject", "DebitVoucher")';
+
+            $.ajax({
+
+                //contentType: "application/json",
+                data: { id: id },
+                dataType: "json",
+                url: urlpath,
+                type: "POST"
+            })
+                .success(function (result) {
+                    console.log(result);
+                    if (result.isSuccess == true) {
+                        swal({
+                            title: " Reject Successfull",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            window.location.href = '@Url.Action("DebitVoucherApproval", "DebitVoucher")';
+                        });
+                    }
+
+                });
+        }
+    </script>
+}

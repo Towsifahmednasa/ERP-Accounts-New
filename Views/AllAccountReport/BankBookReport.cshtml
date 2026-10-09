@@ -1,0 +1,725 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\BankBookReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Bank Book Report ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .radio-label {
+        font-weight: bold !important;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+<div id="loadingSpinner" style="display:none;">
+    <div class="overlay"></div>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Bank Book Report </span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light bg-gradient ">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divCompany">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlBankName" class="bold col-form-label">Bank Name: <span style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divBankName"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlBankName" onchange="LoadAccountNObyBankCom()"></select> </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group">
+
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlBankNameAccountNO" class="bold col-form-label">Bank Account No.: <span style="color: orangered !important;"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divBankNameAccountNO"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlBankNameAccountNO"></select> </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlFinansialYear" class="bold col-form-label">Financial Year: </label></div>
+                                                                    <div class="col-md-8" id="divFinansialYear">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFinansialYear" onchange="LoadDaterangebyFiscal()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtToDate" class="bold col-form-label">To Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;display:none">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+
+                                                                <div class="col-md-8" id="divTransactionType">
+
+
+                                                                    <input type="radio" checked name="rbTransactionType" value="Monthly" id="MonthlyRadio" />
+                                                                    <label for="MonthlyRadio" style="font-weight: bold">Monthly </label>
+                                                                    <input type="radio" id="NarrationRadio" name="rbTransactionType" value="Narration">
+                                                                    <label for="NarrationRadio" style="font-weight: bold">Narration</label>
+
+                                                                </div>
+
+                                                            </div>
+
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                                                <div class="col-md-8">
+                                                                    <button class="small blue button" id="Reject" onclick="PrintReport()">
+                                                                        <i class="fa fa-search" aria-hidden="true"></i>
+                                                                        Search
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                                <!-- Rana Code Start-->
+
+                                <div class="col-12">
+
+                                    <div class="row m-2">
+                                        <div class="col-12">
+
+                                            <div class="row">
+                                                <div class="col-12 text-end">
+                                                    <button id="exportButton" class="btn btn-sm btn-outline-success mb-3 me-2">
+                                                        📊 Export to Excel
+                                                    </button>
+
+                                                    <button id="printButton" class="btn btn-sm btn-outline-info mb-3">
+                                                        🖨️ Print
+                                                    </button>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row m-2">
+                                                <div class="col-12">
+
+                                                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid #ccc;">
+
+                                                        <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable p-2" style="width: 100%;">
+                                                            <thead>
+
+                                                                <tr>
+                                                                    <th colspan="12" style="text-align: center; font-weight: bold; font-size: 16px; color: blue;"> <label id="lblheading"> Bank Book Report </label> </th>
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Business Unit: </td>
+                                                                    <td colspan="4">
+                                                                        <label style="font-size: 18px !important;" id="lblBusinessUnit"></label>
+                                                                    </td>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> From Date: </td>
+                                                                    <td colspan="4">
+                                                                        <label style="font-size: 18px !important;" id="lblFromDate"></label>
+                                                                    </td>
+
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Financial Year: </td>
+                                                                    <td colspan="4">
+                                                                        <label style="font-size: 18px !important;" id="lblFinancialYear"></label>
+                                                                    </td>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> To Date: </td>
+                                                                    <td colspan="4">
+                                                                        <label style="font-size: 18px !important;" id="lblToDate"></label>
+                                                                    </td>
+
+                                                                </tr>
+
+
+                                                                <tr>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> GL: </td>
+                                                                    <td colspan="4">
+                                                                        <label style="font-size: 18px !important;" id="lblAccount"></label>
+                                                                    </td>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;color: forestgreen !important; "> Opening Balance: </td>
+                                                                    <td colspan="4">
+                                                                        <label style="font-size: 18px !important;" id="lblOpeningBalance"></label>
+                                                                    </td>
+
+                                                                </tr>
+
+
+                                                                <tr>
+                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Currency: </td>
+                                                                    <td colspan="10">
+                                                                        <label style="font-size: 18px !important;" id="lblCurrency"></label>
+                                                                    </td>
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td colspan="12"></td>
+                                                                </tr>
+                                                            </thead>
+                                                            <thead style="position: sticky; top: 0; background-color: #f9f9f9; z-index: 1;">
+                                                                <tr style="background-color: #285B86 !important">
+                                                                    <th colspan="1" style="width: 40px !important; color: white; text-align: center !important;"> # SL</th>
+                                                                    <th colspan="1" style="color:white; text-align: center !important;"> Date </th>
+                                                                    <th colspan="1" style="color:white; text-align: center !important;"> Voucher No </th>
+                                                                    <th colspan="1" style="color:white; text-align: center !important;"> GL </th>
+                                                                    <th colspan="1" style="color:white; text-align: center !important;"> Narration </th>
+                                                                    <th colspan="1" style="color:white; text-align: center !important;"> Subsidiary Type </th>
+                                                                    <th colspan="1" style="color:white; text-align: center !important;"> Subsidiary Ledger </th>
+                                                                    <th colspan="1" style="color:white; text-align: center !important;"> Cost Center </th>
+                                                                    <th colspan="1" style="color:white; text-align: center !important;"> Referrence </th>
+                                                                    <th colspan="1" style="color:white;  text-align: center !important;"> Debit  </th>
+                                                                    <th colspan="1" style="color:white;  text-align: center !important;"> Credit  </th>
+                                                                    <th colspan="1" style="color:white;  text-align: center !important;"> Balance </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="ledgerlist">
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Rana Code End-->
+                                </div>
+
+                                <!-- Rana Code End-->
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+            LoadBankName('ddlBankName');
+        });
+
+        function LoadDDlbyCom() {
+            LoadFinansialYear();
+            _loadAccountNObyBankCom();
+        }
+
+
+
+        function LoadAccountNObyBankCom() {
+            _loadAccountNObyBankCom();
+        }
+
+        function LoadDaterangebyFiscal() {
+            var companyId = $("#ddlCompany").val();
+            var FinancialYearId = $("#ddlFinansialYear").val();
+            $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, FinancialYearId: FinancialYearId },
+                async: false,
+                success: function (data) {
+
+                    $('#txtfrmDate').val((data.StartDate));
+                    $('#txtToDate').val((data.EndDate));
+                }
+            });
+        }
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                    if (data.length > 0) {
+                        // Select the first real financial year (index 1)
+                        $('#ddlFinansialYear').val(data[0].FinancialYearId).trigger('change');
+                    }
+                }
+            });
+        }
+
+        function _loadAccountNObyBankCom() {
+            var companyId = $("#ddlCompany").val();
+            var BankNameId = $("#ddlBankName").val();
+            $.ajax({
+                url: "/Utility/GetAccountNObyBankCom",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, BankNameId: BankNameId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlBankNameAccountNO').empty();
+                    $('#ddlBankNameAccountNO').append("<option value='0'>--Select Account NO --</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlBankNameAccountNO').append($("<option></option>").val(data[i].AccountId).html(data[i].AccountNo));
+                    }
+                }
+            });
+        }
+
+
+        function formatDateToDDMMMYYYY(dateString) {
+            if (!dateString) return "";
+
+            var date = new Date(dateString);
+            if (isNaN(date)) return ""; // invalid date check
+
+            var day = ("0" + date.getDate()).slice(-2);
+            var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var month = monthNames[date.getMonth()];
+            var year = date.getFullYear();
+
+            return day + "-" + month + "-" + year;
+        }
+
+
+        function PrintReport() {
+
+            var CompanyID = $('#ddlCompany').val();
+            var BankAccountID = $('#ddlBankNameAccountNO').val();
+            var FinancialYearID = $('#ddlFinansialYear').val() || null;
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+            var BankBookBankNAme = $("#ddlBankNameAccountNO option:selected").text();
+
+            if (!CompanyID) {
+                toastr.warning("Please select a Company.");
+                $('#ddlCompany').focus();
+                return false;
+            }
+
+            if (!BankAccountID) {
+                toastr.warning("Please select a Bank Account.");
+                $('#ddlBankNameAccountNO').focus();
+                return false;
+            }
+
+            //if (!FinancialYearID) {
+            //    toastr.warning("Please select a Financial Year.");
+            //    $('#ddlFinansialYear').focus();
+            //    return false;
+            //}
+
+            if (!FromDate) {
+                toastr.warning("Please enter From Date.");
+                $('#txtfrmDate').focus();
+                return false;
+            }
+
+            if (!ToDate) {
+                toastr.warning("Please enter To Date.");
+                $('#txtToDate').focus();
+                return false;
+            }
+
+            var Monthly = "";
+            var Narration = "";
+            if ($('#MonthlyRadio').is(':checked')) {
+                Monthly = "True";
+            }
+            if ($('#NarrationRadio').is(':checked')) {
+                Narration = "True";
+            }
+
+
+            var prm = "CompanyID=" + CompanyID + "&BankAccountID=" + BankAccountID + "&FinancialYearID=" + FinancialYearID + "&FromDate=" + FromDate + "&ToDate=" + ToDate + "&BankBookBankNAme=" + BankBookBankNAme + "&Monthly=" + Monthly + "&Narration=" + Narration;
+
+
+            $.ajax({
+                url: '/BankBook/GetBankBook_Report',
+                data: { CompanyID: CompanyID, BankAccountID: BankAccountID, FinancialYearID: FinancialYearID, FromDate: FromDate, ToDate: ToDate, BankNAme: BankBookBankNAme, Monthly: Monthly, Narration: Narration },
+                dataType: 'json',
+                type: "Get",
+                beforeSend: function () {
+                    // Show the full-screen loading spinner
+                    $("#loadingSpinner").show();
+                },
+                success: function (data) {
+                    console.log("Full response:", data);
+
+                    var bankBookDataTable = data.BankBookDataTable || [];
+                    var table = data.Table || [];
+                    if (bankBookDataTable.length === 0) {
+                        // Show toastr warning
+                        toastr.warning("No data found.");
+
+
+                    }
+                    // Clear old rows
+                    $('#ledgerlist').empty();
+
+                    var finalClosingBalance = 0;
+                    var grandTotalDebitBDT = 0;
+                    var grandTotalCreditBDT = 0;
+
+                    // Calculate totals once across the dataset
+                    for (var i = 0; i < bankBookDataTable.length; i++) {
+                        grandTotalDebitBDT += bankBookDataTable[i].DebitAmountBDT || 0;
+                        grandTotalCreditBDT += bankBookDataTable[i].CreditAmountBDT || 0;
+                    }
+                    var openingBalanceMain = 0;
+                    // Calculate closing balance
+                    for (var cb = 0; cb < table.length; cb++) {
+                        var glName = table[cb].GLName;
+                        var openingBalance = table[cb].OpeningBalance || 0;
+                        openingBalanceMain = openingBalance;
+                        var closingBalance = 0;
+                        if (glName === "Assets" || glName === "Expenses") {
+                            closingBalance = (openingBalance + grandTotalDebitBDT) - grandTotalCreditBDT;
+                        } else if (glName === "Revenue/Income" || glName === "Liability") {
+                            closingBalance = (openingBalance + grandTotalCreditBDT) - grandTotalDebitBDT;
+                        }
+                        finalClosingBalance = closingBalance;
+                    }
+
+                    // Render table rows
+                    let runningBlnc = openingBalanceMain;
+
+                    for (var i = 0; i < bankBookDataTable.length; i++) {
+                        var row = bankBookDataTable[i];
+
+                        // Update running balance
+                        runningBlnc = runningBlnc + ((row.DebitAmountBDT || 0) - (row.CreditAmountBDT || 0));
+
+                        var html = `<tr>
+        <td style="width: 40px !important; text-align: center;">${i + 1}</td>
+        <td style="text-align: center;">${formatDateToDDMMMYYYY(row.PostingDate) || ''}</td>
+        <td style="text-align: center;">
+            <a data-bs-toggle='modal' onclick='PrintVoucherReport(${row.VoucherMasterId})' style='text-decoration: underline; cursor: pointer;' class='link-primary bold popupLink'>
+                ${row.VoucherNo}
+            </a>
+        </td>
+        <td style="text-align: left; word-wrap: break-word; white-space: normal;">${row.AccountName || ''}</td>
+        <td style="text-align: left; word-wrap: break-word; white-space: normal;">${row.Narration || ''}</td>
+        <td style="text-align: center;">${row.SubsidiaryType || ''}</td>
+        <td style="text-align: center;">${row.SubsidiaryLedger || ''}</td>
+        <td style="text-align: center;">${row.CostCenter || ''}</td>
+        <td style="text-align: center;">${row.Referrence || ''}</td>
+        <td style="text-align: right; color: green;"><strong>${(row.DebitAmountBDT || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
+        <td style="text-align: right; color: green;"><strong>${(row.CreditAmountBDT || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
+        <td style="text-align: right; color: green;"><strong>${runningBlnc.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
+    </tr>`;
+
+                        $('#ledgerlist').append(html);
+                    }
+
+
+                    //Append Total Value
+
+                    var TotalRow = `
+<tr style="font-weight: bold; background-color: #f0f0f0;">
+    <td colspan="9" style="text-align: right;">Total Balance</td>
+    <td colspan="1" style="text-align: right; color: green;">
+        ${(grandTotalDebitBDT || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+    </td>
+    <td colspan="1" style="text-align: right; color: green;">
+    ${(grandTotalCreditBDT || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+</td>
+        <td colspan="1" style="text-align: right; color: green;">
+    
+</td>
+</tr>`;
+                    $('#ledgerlist').append(TotalRow);
+
+                    // Append final total row only once
+                    var finalTotalRow = `
+<tr style="font-weight: bold; background-color: #f0f0f0;">
+    <td style="width: 40px !important; text-align: center;"></td>
+    <td colspan="8" style="text-align: right;">Closing Balance</td>
+    <td colspan="3" style="text-align: right; color: green;">
+        ${(finalClosingBalance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+    </td>
+</tr>`;
+                    $('#ledgerlist').append(finalTotalRow);
+
+                    // Set header labels once
+                    const firstRow = bankBookDataTable[0] || {};
+                    $('#lblAccount').text(firstRow.ChartofAccountName || '');
+                    $('#lblFromDate').text(formatDateToDDMMMYYYY(firstRow.FromDate) || '');
+                    $('#lblToDate').text(formatDateToDDMMMYYYY(firstRow.ToDate) || '');
+                    $('#lblBusinessUnit').text(firstRow.CompanyName || '');
+                    $('#lblFinancialYear').text(firstRow.FinancialYearDesc || '');
+                    $('#lblOpeningBalance').text((table[0]?.OpeningBalance || 0).toFixed(2));
+                    $('#lblCurrency').text(firstRow.CurrencyName || '');
+                },
+                complete: function () {
+                    setTimeout(function () {
+                        $("#loadingSpinner").hide();
+                    }, 5000);
+                }
+            });
+        }
+
+        document.getElementById("printButton").addEventListener("click", function () {
+            var printContents = document.getElementById("dtTb").outerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = `
+        <html>
+            <head>
+                <title>Print Table</title>
+                <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+            </head>
+            <body>
+                <div class="">
+                    ${printContents}
+                </div>
+            </body>
+        </html>
+    `;
+
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload(); // Refresh to restore any lost scripts/styles
+        });
+
+        //$('#exportButton').click(function () {
+        //    // Show the loading spinner
+        //    $("#loadingSpinner").show();
+
+        //    // Use a small timeout to allow spinner to render before blocking operation
+        //    setTimeout(function () {
+        //        var table = document.getElementById('dtTb');
+        //        var html = table.outerHTML;
+
+        //        var now = new Date();
+        //        var day = ("0" + now.getDate()).slice(-2);
+        //        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        //            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        //        var month = monthNames[now.getMonth()];
+        //        var year = now.getFullYear();
+
+        //        var hour = ("0" + now.getHours()).slice(-2);
+        //        var minute = ("0" + now.getMinutes()).slice(-2);
+        //        var second = ("0" + now.getSeconds()).slice(-2);
+
+        //        var dateTime = day + "-" + month + "-" + year + " " + hour + "-" + minute + "-" + second;
+        //        var fileName = 'Bank Book Report ' + dateTime + '.xls';
+
+        //        var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+        //        var link = document.createElement('a');
+        //        link.href = url;
+        //        link.download = fileName;
+        //        link.click();
+
+        //        // Hide the spinner after export
+        //        $("#loadingSpinner").hide();
+
+        //    }, 3000); // Slight delay for smoother UX
+        //});
+
+                function PrintVoucherReport(MasterId)
+{
+    var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
+    var reportValue = "AllVoucherReport";
+
+$.ajax({
+    url: urlpath,
+    data: { MasterId: MasterId, reportValue: reportValue},
+        dataType: 'json',
+        type: "Get",
+        success: function (data) {
+            if (data.isSuccess) {
+                //OpenPopUp('BasicReportViewer.aspx');
+                window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+            }
+        }
+    });
+}
+
+    $('#exportButton').click(function () {
+        // Show the loading spinner
+        $("#loadingSpinner").show();
+        setTimeout(function () {
+            var table = document.getElementById("dtTb");
+            var workbook = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+
+            var now = new Date();
+            var day = ("0" + now.getDate()).slice(-2);
+            var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var month = monthNames[now.getMonth()];
+            var year = now.getFullYear();
+
+            var hour = ("0" + now.getHours()).slice(-2);
+            var minute = ("0" + now.getMinutes()).slice(-2);
+            var second = ("0" + now.getSeconds()).slice(-2);
+
+            var dateTime = day + "-" + month + "-" + year + " " + hour + "-" + minute + "-" + second;
+            var fileName = 'Bank Book Report ' + dateTime + '.xlsx';
+
+            XLSX.writeFile(workbook, fileName);
+
+            $("#loadingSpinner").hide(); // Hide spinner
+        }, 3000); // Delay for smoother UX
+        // Use a small timeout to allow spinner to render before blocking operation
+        //setTimeout(function () {
+
+        //    //With Design
+        //    //var table = document.getElementById('dtTb');
+        //    //var html = table.outerHTML;
+
+        //    //var now = new Date();
+        //    //var day = ("0" + now.getDate()).slice(-2);
+        //    //var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        //    //    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        //    //var month = monthNames[now.getMonth()];
+        //    //var year = now.getFullYear();
+
+        //    //var hour = ("0" + now.getHours()).slice(-2);
+        //    //var minute = ("0" + now.getMinutes()).slice(-2);
+        //    //var second = ("0" + now.getSeconds()).slice(-2);
+
+        //    //var dateTime = day + "-" + month + "-" + year + " " + hour + "-" + minute + "-" + second;
+        //    //var fileName = 'Cash Book Report ' + dateTime + '.xls';
+
+        //    //var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+        //    //var link = document.createElement('a');
+        //    //link.href = url;
+        //    //link.download = fileName;
+        //    //link.click();
+
+        //    // Hide the spinner after export
+        //    $("#loadingSpinner").hide();
+
+        //}, 3000); // Slight delay for smoother UX
+    });
+
+
+          @*function PrintReport()
+{
+    var urlpath = '@Url.Action("rptBankBook", "AccountingTaskReport")';
+      var reportValue = "BBRpt";
+
+
+
+
+      var CompanyID = $('#ddlCompany').val();
+      var BankAccountID = $('#ddlBankNameAccountNO').val();
+      var FinancialYearID = $('#ddlFinansialYear').val();
+      var FromDate = $('#txtfrmDate').val();
+      var ToDate = $('#txtToDate').val();
+      var BankBookBankNAme = $("#ddlBankNameAccountNO option:selected").text();
+      var Monthly = "";
+      var Narration = "";
+      if ($('#MonthlyRadio').is(':checked')) {
+          Monthly = "True";
+      }
+      if ($('#NarrationRadio').is(':checked')) {
+          Narration = "True";
+      }
+
+      var prm = "CompanyID=" + CompanyID + "&BankAccountID=" + BankAccountID + "&FinancialYearID=" + FinancialYearID + "&FromDate=" + FromDate + "&ToDate=" + ToDate + "&BankBookBankNAme=" + BankBookBankNAme + "&Monthly=" + Monthly + "&Narration=" + Narration;
+
+
+$.ajax({
+    url: urlpath,
+    data: { MasterId: 0, reportValue: reportValue},
+        dataType: 'json',
+        type: "Get",
+        success: function (data) {
+            if (data.isSuccess) {
+                //OpenPopUp('BasicReportViewer.aspx');
+                window.open("/CrystalViewer/CrystalViewer.aspx?" + prm+ "", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+            }
+        }
+    });
+}*@
+    </script>
+}

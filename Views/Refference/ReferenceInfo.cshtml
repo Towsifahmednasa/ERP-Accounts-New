@@ -1,0 +1,454 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Refference\ReferenceInfo.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Reference Info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Reference Info</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        @*<a class="small blue button" href="@Url.Action("ChartOfAccountList", "ChartOfAccount")">
+                                                <span class="fa fa-share"></span>  Back to List
+                                            </a>*@
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Reference Type:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divSubsidiaryType">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlReferenceType" onchange="LoadDataByReferenceType()"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+
+                            @*<div class="row mt-2">
+
+                                    <div class="col-md-4 mb-1"></div>
+                                    <div class="col-md-4">
+                                        <div class="form-group row" style="margin-bottom: 3px !important;">
+                                            <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                            <div class="col-md-8">
+
+
+
+                                                <input type="radio" id="Select" name="rbSelect" value="Select">
+                                                <label for="Select">Select</label>
+                                                <input type="radio" id="NewAdd" name="rbSelect" value="NewAdd">
+                                                <label for="NewAdd">New Add</label>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-1"></div>
+                                </div>*@
+
+
+
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                        <div class="col-md-8">
+                                            <label for="ddlRef" id="lblSubType">
+
+                                            </label> <input class="checkAll" type="checkbox" id="checkAll" name="checkAll" value="1" onchange="CheckAll()" />
+                                            <label for="checkAll">Select All</label>
+
+                                            <div id="detailsR" class="card-box table-borderless table-hover" style="padding-left: 10px; border: 1px solid">
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-md-3">
+                                    <div style="padding-top: 1.5%">
+
+                                        <div class="wrapper">
+                                            <div class="row">
+                                                <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                                    <div class="form-group">
+
+                                                        <button class="small blue button" id="Reject" onclick="Save()">Submit</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label">Description:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-7" id="divDescription">
+                                            <input type="text" id="txtDescription" class="form-control form-control-sm" />
+                                        </div>
+
+                                        <div class="col-md-1">
+                                            <button class="small green_New button" onclick="DescriptionAddToTable()">
+                                                <i class="fa fa-plus" aria-hidden="true"></i>
+                                                add
+                                            </button>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <table class="table table-bordered table-striped table-hover" id="tblDescription">
+                                            <thead>
+                                                <tr>
+
+                                                    <th>Description</th>
+                                                    <th>Action</th>
+                                                </tr>
+
+                                            </thead>
+
+                                            <tbody id="dtTableBody">
+                                            </tbody>
+
+
+
+
+                                        </table>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            //$("#divSelect").hide();
+            //$("#divAdd").hide();
+
+            LoadReferenceType();
+        });
+        //$("input[type='radio']").click(function () {
+        //    var radioValue = $("input[name='rbSelect']:checked").val();
+        //    if (radioValue == 'Select') {
+        //        $("#divSelect").show();
+        //        $("#divAdd").hide();
+        //    }
+
+        //    if (radioValue == 'NewAdd') {
+        //        $("#divSelect").hide();
+        //        $("#divAdd").show();
+
+        //    }
+        //});
+
+
+        function un(o) {
+            return o != null ? o : '';
+        }
+        function LoadReferenceType() {
+            $.ajax({
+                url: "/Utility/GetReferanceType",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    $('#ddlReferenceType').empty();
+                    $('#ddlReferenceType').append("<option value='0'>--Select  Reference Type--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlReferenceType').append($("<option></option>").val(data[i].ReferanceTypeId).html(data[i].ReferanceTypeName));
+                    }
+                }
+            });
+        }
+
+
+
+        function LoadDataByReferenceType() {
+            var urlpath = '@Url.Action("LoadReferenceInfoInPartialView", "Refference")';
+
+            var ReferenceType = //$("#ddlReferenceType:selected").text();
+                $("#ddlReferenceType option:selected").text();
+            $("#lblSubType").empty();
+            $("#lblSubType").append(ReferenceType+" List");
+
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                async: true,
+                data: { ReferenceType: ReferenceType},
+                beforeSend: function () {
+                    $('#detailsR').empty();
+                    $("#overlay").fadeIn(300);
+
+
+                },
+                success: function (data) {
+                    $('#detailsR').append(data);
+                } ,
+                complete: function () {
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+
+            });
+
+
+
+            var urlpath3 = '@Url.Action("LoadRefTableInfo", "Refference")';
+
+            $.ajax({
+                url: urlpath3,
+                dataType: 'json',
+                type: "Get",
+                async: true,
+                data: { ReferenceType: ReferenceType },
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+
+
+                },
+                success: function (data) {
+
+
+                    var result = JSON.parse(data);
+                    var row = "";
+                    $('#dtTableBody').html("");
+                    for (var i = 0; i < result.length; i++) {
+                        row += "<tr>";
+
+
+
+                        row += "<td>" + un(result[i].Description) + "</td>";
+
+                        if (un(result[i].isReadOnly) == 1) {
+                            row += "<td><button type='button'  onclick = 'productDelete(this);' disabled='disabled' class= 'btn btn-default btn-sm' > " + "<i class='fa fa-times' aria-hidden='true'></i>" + "</button> </td>";
+                        }
+
+                        else {
+                            row += "<td><button type='button'  onclick = 'productDelete(this);'  class= 'btn btn-default btn-sm' > " + "<i class='fa fa-times' aria-hidden='true'></i>" + "</button> </td>";
+                        }
+                    }
+                    $('#dtTableBody').html(row);
+
+
+
+
+                },
+                complete: function () {
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+        function DescriptionValidation() {
+
+            var isValid = true;
+
+
+
+                if ($('#txtDescription').val() == '' || $('#txtDescription').val() == null) {
+                ValidationColorChangeNew("txtDescription", "divDescription", "Description Required", true);
+
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function DescriptionAddToTable() {
+
+            if (DescriptionValidation() == true) {
+            // First check if a <tbody> tag exists, add one if not
+            if ($("#tblDescription tbody").length == 0) {
+                $("#tblDescription").append("<tbody></tbody>");
+            }
+
+            // Append product to the table
+            $("#tblDescription tbody").append("<tr>" +
+                "<td>" + $("#txtDescription").val() + "</td>" +
+
+                "<td>" +
+                "<button type='button'  onclick = 'productDelete(this);'  class= 'btn btn-default btn-sm' > " + "<i class='fa fa-times' aria-hidden='true'></i>" + "</button>" + "</td>" +
+                "</tr>");
+
+                $("#txtDescription").val("");
+            }
+        }
+        function productDelete(ctl) {
+            $(ctl).parents("tr").remove();
+        }
+
+
+        function CheckAll() {
+            if ($('#checkAll').is(':checked')) {
+
+                $('.chk').prop('checked', true);
+            } else {
+                $('.chk').prop('checked', false);
+            }
+        }
+
+
+        function Save() {
+
+
+            SaveSelected();
+            //if (SaveValidation()) {
+
+            //}
+        }
+
+
+          function SaveSelected() {
+              var jsonObj = [];
+           /*   var Selectted = false;*/
+            /*  var radioValue = $("input[name='rbSelect']:checked").val();*/
+
+
+
+                  $('#reportTableR tbody tr').each(function () {
+                      var idr = $(this).attr('id');
+                      var id = idr.substring(3);
+
+
+                      if ($('#chk_' + id).is(':checked')) {
+                          var jsonData = {};
+                          var idr = $(this).attr('id');
+                          var id = idr.substring(3);
+                          // alert(idr);
+                          // alert(id);
+
+                          var R_InfoName = $(this).find('td:eq(1)').text().trim();
+
+                          var result = R_InfoName.split(':')[0].trim();
+                          //var isrefrence = $('#isrefrence_' + id).val();
+
+                          //if ( isrefrence != 0) {
+                          //    id = isrefrence;
+                          //}
+                          //alert(isrefrence);
+                          var ReferenceTypeId = $("#ddlReferenceType").val();
+
+                          jsonData["R_Info_Id"] = id;
+                          jsonData["IsSelect"] = true;
+                          jsonData["ReferenceTypeId"] = ReferenceTypeId;
+                          jsonData["Description"] = result;
+                          jsonObj.push(jsonData);
+                      }
+                  });
+
+
+
+
+
+
+                  $("#tblDescription > tbody > tr").each(function () {
+
+                      var jsonData = {};
+
+
+                      var des = $(this).find('td').eq(0).text()
+
+                      var ReferenceTypeId = $("#ddlReferenceType").val();
+
+                      jsonData["Description"] = des;
+                      jsonData["IsSelect"] = false;
+                      jsonData["ReferenceTypeId"] = ReferenceTypeId;
+
+                      jsonObj.push(jsonData);
+                  });
+
+
+
+            var urlpath = '@Url.Action("SaveRefInfoDetails", "ChartOfAccount")';
+
+            $.ajax({
+                url: urlpath,
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(jsonObj),
+                dataType: 'json',
+                type: "POST",
+                success: function (result) {
+                    
+                    if (result == true) {
+                        swal({
+                            title: 'Save Successfully!!',
+                            type: 'success',
+                            closeOnCancel: true
+
+                        },
+                            function () {
+                                $('#details').empty();
+                                window.location.href = '@Url.Action("ReferenceInfo", "Refference")';
+
+                            });
+
+                    }
+
+
+                }
+            });
+        }
+    </script>
+
+}

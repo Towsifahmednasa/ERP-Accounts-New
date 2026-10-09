@@ -1,0 +1,56 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\ChartOfAccount\_SubSidaryPartial.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+
+@model IEnumerable<New_Accounts.Models.Accounts.SubsidiaryType_Ddl>
+
+
+
+
+
+
+<div class="row">
+
+    <table class="table table-borderless table-hover" id="reportTableS">
+        <thead>
+
+        </thead>
+        <tbody>
+            @{
+                int count = 1;
+
+            }
+            @foreach (var item in Model)
+            {
+            <tr id="tr_@item.SubsidiaryTypeId">
+
+                @if (item.isrefrence == 1)
+        {
+            <td class="text-center" style="padding-left: 20px"><input type="checkbox" class="chk" value="@item.SubsidiaryTypeId" id="chkS_@item.SubsidiaryTypeId" checked="checked" /></td>
+        }
+        else
+                {
+                <td class="text-center" style="padding-left: 20px"><input type="checkbox" value="@item.SubsidiaryTypeId" class="chk" id="chkS_@item.SubsidiaryTypeId" /></td>
+                  }
+
+
+
+                <td class="text-left">@item.SubsidiaryType</td>
+                <td class="text-left"><input type="hidden" id="isSub_@item.SubsidiaryTypeId" /> </td>
+
+
+
+
+
+            </tr>
+                count++;
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+
+

@@ -1,0 +1,460 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\CashFlowReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Cash Flow Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .radio-label {
+        font-weight: bold !important;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+<div id="loadingSpinner" style="display:none;">
+    <div class="overlay"></div>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
+
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Cash Flow Report </span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="card-title d-flex align-items-center">
+                                            <div>
+                                                <i class="bx bxs-filter-alt me-1 font-22 text-primary"></i>
+                                            </div>
+                                            <h5 class="mb-0 text-primary">Filtering Criteria</h5>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light bg-gradient ">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divCompany">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="ddlFinansialYear" class="bold col-form-label">Financial Year: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8" id="divFinansialYear">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFinansialYear" onchange="LoadDaterangebyFiscal()"></select> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">   <label for="txtToDate" class="bold col-form-label">To Date: <span class="required"> *</span></label></div>
+                                                                    <div class="col-md-8">     <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;display:none">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+
+                                                                <div class="col-md-8" id="divTransactionType">
+                                                                    <div class="form-check form-switch">
+                                                                        <input class="form-check-input" type="checkbox" id="customSwitch1">
+                                                                        <label class="custom-control-label" for="customSwitch1">Monthly</label>
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                            <br />
+                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
+                                                                <div class="col-md-8">
+                                                                    <button class="small blue button" id="Reject" onclick="PrintReport()">
+                                                                        <i class="fa fa-print" aria-hidden="true"></i>
+                                                                        View Report
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+
+
+
+                                <!-- Rana Code Start-->
+
+                                <div class="col-12">
+
+                                    <div class="row m-2">
+                                        <div class="col-12">
+
+                                            <div class="row">
+
+                                                <div class="col-11"></div>
+
+                                                <div class="col-1">
+
+                                                    <button id="exportButton" class="btn btn-sm btn-success mb-3 btn-block">
+                                                        <i class="fa fa-file-excel"></i> Export to Excel
+                                                    </button>
+
+
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row m-2">
+                                            <div class="col-12">
+
+                                                <div class="table-responsive" style="width: 99% !important; margin: 0 auto !important">
+
+                                                    <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable p-2">
+                                                        <thead>
+
+                                                            <tr>
+                                                                <th colspan="10" style="text-align: center; font-weight: bold; font-size: 16px; color: blue;"> <label id="lblheading"> Cash Flow Report </label> </th>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Business Unit: </td>
+                                                                <td colspan="3">
+                                                                    <label style="font-size: 18px !important;" id="lblBusinessUnit"></label>
+                                                                </td>
+                                                                
+                                                                <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> From Date: </td>
+                                                                <td colspan="3">
+                                                                    <label style="font-size: 18px !important;" id="lblFromDate"></label>
+                                                                </td>
+
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Financial Year: </td>
+                                                                <td colspan="3">
+                                                                    <label style="font-size: 18px !important;" id="lblFinancialYear"></label>
+                                                                </td>
+                                                                <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> To Date: </td>
+                                                                <td colspan="3">
+                                                                    <label style="font-size: 18px !important;" id="lblToDate"></label>
+                                                                </td>
+
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td colspan="10"></td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="ledgerlist">
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rana Code End-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+
+        });
+
+        function LoadDDlbyCom() {
+            LoadFinansialYear();
+        }
+
+        function LoadDaterangebyFiscal() {
+            var companyId = $("#ddlCompany").val();
+            var FinancialYearId = $("#ddlFinansialYear").val();
+            $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, FinancialYearId: FinancialYearId },
+                async: false,
+                success: function (data) {
+
+                    $('#txtfrmDate').val((data.StartDate));
+                    $('#txtToDate').val((data.EndDate));
+                }
+            });
+        }
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                }
+            });
+        }
+
+        function PrintReport()
+	    {
+		    var urlpath = '@Url.Action("GetCashFlow_Report", "CashFlow")';
+
+            var companyName = $("#ddlCompany option:selected").text();
+            var FinancialYearText = $("#ddlFinansialYear option:selected").text();
+
+
+            var CompanyID = $('#ddlCompany').val();
+
+            var FinancialYearID = $('#ddlFinansialYear').val();
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+
+            var Monthly = "";
+            var Narration = "";
+
+            if ($('#customSwitch1').is(':checked')) {
+                Monthly = "True";
+            }
+
+            var prm = "CompanyID=" + CompanyID + "&CashAccountID=" + "" + "&FinancialYearID=" + FinancialYearID + "&FromDate=" + FromDate + "&ToDate=" + ToDate + "&BankBookBankNAme=" + "" + "&Monthly=" + Monthly + "&Narration=" + Narration + "&companyName=" + companyName + "&FinancialYearText=" + FinancialYearText;
+
+
+		    $.ajax({
+			    url: urlpath,
+			    data: { CompanyID: CompanyID, FinancialYearID: FinancialYearID, FromDate: FromDate, ToDate: ToDate},
+			    dataType: 'json',
+                type: "Get",
+                beforeSend: function () {
+                    // Show the full-screen loading spinner
+                    $("#loadingSpinner").show();
+                },
+                success: function (data) {
+                    console.log("Full response:", data);
+
+                    // Extract ledger data
+                    var bankBookDataTable = data.BankBookDataTable;
+                    var table = data.Table;
+
+                    // Clear old rows
+                    $('#ledgerlist').empty();
+
+                    var finalAmountBalance = 0;
+                    var TotalAmount = 0;
+                    var grandTotalAmount = 0;
+
+                    var processedCategory = new Set();
+
+                    for (var i = 0; i < bankBookDataTable.length; i++) {
+                        var row = bankBookDataTable[i];
+                        var Category = row.Category;
+                        var StartDate = row.StartDate;
+                        var EndDate = row.EndDate;
+                        var SubsidiryLName = row.SubsidiryLName;
+                        var SubsidiryLCode = row.SubsidiryLCode
+
+                        var TotalAmount = 0;
+
+                        // ✅ Skip if this Category is already processed
+                        if (processedCategory.has(Category)) {
+                            continue;
+                        }
+
+                        processedCategory.add(Category);
+
+                        // Calculate total debit and credit for this Category
+                        for (var j = 0; j < bankBookDataTable.length; j++) {
+                            if (bankBookDataTable[j].Category == Category) {
+                                TotalAmount += bankBookDataTable[j].AmountBDT || 0;
+                            }
+                        }
+
+                        grandTotalAmount += TotalAmount;
+
+                        var HeadRow = `<tr style="font-weight:bold; background-color: #f0f0f0;">
+                                            <td colspan="10" style="text-align: left;"><h5>${Category}</h5></td>
+                                        </tr>`;
+
+                        $('#ledgerlist').append(HeadRow);
+
+                        var totalRow = `<tr style="font-weight:bold; background-color: #f0f0f0;">
+                                <td  colspan="1" style="text-align: center">${i + 1}</td>
+                                <td  colspan="5" style="text-align: left">${SubsidiryLName}-<strong>${SubsidiryLCode}</strong></td>
+                                <td  colspan="4" style="text-align: right">${TotalAmount.toFixed(2)}</td>
+                            </tr>`;
+
+                        $('#ledgerlist').append(totalRow);
+
+                        // Append all rows for this voucher
+                        for (var k = 0; k < bankBookDataTable.length; k++) {
+                            if (bankBookDataTable[k].Category == Category) {
+                                var html = `<tr>
+                                    <td colspan="1" style="text-align: center;"></td>
+                                    <td colspan="5" style="text-align: left;">${bankBookDataTable[k].AccountCode || ''} <br> ${bankBookDataTable[k].SubsidiryLName || ''}</td>
+                                    <td colspan="4" style="text-align: right;">${(bankBookDataTable[k].AmountBDT || 0).toFixed(2)}</td>
+                                </tr>`;
+                                $('#ledgerlist').append(html);
+                            }
+                        }
+                    }
+
+                    for (var u = 0; u < bankBookDataTable.length; u++) {
+                        finalAmountBalance += bankBookDataTable[u].AmountBDT
+                    }
+
+
+                    var html2 = `<tr>
+                                    <td colspan="8" style="text-align: right;">Net Amount </td>
+                                    <td style="text-align: right;"> ${(finalAmountBalance || 0).toFixed(2)}</td>
+                                </tr>`;
+                    $('#ledgerlist').append(html2);
+
+                    $('#lblFromDate').text(new Date(bankBookDataTable[0]?.StartDate).toLocaleDateString());
+                    $('#lblToDate').text(new Date(bankBookDataTable[0]?.EndDate).toLocaleDateString());
+                    $('#lblBusinessUnit').text(bankBookDataTable[0]?.CompanyName);
+                    $('#lblFinancialYear').text(bankBookDataTable[0]?.FinancialYearDesc);
+            },
+                complete: function () {
+                setTimeout(function () {
+                    $("#loadingSpinner").hide();
+                }, 5000);
+            }
+            });
+        }
+
+        $('#exportButton').click(function () {
+
+            // Get the table element
+            var table = document.getElementById('dtTb');
+
+            // Clone the table to modify it without affecting the original
+            var clonedTable = table.cloneNode(true);
+
+            // Find and remove columns with the `.noExcel` class
+            $(clonedTable).find('tr').each(function () {
+                $(this).find('.noExcel').remove();
+            });
+
+            // Convert the modified table to a worksheet
+            var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Cash flow Report" });
+            var worksheet = workbook.Sheets["Cash flow Report"];
+
+            // Specify the column indexes (0-based) for GL Code, Debit (BDT), and Credit (BDT)
+            var glCodeColIndex = 3;       // GL Code column
+            var debitColIndex = 8;        // Debit (BDT) column
+            var creditColIndex = 9;       // Credit (BDT) column
+
+            // Convert GL Code cells to string format
+            var range = XLSX.utils.decode_range(worksheet['!ref']);
+            for (var row = range.s.r + 1; row <= range.e.r; row++) { // Skip header row
+                // Handle GL Code as string
+                var glCodeCellRef = XLSX.utils.encode_cell({ c: glCodeColIndex, r: row });
+                var glCodeCell = worksheet[glCodeCellRef];
+                if (glCodeCell && glCodeCell.v !== undefined) {
+                    glCodeCell.t = 's'; // Set cell type to string
+                    glCodeCell.v = String(glCodeCell.v); // Ensure the value is a string
+                }
+
+                // Handle Debit (BDT) as number with 4 decimal places
+                var debitCellRef = XLSX.utils.encode_cell({ c: debitColIndex, r: row });
+                var debitCell = worksheet[debitCellRef];
+                if (debitCell && debitCell.v !== undefined) {
+                    debitCell.t = 'n'; // Set cell type to number
+                    debitCell.v = parseFloat(debitCell.v).toFixed(4); // Ensure the value is a number with 4 decimal places
+                    debitCell.z = '0.0000'; // Set cell format to 4 decimal places
+                }
+
+                // Handle Credit (BDT) as number with 4 decimal places
+                var creditCellRef = XLSX.utils.encode_cell({ c: creditColIndex, r: row });
+                var creditCell = worksheet[creditCellRef];
+                if (creditCell && creditCell.v !== undefined) {
+                    creditCell.t = 'n'; // Set cell type to number
+                    creditCell.v = parseFloat(creditCell.v).toFixed(4); // Ensure the value is a number with 4 decimal places
+                    creditCell.z = '0.0000'; // Set cell format to 4 decimal places
+                }
+            }
+
+            // Generate Excel file and prompt download
+            XLSX.writeFile(workbook, 'Cash_flow_Report.xlsx');
+
+        });
+
+    </script>
+}

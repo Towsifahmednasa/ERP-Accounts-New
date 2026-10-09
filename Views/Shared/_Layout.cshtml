@@ -1,0 +1,211 @@
+@* SAP Fiori Horizon application shell for Accounts & Finance, built to D:\Wireframe-ERP-DISTRIBUTION\SAP_Fiori_Style_Wireframe_1.html
+   (shell bar + side navigation of screens 80-85). Replaces the legacy Rocker/AdminLTE _Layout.cshtml.
+   The legacy page scripts depend on the same library stack (jQuery 2.2.3, Bootstrap 5, DataTables, select2, SweetAlert,
+   toastr, pickadate, jQuery UI, custom-functions.js, SheetJS) and on #overlay, so those are kept in the same order. *@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@{
+    var session = new LegacySession(Context.Session);
+    var menu = session.Get<System.Collections.Generic.List<MenuStepOne>>("MenuList") ?? new System.Collections.Generic.List<MenuStepOne>();
+    string controller = Context.GetRouteValue("controller") as string ?? "";
+    string action = Context.GetRouteValue("action") as string ?? "";
+    var leaves = MenuMap.Leaves(menu);
+    var current = leaves.FirstOrDefault(l => l.Controller.Equals(controller, System.StringComparison.OrdinalIgnoreCase) && l.Action.Equals(action, System.StringComparison.OrdinalIgnoreCase))
+               ?? leaves.FirstOrDefault(l => l.Controller.Equals(controller, System.StringComparison.OrdinalIgnoreCase));
+    string pageTitle = ViewBag.Title as string ?? current?.Title ?? controller;
+    string groupTitle = controller.Equals("Dashboard", System.StringComparison.OrdinalIgnoreCase) ? null : MenuMap.GroupTitle(controller);
+    int groupNo = MenuMap.GroupNumber(controller);
+    string userName = session["username"] as string ?? "";
+    string userType = session["loginusertype"] as string ?? "";
+    string initials = string.Concat(userName.Split(' ', System.StringSplitOptions.RemoveEmptyEntries).Select(w => char.ToUpperInvariant(w[0])).Take(2));
+    if (initials.Length == 0) { initials = "U"; }
+    string token = Xsrf.GetAndStoreTokens(Context).RequestToken;
+    var navGroups = MenuMap.Build(menu);
+    var activeGroup = navGroups.FirstOrDefault(g => g.Items.Any(i => i.Controller.Equals(controller, System.StringComparison.OrdinalIgnoreCase)));
+    bool onHome = controller.Equals("Dashboard", System.StringComparison.OrdinalIgnoreCase) || activeGroup == null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="RequestVerificationToken" content="@token" />
+    <title>@pageTitle &middot; ERP &mdash; Accounts &amp; Finance</title>
+    <link rel="icon" href="/favicon.ico" />
+    @* legacy library stylesheets the page markup relies on (Bootstrap 5 grid/forms, icons, plugins) *@
+    <link href="/VerticalAsset/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/VerticalAsset/css/icons.css" rel="stylesheet" />
+    <link href="/VerticalAsset/plugins/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="/VerticalAsset/plugins/select2/css/select2-bootstrap4.css" rel="stylesheet" />
+    <link href="/VerticalAsset/plugins/datetimepicker/css/classic.css" rel="stylesheet" />
+    <link href="/VerticalAsset/plugins/datetimepicker/css/classic.time.css" rel="stylesheet" />
+    <link href="/VerticalAsset/plugins/datetimepicker/css/classic.date.css" rel="stylesheet" />
+    <link href="/VerticalAsset/Other/toastr.css" rel="stylesheet" />
+    <link href="/AssetsStatic/CSS/jquery-ui.min.css" rel="stylesheet" />
+    <link href="/VerticalAsset/MySweetAlert/sweetalert.css" rel="stylesheet" />
+    <link href="/VerticalAsset/MySweetAlert/SpinnerStyle.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    @* Fiori design system (wireframe tokens) and the bridge that maps the legacy page classes onto it - always last *@
+    <link href="/css/fiori/fiori.css" rel="stylesheet" />
+    <link href="/css/fiori/fiori-bridge.css" rel="stylesheet" />
+
+    <script src="/VerticalAsset/MySweetAlert/jquery-2.2.3.min.js"></script>
+    <script src="/VerticalAsset/js/bootstrap.bundle.min.js"></script>
+    <script src="/VerticalAsset/plugins/datetimepicker/js/legacy.js"></script>
+    <script src="/VerticalAsset/plugins/datetimepicker/js/picker.js"></script>
+    <script src="/VerticalAsset/plugins/datetimepicker/js/picker.time.js"></script>
+    <script src="/VerticalAsset/plugins/datetimepicker/js/picker.date.js"></script>
+    <script src="/VerticalAsset/plugins/select2/js/select2.min.js"></script>
+    <script src="/VerticalAsset/plugins/datatable/js/jquery.dataTables.min.js"></script>
+    <script src="/VerticalAsset/plugins/datatable/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/VerticalAsset/Other/toastr.js"></script>
+    <script src="/AssetsStatic/JS/jquery-ui.min.js"></script>
+    <script src="/VerticalAsset/MySweetAlert/sweetalert.min.js"></script>
+    <script src="/AssetsStatic/JS/custom-functions.js"></script>
+    <script src="/VerticalAsset/MySweetAlert/_myCusGen_Func.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        // CSRF: every jQuery AJAX call carries the anti-forgery token (legacy had no CSRF protection, finding S6).
+        $.ajaxSetup({ headers: { 'RequestVerificationToken': '@token' } });
+        // Session expiry: the server answers AJAX calls with 401 JSON instead of the legacy redirected login HTML.
+        $(document).ajaxError(function (e, xhr) { if (xhr.status === 401) { window.location.href = '/Home/Index'; } });
+    </script>
+    @RenderSection("head", required: false)
+</head>
+<body>
+@await Html.PartialAsync("_FioriIcons")
+<div class="app">
+    <div class="shellbar">
+        <div class="shell-ic burger" id="burger" role="button" aria-label="Menu"><svg width="18" height="18"><use href="#s-sort"/></svg></div>
+        <a class="sap-logo" href="/Dashboard/Index"><span>CSTL</span>&nbsp;ERP</a>
+        <div class="shell-ic" id="appsBtn" role="button" aria-label="Apps"><svg width="18" height="18"><use href="#s-grid"/></svg></div>
+        <div class="shell-title">ERP &mdash; Accounts &amp; Finance <small>&middot; @pageTitle</small></div>
+        <div class="shell-search"><svg width="14" height="14"><use href="#s-search"/></svg>Search</div>
+        <div class="shell-ic" id="notifBtn" role="button" aria-label="Notifications"><svg width="18" height="18"><use href="#s-bell"/></svg></div>
+        <div class="shell-ic" id="userBtn" role="button" aria-label="User"><span class="shell-av">@initials</span></div>
+    </div>
+
+    @* module tab bar: one tab per navigation group, the sidebar below shows only the active module *@
+    <nav class="topnav" aria-label="Modules">
+        <a href="/Dashboard/Index" class="@(onHome ? "on" : null)">My Home</a>
+        @foreach (var g in navGroups)
+        {
+            <a href="@g.Items.First().Href" class="@(g == activeGroup ? "on" : null)">@g.Title</a>
+        }
+    </nav>
+
+    <div class="pop shellpop apps" id="appsPop" hidden>
+        <div class="ph">My Apps</div>
+        <div class="appgrid">
+            @foreach (var item in leaves.Take(9))
+            {
+                <a href="@item.Href"><svg width="22" height="22"><use href="#@item.Icon"/></svg>@item.Title</a>
+            }
+        </div>
+        <a href="/Dashboard/Index" class="poplink">Open Home Page</a>
+    </div>
+    <div class="pop shellpop notif" id="notifPop" hidden>
+        <div class="ph"><svg width="15" height="15"><use href="#s-bell"/></svg>Notifications</div>
+        <div style="padding:22px 16px;text-align:center">
+            <div class="illu" style="margin:0 auto 10px;width:48px;height:48px"><svg width="24" height="24"><use href="#s-bell"/></svg></div>
+            <div style="font-size:13px;font-weight:600">Nothing needs your attention</div>
+            <div class="mini" style="margin-top:3px">Pending approvals are listed on the Approval pages.</div>
+        </div>
+    </div>
+    <div class="pop shellpop" id="userPop" hidden>
+        <div class="ph"><span class="shell-av" style="width:34px;height:34px">@initials</span>
+            <div><div style="font-size:13.5px">@userName</div><div class="mini" style="font-weight:400">@userType</div></div></div>
+        <a class="pi" href="/Dashboard/Index" style="text-decoration:none;color:inherit">Home Page</a>
+        <a class="pi" href="/Home/Logout" style="text-decoration:none;color:var(--sapNegativeColor);border-top:1px solid var(--sapList_BorderColor)">Sign Out</a>
+    </div>
+
+    <div class="appbody">
+        @if (!controller.Equals("Dashboard", System.StringComparison.OrdinalIgnoreCase))
+        {
+            @await Html.PartialAsync("_SideNav", menu)
+        }
+        <div class="content">
+            <div class="crumbs">
+                <a href="/Dashboard/Index">Home</a>
+                @if (!string.IsNullOrEmpty(groupTitle))
+                {
+                    <span> &rsaquo; </span><span>@groupTitle@(groupNo > 0 ? " (" + groupNo + ")" : "")</span>
+                }
+                <span> &rsaquo; </span><span>@pageTitle</span>
+            </div>
+            <div class="page">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+</div>
+
+@* legacy loading overlay: page scripts call $("#overlay").fadeIn()/fadeOut() around AJAX saves *@
+<div id="overlay">
+    <div class="cv-spinner">
+        <div class="alert border-0 border-start bg-secondary border-5 border-info alert-dismissible fade show py-2">
+            <div class="d-flex align-items-center">
+                <span class="spinner"></span>
+                <div class="ms-3"><h6 class="mb-0 text-info">Loading... Please wait</h6></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="toasts"></div>
+<div class="dlg-overlay" id="dlgConfirm" hidden>
+    <div class="dlg" role="dialog" aria-modal="true">
+        <div class="dh"><svg width="17" height="17" id="dlgIcon" style="color:var(--sapNegativeColor)"><use href="#s-alert"/></svg><h5 id="dlgTitle"></h5></div>
+        <div class="db"><div style="font-size:13.5px;line-height:1.7" id="dlgText"></div></div>
+        <div class="df"><div style="margin-left:auto;display:flex;gap:8px">
+            <button type="button" class="btn" id="dlgCancel">Cancel</button>
+            <button type="button" class="btn" id="dlgOk"></button>
+        </div></div>
+    </div>
+</div>
+
+<script src="/js/fiori/fiori.js"></script>
+<script>
+    // --- legacy _Layout.cshtml global scripts, same order relative to the page's Scripts section ---
+    $.widget.bridge('uibutton', $.ui.button);
+    $('.datepicker').pickadate({
+        selectMonths: true,
+        selectYears: true
+    });
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+        placeholder: $(this).data('placeholder'),
+        allowClear: Boolean($(this).data('allow-clear')),
+    });
+</script>
+@RenderSection("Scripts", required: false)
+<script type="text/javascript">
+    $(window).load(function () {
+        $("#overlay").fadeIn(400);
+        setTimeout(function () {
+            $("#overlay").fadeOut(400);
+        }, 500);
+    });
+    $(function () {
+        $('.select2').select2();
+        $('.multiple-select').select2({
+            theme: 'bootstrap4',
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+            allowClear: Boolean($(this).data('allow-clear')),
+        });
+        $('.dataTable').dataTable();
+        $(document).on('keypress', 'input[type=number]', function (e) {
+            var keyCode = e.which ? e.which : e.keyCode;
+            if (!(keyCode >= 46 && keyCode <= 57)) {
+                return false;
+            }
+        });
+        $(document).on('keyup keydown change', 'input[type=number]', function (e) {
+            $('input[type=number]').attr({
+                "min": 0
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Budget\BudgetEntry.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Budget Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Budget Entry</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        <a class="small blue button" href="@Url.Action("BudgetList", "Budget")">
+                                            <span class="fa fa-share"></span>  Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+
+
+
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Company: <span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divBusinessUnit">
+                                            <select class="form-select form-select-sm mb-3 select2" onchange="LoadDDlbyCom()" style="width: 100%;" id="ddlCompany"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Fiscal Year:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divFinansialYear">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadFinMonth()" id="ddlFinansialYear"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Ledger Head:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divLedgerHead">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadControlLedger()" id="ddlLedgerHead"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Control Ledger:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divControlLedger">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadSubsidaryLedger()" id="ddlControlLedger"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Sub Control Ledger:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divSubControlLedger">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadSubSubControlLedger()" id="ddlSubControlLedger"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Sub Sub Control Ledger:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divSubSubControlLedger">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlSubSubControlLedger" onchange="LoadCOA()"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Chart of Accounts:<span style="color: orangered !important;"> *</span></label>
+                                        <div class="col-md-8" id="divCOA">
+                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCOA"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+
+                            <div class="row mt-2">
+
+                                <div class="col-md-4 mb-1"></div>
+                                <div class="col-md-4">
+                                    <div class="form-group row" style="margin-bottom: 3px !important;">
+                                        <label style="text-align: right !important; font-size:small !important" class="col-md-4 bold col-form-label">Total Amount: </label>
+                                        <div class="col-md-8" >
+                                            <label class="bold col-form-label" id="lblTotalAmountAmount">0</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="table table-responsive">
+
+                                        <div id="divBudgetDtlsData" class="table-responsive">
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div style="padding-top: 1.5%">
+
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+
+                                                <button class="small blue button" id="Reject" onclick="Save_Budget()">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Modal -->
+                <!-- /.card-header -->
+                <!-- form start -->
+                <!-- /.row -->
+            </div><!-- /.container-fluid -->
+           
+        </div>
+    </div>
+</div>
+
+
+<input id="masterId" value="@ViewBag.Id" style="display:none" />
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+
+
+        let id = $('#masterId').val();
+        $(function () {
+
+            LoadCompany('ddlCompany');
+
+            LoadLadgerHead()
+            if (id > 0) {
+
+                GetData(id);
+            } else {
+
+          
+
+
+            }
+
+        });
+
+        function LoadLadgerHead() {
+            $.ajax({
+                url: "/Utility/GetLadgerHead",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    $('#ddlLedgerHead').empty();
+                    $('#ddlLedgerHead').append("<option value='0'>--Select  Ledger Head--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlLedgerHead').append($("<option></option>").val(data[i].GLHeadId).html(data[i].GLName));
+                    }
+                }
+            });
+        }
+
+        function LoadControlLedger() {
+            var LedgerHeadId = $("#ddlLedgerHead").val();
+            $.ajax({
+                url: "/Utility/LoadControlLedgerByLedgerHeadId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { LedgerHeadId: LedgerHeadId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlControlLedger').empty();
+                    $('#ddlControlLedger').append("<option value='0'>--Select Control Ledger--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlControlLedger').append($("<option></option>").val(data[i].ControlLId).html(data[i].ControlLName));
+                    }
+                }
+            });
+        }
+        function LoadSubsidaryLedger() {
+            var ControlLedgerId = $("#ddlControlLedger").val();
+            $.ajax({
+                url: "/Utility/LoadSubsidaryByControlLedgerId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { ControlLedgerId: ControlLedgerId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlSubControlLedger').empty();
+                    $('#ddlSubControlLedger').append("<option value='0'>--Select Control Ledger--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlSubControlLedger').append($("<option></option>").val(data[i].SubsidiryLId).html(data[i].SubsidiryLName));
+                    }
+                }
+            });
+        }
+
+        function LoadSubSubControlLedger() {
+            var SubControlLedgerId = $("#ddlSubControlLedger").val();
+            $.ajax({
+                url: "/Utility/LoadSubSubControlLedgerId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { SubControlLedgerId: SubControlLedgerId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlSubSubControlLedger').empty();
+                    $('#ddlSubSubControlLedger').append("<option value='0'>--Select Sub Sub Control Ledger--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlSubSubControlLedger').append($("<option></option>").val(data[i].SubSubControlLedgerId).html(data[i].SubSubControlLedgerName));
+                    }
+                }
+            });
+        }
+
+
+        function LoadDDlbyCom() {
+
+
+            $("#overlay").fadeIn(300);
+
+            LoadFinansialYear();
+            //  LoadCOAAccount();
+            $("#overlay").fadeOut(300);
+        }
+
+
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Fiscal Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                }
+            });
+        }
+        function LoadCOA() {
+            var SubSubControlLedgerId = $("#ddlSubSubControlLedger").val();
+            $.ajax({
+                url: "/Utility/GetCOASubSubControlLedgerId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { SubSubControlLedgerId: SubSubControlLedgerId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlCOA').empty();
+                    $('#ddlCOA').append("<option value='0'>--Select Chart of Accounts--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlCOA').append($("<option></option>").val(data[i].AccountId).html(data[i].AccountName));
+                    }
+                }
+            });
+        }
+
+
+
+        function LoadFinMonth() {
+
+                 var comID = $('#ddlCompany').val();
+                 var finID = $('#ddlFinansialYear').val();
+
+
+
+
+                         var urlpath = '@Url.Action("BudgetMonthAmountDetails", "Budget")';
+                         $.ajax({
+                             url: urlpath,
+                             type: "Get",
+                             dataType: 'html',
+                             data: { comID: comID, finID: finID, id: id },
+                             async: false,
+                             success: function (data) {
+
+
+                                 $('#divBudgetDtlsData').empty();
+                                 $('#divBudgetDtlsData').html(data);
+                             },
+                             complete: function () {
+                                 if ($('#tblIssueQC tbody tr').length === 0) {
+                                     swal("No Records!!");
+                                 }
+                             }
+                         });
+
+        }
+
+
+        function CalculateAll() {
+
+
+            var grandTotal = 0;
+            var proCout = 0;
+            $('#tblIssueQC tbody tr').each(function () {
+
+
+
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+
+                var amount = isNaN(parseFloat($('#txtAmount_' + id).val())) ? 0 : parseFloat($('#txtAmount_' + id).val());
+
+                grandTotal += amount;
+
+
+
+
+
+            });
+            $('#lblTotalAmountAmount').html(grandTotal.toFixed(2));
+        }
+
+
+           function Save_Budget() {
+
+            //if (Bankp_Validation() == true) {
+
+                SaveFinalBudget();
+
+
+            //}
+        }
+
+
+        function SaveFinalBudget() {
+
+            var jsonData = {};
+
+
+            jsonData["BudgetMasterId"] = $('#masterId').val();
+            jsonData["COAId"] = $('#ddlCOA').val();
+
+            jsonData["FinancialYearId"] = $('#ddlFinansialYear').val();
+            jsonData["CompanyId"] = $('#ddlCompany').val();
+
+
+
+            jsonData["TotalAmount"] = parseFloat($('#lblTotalAmountAmount').html());
+
+
+
+
+
+            var jsonObjs = [];
+
+            ////Credit Object
+
+
+            $('#tblIssueQC tbody tr').each(function () {
+
+                var theObj = {};
+
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+
+
+
+
+                var amount = isNaN(parseFloat($('#txtAmount_' + id).val())) ? 0 : parseFloat($('#txtAmount_' + id).val());
+
+                var Period = $('#txtPeriod_' + id).val();
+
+
+
+
+
+
+                theObj["Amount"] = amount;
+                theObj["Period"] = Period;
+
+
+
+
+                jsonObjs.push(theObj);
+
+
+
+            });
+
+
+            jsonData["DetailsInfo"] = jsonObjs;
+            var urlpath = '@Url.Action("SaveBudgetInfo", "Budget")';
+            $.ajax({
+                contentType: "application/json",
+                data: JSON.stringify(jsonData),
+                dataType: 'json',
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+                    $("#overlay").fadeIn(300);
+                }
+            })
+                .success(function (result) {
+
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                    if (result.pk > 0) {
+                        swal({
+                            title: " Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                         }, function () {
+                            window.location.href = '@Url.Action("BudgetList", "Budget")';
+                        });
+                    }
+
+                });
+        }
+
+        function GetData(id) {
+
+            var urlpath = '@Url.Action("GetBudgetMasterId", "Budget")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "Get",
+                data: { id: id },
+                async: false,
+                success: function (data) {
+                    $("#ddlCompany").val(data.CompanyId).trigger('change');
+                    $("#ddlCompany").prop("disabled", true);
+                    LoadDDlbyCom(data.CompanyId);
+                    $("#ddlFinansialYear").val(data.FinancialYearId).trigger('change');
+                    $("#ddlFinansialYear").prop("disabled", true);
+
+
+                    $('#ddlLedgerHead').val(data.GLHeadId).change();
+                    $('#ddlControlLedger').val(data.ControlLId).change();
+                    $('#ddlSubControlLedger').val(data.SubsidiryLId).change();
+                    $('#ddlSubSubControlLedger').val(data.SubSubControlLedgerId).change();
+                    $('#ddlCOA').val(data.COAId).change();
+
+                    $('#lblTotalAmountAmount').html(data.TotalAmount);
+                   
+
+
+                    //for (var i = 0; i < data.DetailsInfo.length; i++) {
+
+                    //    var tr = $('#tblIssueQC tbody tr').length + 1;
+                        
+                   
+                    //    $('#txtPeriod_' + tr).val(data.DetailsInfo[i].Period);
+                    //    $('#txtAmount_' + tr).val(data.DetailsInfo[i].Amount);
+
+
+
+
+                    //}
+
+                    
+
+
+                    }
+
+                });
+        }
+    </script>
+}

@@ -1,0 +1,66 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Refference\_SubsidiaryInfo.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@model IEnumerable<New_Accounts.Models.Accounts.Subsidiary_chk>
+
+
+
+
+
+
+<div class="row">
+
+    <table class="table table-borderless table-hover" id="reportTableR">
+        <thead>
+
+        </thead>
+        <tbody>
+            @{
+                int count = 1;
+
+            }
+            @foreach (var item in Model)
+            {
+            <tr id="tr_@item.S_Info_Id">
+
+                @if (item.isrefrence == 1)
+                {
+
+                     if (item.isReadOnly == 1)
+                    {
+                        <td class="text-center"  style="padding-left: 20px"><input type="checkbox" class="chk" value="@item.S_Info_Id" id="chk_@item.S_Info_Id" disabled="disabled" checked="checked" /></td>
+                    }
+                    else
+                    {
+                        <td class="text-center" style="padding-left: 20px"><input type="checkbox" class="chk" value="@item.S_Info_Id" id="chk_@item.S_Info_Id" checked="checked" /></td>
+                    }
+
+
+                }
+                else
+                {
+                    <td class="text-center" style="padding-left: 20px"><input type="checkbox" value="@item.S_Info_Id" class="chk" id="chk_@item.S_Info_Id" /></td>
+                }
+
+
+
+                <td class="text-left">@item.S_InfoName</td>
+                <td class="text-left"><input type="hidden" id="isrefrence_@item.S_Info_Id" value="@item.isrefrence" /> </td>
+
+
+
+
+
+            </tr>
+                count++;
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+
+
+

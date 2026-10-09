@@ -1,0 +1,37 @@
+@* Side navigation: the user's DB-driven menu (Session["MenuList"], unchanged content). A module tab bar
+   (.topnav in _Layout) selects one MenuMap group; this partial shows only that group's items, sectioned by
+   their legacy parent-menu name as uppercase headers. On Home (or an unmapped page) all groups are listed. *@
+@model System.Collections.Generic.List<New_Accounts.Models.MenuStepOne>
+@{
+    var groups = MenuMap.Build(Model);
+    string currentController = (Context.GetRouteValue("controller") as string ?? "");
+    var active = groups.FirstOrDefault(g => g.Items.Any(i => i.Controller.Equals(currentController, System.StringComparison.OrdinalIgnoreCase)));
+}
+<nav class="sidenav" aria-label="Navigation">
+    <div class="grp"><span class="lbl">Dashboard</span></div>
+    <a href="/Dashboard/Index" class="@(currentController.Equals("Dashboard", System.StringComparison.OrdinalIgnoreCase) ? "on" : null)"><svg width="17" height="17"><use href="#s-grid"/></svg><span class="lbl">Dashboard</span></a>
+    @if (active != null)
+    {
+        foreach (var sect in active.Items.GroupBy(i => string.IsNullOrWhiteSpace(i.LegacyGroup) ? active.Title : i.LegacyGroup))
+        {
+            <div class="grp"><span class="lbl">@sect.Key</span></div>
+            foreach (var item in sect)
+            {
+                bool on = item.Controller.Equals(currentController, System.StringComparison.OrdinalIgnoreCase);
+                <a href="@item.Href" class="@(on ? "on" : null)" title="@item.Title"><svg width="17" height="17"><use href="#@item.Icon"/></svg><span class="lbl">@item.Title</span></a>
+            }
+        }
+    }
+    else
+    {
+        foreach (var group in groups)
+        {
+            <div class="grp"><span class="lbl">@group.Title</span>@if (group.Number > 0) {<span class="nu">@group.Number</span>}</div>
+            foreach (var item in group.Items)
+            {
+                bool on = item.Controller.Equals(currentController, System.StringComparison.OrdinalIgnoreCase);
+                <a href="@item.Href" class="@(on ? "on" : null)" title="@item.Title"><svg width="17" height="17"><use href="#@item.Icon"/></svg><span class="lbl">@item.Title</span></a>
+            }
+        }
+    }
+</nav>

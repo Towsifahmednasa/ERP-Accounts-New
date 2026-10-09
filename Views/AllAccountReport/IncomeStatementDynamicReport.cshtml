@@ -1,0 +1,406 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\IncomeStatementDynamicReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@{
+    ViewBag.Title = "Income Statement Dynamic Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .statement-filter {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .statement-wrap {
+        max-width: 780px;
+        margin: 6px auto 0;
+        background: #fff;
+        padding: 28px 34px;
+        border: 1px solid #d7dbe3;
+    }
+
+    .statement-toolbar {
+        max-width: 780px;
+        margin: 18px auto 0;
+        text-align: right;
+    }
+
+    .statement-title {
+        text-align: center;
+        font-weight: 700;
+        font-size: 17px;
+        margin-bottom: 4px;
+    }
+
+    .statement-subtitle {
+        text-align: center;
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 18px;
+    }
+
+    #dtIncomeStatementDynamic {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        color: #111;
+    }
+
+    #dtIncomeStatementDynamic th {
+        font-size: 16px;
+        padding: 8px 6px;
+        border-bottom: 0;
+    }
+
+    #dtIncomeStatementDynamic td {
+        padding: 3px 6px;
+        vertical-align: middle;
+    }
+
+    #dtIncomeStatementDynamic .particular {
+        text-align: left;
+        width: 52%;
+    }
+
+    #dtIncomeStatementDynamic .notes {
+        text-align: center;
+        width: 14%;
+    }
+
+    #dtIncomeStatementDynamic .amount {
+        text-align: right;
+        width: 34%;
+    }
+
+    #dtIncomeStatementDynamic .bold-row td {
+        font-weight: 700;
+        font-size: 15px;
+        padding-top: 9px;
+    }
+
+    #dtIncomeStatementDynamic .bold-row td.notes {
+        font-weight: 400;
+        font-size: 14px;
+    }
+
+    #dtIncomeStatementDynamic .total-amount {
+        border-top: 1px solid #222;
+    }
+
+    #dtIncomeStatementDynamic .final-amount {
+        border-top: 1px solid #222;
+        border-bottom: 3px double #222;
+    }
+
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #printArea, #printArea * {
+            visibility: visible;
+        }
+
+        #printArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        .statement-wrap {
+            border: none;
+            max-width: none;
+        }
+    }
+</style>
+
+<div id="loadingSpinner" style="display:none;">
+    <div class="overlay"></div>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            Income Statement Dynamic Report
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="statement-filter mt-3">
+                                <div class="card bg-light bg-gradient">
+                                    <div class="card-body">
+                                        <div class="p-2 text-dark rounded">
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label for="ddlCompany" class="bold col-form-label">Company: <span class="required">*</span></label>
+                                                    </div>
+                                                    <div class="col-md-8" id="divCompany">
+                                                        <select class="form-select form-select-sm mb-3 select2" style="width:100%;" id="ddlCompany" onchange="LoadFinansialYear()"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label for="ddlFinansialYear" class="bold col-form-label">Financial Year: <span class="required">*</span></label>
+                                                    </div>
+                                                    <div class="col-md-8" id="divFinansialYear">
+                                                        <select class="form-select form-select-sm mb-3 select2" style="width:100%;" id="ddlFinansialYear" onchange="LoadDaterangebyFiscal()"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required">*</span></label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label for="txtToDate" class="bold col-form-label">To Date: <span class="required">*</span></label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row" style="margin-bottom: 3px !important;">
+                                                <label class="col-md-4 bold col-form-label"></label>
+                                                <div class="col-md-8">
+                                                    <button class="small blue button" id="btnSearch" onclick="LoadReport()">
+                                                        <i class="fa fa-search" aria-hidden="true"></i>
+                                                        Search
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="statement-toolbar">
+                                <button id="exportButton" class="btn btn-sm btn-outline-success me-2">
+                                    Export to Excel
+                                </button>
+                                <button id="printButton" class="btn btn-sm btn-outline-info">
+                                    Print
+                                </button>
+                            </div>
+
+                            <div id="printArea" class="statement-wrap">
+                                <div class="statement-title" id="lblCompanyName"></div>
+                                <div class="statement-subtitle">
+                                    Income Statement for the period ended <span id="lblPeriod"></span>
+                                </div>
+
+                                <table id="dtIncomeStatementDynamic">
+                                    <thead>
+                                        <tr>
+                                            <th class="particular">Particulars</th>
+                                            <th class="notes">Remarks</th>
+                                            <th class="amount" id="amountHeader">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="statementBody">
+                                        <tr>
+                                            <td colspan="3" style="text-align:center;color:#777;padding:18px;">No data loaded.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+        });
+
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                }
+            });
+        }
+
+        function LoadDaterangebyFiscal() {
+            var companyId = $("#ddlCompany").val();
+            var financialYearId = $("#ddlFinansialYear").val();
+            $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, FinancialYearId: financialYearId },
+                async: false,
+                success: function (data) {
+                    $('#txtfrmDate').val(data.StartDate);
+                    $('#txtToDate').val(data.EndDate);
+                }
+            });
+        }
+
+        function LoadReport() {
+            var companyId = $('#ddlCompany').val();
+            var financialYearId = $('#ddlFinansialYear').val();
+            var fromDate = $('#txtfrmDate').val();
+            var toDate = $('#txtToDate').val();
+
+            if (!companyId || companyId === "0") {
+                toastr.error("Please select a company.");
+                return;
+            }
+            if (!financialYearId || financialYearId === "0") {
+                toastr.error("Please select a financial year.");
+                return;
+            }
+            if (!fromDate || !toDate) {
+                toastr.error("Please select date range.");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("GetReport", "IncomeStatementDynamicReport")',
+                data: {
+                    companyId: companyId,
+                    financialYearId: financialYearId,
+                    fromDate: fromDate,
+                    toDate: toDate
+                },
+                dataType: 'json',
+                type: "GET",
+                beforeSend: function () {
+                    $("#loadingSpinner").show();
+                    $('#btnSearch').prop('disabled', true);
+                },
+                success: function (result) {
+                    if (!result || !result.isSuccess) {
+                        toastr.error((result && result.message) ? result.message : "Failed to load report.");
+                        return;
+                    }
+
+                    renderStatement(result.data || []);
+                    $('#lblCompanyName').text($("#ddlCompany option:selected").text());
+                    $('#lblPeriod').text(formatDateToDDMMMYYYY(toDate));
+                    $('#amountHeader').text('Amount');
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                    $('#btnSearch').prop('disabled', false);
+                }
+            });
+        }
+
+        function renderStatement(rows) {
+            var $tbody = $('#statementBody');
+            $tbody.empty();
+
+            if (!rows || rows.length === 0) {
+                $tbody.append('<tr><td colspan="3" style="text-align:center;color:#777;padding:18px;">No data found.</td></tr>');
+                return;
+            }
+
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var amountClass = row.IsBold ? (i === rows.length - 1 ? 'final-amount' : 'total-amount') : '';
+                var trClass = row.IsBold ? 'bold-row' : '';
+
+                $tbody.append(
+                    '<tr class="' + trClass + '">' +
+                    '<td class="particular">' + html(row.Particular || '') + '</td>' +
+                    '<td class="notes">' + html(row.Notes || '') + '</td>' +
+                    '<td class="amount ' + amountClass + '">' + fmt(row.Amount) + '</td>' +
+                    '</tr>'
+                );
+            }
+        }
+
+        function fmt(num) {
+            var value = parseFloat(num) || 0;
+            if (value === 0) {
+                return '-';
+            }
+
+            return value.toLocaleString('en-IN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        function html(value) {
+            return $('<div/>').text(value).html();
+        }
+
+        function formatDateToDDMMMYYYY(dateString) {
+            if (!dateString) return "";
+            var date = new Date(dateString);
+            if (isNaN(date)) return dateString;
+            var day = ("0" + date.getDate()).slice(-2);
+            var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            return day + "-" + monthNames[date.getMonth()] + "-" + date.getFullYear();
+        }
+
+        function formatMonthYear(dateString) {
+            var date = new Date(dateString);
+            if (isNaN(date)) return "Amount";
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            return months[date.getMonth()] + "'" + date.getFullYear();
+        }
+
+        $('#printButton').click(function () {
+            window.print();
+        });
+
+        $('#exportButton').click(function () {
+            var table = document.getElementById("dtIncomeStatementDynamic");
+            var workbook = XLSX.utils.table_to_book(table, { sheet: "Income Statement" });
+            XLSX.writeFile(workbook, "IncomeStatementDynamicReport.xlsx");
+        });
+    </script>
+}

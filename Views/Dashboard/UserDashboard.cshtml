@@ -1,0 +1,5 @@
+@* Legacy UserDashboard.cshtml was a static welcome page shown when IsMainDashboard = 0; same launchpad. *@
+@{
+    ViewBag.Title = "Home";
+}
+@await Html.PartialAsync("~/Views/Dashboard/Index.cshtml", (System.Collections.Generic.List<New_Accounts.Models.ApprovalMenuList>)null)

@@ -1,0 +1,7 @@
+@using New_Accounts
+@using New_Accounts.Models
+@using New_Accounts.Compat
+@using Microsoft.AspNetCore.Routing
+@* The legacy MVC 5 views had no tag helpers; one even carries a stray asp-for attribute (Loan/L_Entry.cshtml:412) that MVC 5
+   rendered as plain markup. Only "~/" URL resolution is enabled so that src="~/VerticalAsset/..." keeps working. *@
+@addTagHelper Microsoft.AspNetCore.Mvc.Razor.TagHelpers.UrlResolutionTagHelper, Microsoft.AspNetCore.Mvc.Razor

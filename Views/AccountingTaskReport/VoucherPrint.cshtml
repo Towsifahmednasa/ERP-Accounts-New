@@ -1,0 +1,142 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AccountingTaskReport\VoucherPrint.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@using System.Data
+@{
+    Layout = null;
+    DataRow m = ViewBag.Master;
+    DataRow h = ViewBag.Header;
+    DataTable detail = ViewBag.Detail;
+
+    string companyName = (h != null && !string.IsNullOrEmpty(Convert.ToString(h["RptHeader"]))) ? h["RptHeader"].ToString() : m["CompanyName"].ToString();
+    string companyAddress = h != null ? Convert.ToString(h["RptAddress"]) : "";
+    string logoBase64 = null;
+    if (h != null)
+    {
+        var imgBytes = h["RptImage"] as byte[];
+        if (imgBytes != null && imgBytes.Length > 0) { logoBase64 = Convert.ToBase64String(imgBytes); }
+    }
+    DateTime postingDate = Convert.ToDateTime(m["PostingDate"]);
+    decimal totalDebit = ViewBag.TotalDebit;
+    decimal totalCredit = ViewBag.TotalCredit;
+
+    Func<decimal, string> amt = v => v > 0 ? v.ToString("#,##0.00") : "";
+    Func<object, decimal> dec = v => { decimal d; decimal.TryParse(Convert.ToString(v), out d); return d; };
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.ReportTitle - @m["VoucherCode"]</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #000; margin: 0; background: #fff; }
+        .page { width: 800px; margin: 0 auto; padding: 25px 20px; }
+        .rpt-header { position: relative; text-align: center; margin-bottom: 8px; }
+        .rpt-logo { position: absolute; left: 0; top: 0; max-height: 60px; max-width: 130px; }
+        .company-name { font-size: 20px; }
+        .company-address { font-size: 12px; margin-top: 2px; }
+        .rpt-title { font-size: 15px; margin-top: 12px; letter-spacing: 1px; }
+        .info { width: 100%; margin: 14px 0 6px 0; font-size: 12px; }
+        .info td { padding: 2px 0; }
+        .info .lbl { width: 95px; }
+        .info .sep { width: 12px; }
+        .detail { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        .detail th, .detail td { border: 1px solid #000; padding: 4px 6px; vertical-align: top; }
+        .detail th { font-weight: normal; font-size: 13px; text-align: center; background: #f2f2f2; padding: 8px 6px; }
+        .detail td.num { text-align: right; white-space: nowrap; }
+        .detail .total-lbl { text-align: right; font-size: 13px; border-left: none; border-bottom: none; }
+        .words { margin-top: 16px; font-size: 12.5px; }
+        .narration { margin-top: 10px; font-size: 12.5px; }
+        .signs { width: 100%; margin-top: 70px; font-size: 12px; }
+        .signs td { width: 20%; text-align: center; vertical-align: bottom; padding: 0 12px; }
+        .signs .line { border-top: 1px solid #000; padding-top: 4px; }
+        .signs .name { padding-bottom: 4px; font-weight: bold; text-transform: uppercase; }
+        .printed { margin-top: 22px; font-size: 10.5px; }
+        .no-print { text-align: center; padding: 10px; }
+        @@media print {
+            .no-print { display: none; }
+            .page { width: auto; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button onclick="window.print()">Print</button>
+    </div>
+    <div class="page">
+        <div class="rpt-header">
+            @if (logoBase64 != null)
+            {
+                <img class="rpt-logo" src="data:image/png;base64,@logoBase64" alt="" />
+            }
+            else
+            {
+                <img class="rpt-logo" src="@Url.Content("~/VerticalAsset/images/unicorn-logo.png")" alt="" />
+            }
+            <div class="company-name">@companyName</div>
+            <div class="company-address">@companyAddress</div>
+            <div class="rpt-title">@ViewBag.ReportTitle</div>
+        </div>
+
+        @{ bool showPay = !string.IsNullOrEmpty((string)ViewBag.ChequeNo); }
+        <table class="info">
+            <tr>
+                <td class="lbl">@(showPay ? "Payment Mode" : "")</td><td class="sep">@(showPay ? ":" : "")</td><td>@ViewBag.PaymentMode</td>
+                <td class="lbl" style="text-align:left; width:95px;">Voucher No</td><td class="sep">:</td><td style="width:170px;">@m["VoucherCode"]</td>
+            </tr>
+            <tr>
+                <td class="lbl">@(showPay ? "Cheque No" : "")</td><td class="sep">@(showPay ? ":" : "")</td><td>@ViewBag.ChequeNo</td>
+                <td class="lbl">Voucher Date</td><td class="sep">:</td><td>@postingDate.ToString("dd-MMM-yyyy")</td>
+            </tr>
+        </table>
+
+        <table class="detail">
+            <tr>
+                <th style="width:12%;">Accounts Code</th>
+                <th style="width:20%;">Accounts Head</th>
+                <th style="width:10%;">Cost Center</th>
+                <th style="width:10%;">Ref. Info.</th>
+                <th style="width:12%;">Subsidiary</th>
+                <th style="width:11%;">Debit Amount</th>
+                <th style="width:11%;">Credit Amount</th>
+                <th style="width:14%;">Remarks</th>
+            </tr>
+            @foreach (DataRow d in detail.Rows)
+            {
+                <tr>
+                    <td>@d["AccountCode"]</td>
+                    <td>@d["AccountName"]</td>
+                    <td>@d["CostCenter"]</td>
+                    <td>@d["RefInfo"]</td>
+                    <td>@d["SubsidoryLedger"]</td>
+                    <td class="num">@amt(dec(d["DebitAmountBDT"]))</td>
+                    <td class="num">@amt(dec(d["CreditAmountBDT"]))</td>
+                    <td>@d["Remarks"]</td>
+                </tr>
+            }
+            <tr>
+                <td class="total-lbl" colspan="5">Total:</td>
+                <td class="num">@totalDebit.ToString("#,##0.00")</td>
+                <td class="num">@totalCredit.ToString("#,##0.00")</td>
+                <td></td>
+            </tr>
+        </table>
+
+        <div class="words">Taka In Words :&nbsp; @ViewBag.TakaInWords</div>
+        <div class="narration">Narration: @m["Narration"]</div>
+
+        <table class="signs">
+            <tr>
+                <td>
+                    <div class="name">@m["EntryBy"]</div>
+                    <div class="line">Prepared by</div>
+                </td>
+                <td><div class="name">&nbsp;</div><div class="line">Recommend by</div></td>
+                <td><div class="name">&nbsp;</div><div class="line">Head (A&amp;F)</div></td>
+                <td><div class="name">&nbsp;</div><div class="line">Managing Director</div></td>
+                <td><div class="name">&nbsp;</div><div class="line">Received By</div></td>
+            </tr>
+        </table>
+
+        <div class="printed">Printed from Computer Address : User: @ViewBag.PrintedUser ,Time: @DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss tt")</div>
+    </div>
+</body>
+</html>

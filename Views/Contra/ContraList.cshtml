@@ -1,0 +1,421 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Contra\ContraList.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Contra List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-success mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+
+
+                                            <span class=""> Contra List</span>
+
+
+
+
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="small blue button" href="@Url.Action("ContraEntry", "Contra")">
+                                            <span class="fa fa-plus"></span> Add New
+
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="detailsR" class="card-box " >
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card-body " >
+                                                <div class="table table-responsive"  style="overflow-x: auto; max-height: 620px" >
+                                                    <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>#</th>
+
+                                                                <th>Company Name</th>
+                                                                <th>Voucher Code</th>
+                                                                <th>Voucher No</th>
+                                                                <th>Posting Date</th>
+
+
+                                                                <th>Narration</th>
+                                                                <th>Total Amount(BDT)</th>
+                                                                <th>Status</th>
+                                                                <th>Entry By</th>
+                                                                <th>Entry Date</th>
+                                                                <th>Update By</th>
+                                                                <th>Update Date</th>
+
+                                                                <th>Action</th>
+                                                                <th>Print</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="manuallist">
+                                                        </tbody>
+                                                    </table>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        function un(o) {
+            return o != null ? o : '';
+        }
+        $(document).ready(function () {
+            LoadFilterData();
+           // ShowReport();
+
+        });
+
+         function LoadFilterData() {
+            var urlpath = '@Url.Action("LoadFilterInPartialView", "Dashboard")';
+
+
+
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                async: true,
+                data: { },
+                beforeSend: function () {
+                    $('#detailsR').empty();
+
+
+
+                },
+                success: function (data) {
+
+                    $('#detailsR').append(data);
+                    // $('#reportTable1').dataTable();
+                }
+            });
+
+
+
+
+        }
+
+      
+         function ShowReport() {
+          //
+
+             var param = '';
+
+             var comID = $('#ddlCompany').val();
+             var finID = $('#ddlFinansialYear').val();
+             var frmD = $('#txtPostingFDate').val();
+             var toD = $('#txtPostingTDate').val();
+             var Status = $('#ddlApprovalStatus').val();
+             
+
+
+             if (jQuery.type(comID) === "undefined") { } 
+             else {
+                 if (comID !== "0" && comID !==  null ) {
+                     param = param + " and mas.CompanyInfoId='" + comID+"'";
+                 } 
+             }
+
+             if (jQuery.type(finID) === "undefined") { }
+             else {
+                 if (finID !== "0" && finID !==null) {
+                     param = param + " and mas.FinancialYearId='" + finID + "'";
+                 }
+             }
+
+
+             if (jQuery.type(frmD) === "undefined" && jQuery.type(toD) === "undefined") {
+
+                 param = param + " and CONVERT(date, mas.PostingDate) >=CONVERT(date, DATEADD(day,-7, GETDATE()))";
+             }
+             else {
+                 if (frmD !== "" && toD !== "") {
+                     param = param + " and CONVERT(date, mas.PostingDate) between CONVERT(date,'" + frmD + "') and CONVERT(date,'" + toD + "')";
+                 }
+             }
+
+             if (jQuery.type(Status) === "undefined") { }
+             else {
+                 if (Status !== "0" && Status !== null) {
+                     param = param + " and mas.ActionStatus='" + Status + "'";
+                 }
+             }
+
+            var urlpath = '@Url.Action("GetContraList", "Contra")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { param: param},
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    data = JSON.parse(data);
+                    
+                    $("#manuallist").html("");
+                    if (data.length > 0) {
+
+
+
+                        var row = "";
+                        var count = 1;
+                        $("#manuallist").html("");
+
+                        var count = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+
+
+                            row += "<tr>";
+                            row += "<td style='text-align:center'>" + count + "</td>";
+                            row += "<td style='text-align:center'>" + un(data[i].CompanyName) + "</td>";
+
+                            row += "<td style='text-align:center'>" + un(data[i].VoucherCode) + "</td>";
+                            row += "<td style='text-align:center'>" + un(data[i].VoucherNo) + "</td>";
+                            row += "<td style='text-align:center'>" + un(data[i].PostingDate) + "</td>";
+
+                            row += "<td style='text-align:center'>" + un(data[i].Narration) + "</td>";
+
+                            row += "<td style='text-align:center'>" + un(data[i].TotalAmountBDT) + "</td>";
+
+                            if (un(data[i].ActionStatus) == 'Approved') {
+                                row += "<td><span class='badge bg-success'>Approved</span></td>";
+                            }
+                            else if (un(data[i].ActionStatus) == 'Canceled') {
+                                row += "<td><span class='badge bg-danger'>Canceled</span></td>";
+                            }
+
+                            else {
+                                row += "<td><span class='badge bg-warning'>Posting</span></td>";
+                            }
+
+
+                            row += "<td style='text-align:center'>" + un(data[i].EntryBy) + "</td>";
+                            row += "<td style='text-align:center'>" + un(data[i].EntryDate) + "</td>";
+                            row += "<td style='text-align:center'>" + un(data[i].UpdateBy) + "</td>";
+                            row += "<td style='text-align:center'>" + un(data[i].UpdateDate) + "</td>";
+
+                           
+
+                            if (un(data[i].ActionStatus) == 'Approved') {
+                                row += "<td><button style='border-style:none;display:none'   onclick='editClick(" + data[i].VoucherMasterId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button> </td>";
+                            } else {
+                                row += "<td><button style='border-style:none;'   onclick='editClick(" + data[i].VoucherMasterId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button> </td>";
+                            }
+
+                            row += "<td><button style='border-style:none;'   onclick='PrintReport(" + data[i].VoucherMasterId + ")'><i class='fa fa-print' style='color:#04AA6D'></i></button> </td>";
+
+                            row += "</tr>";
+                            count = count + 1;
+
+                        }
+                        $("#manuallist").html(row);
+                    } else {
+
+                        
+                        
+                        //$('#dtTb').dataTable().fnClearTable();
+                      //  $('#dtTb').dataTable().fnDestroy();
+                        
+                    }
+                    
+                },
+                complete: function () {
+
+                  
+                    if ($.fn.dataTable.isDataTable('.jdtDataTable')) {
+                        table = $('#dtTb').DataTable({
+                            paging: true,
+                            retrieve: true,
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: false,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ],
+                            columnDefs: [
+                                {
+                                    render: function (data, type, full, meta) {
+                                        return "<div class='text-wrap width-180'>" + data + "</div>";
+                                    },
+                                    targets: 5
+                                }
+                            ]
+                        });
+                    }
+                    else {
+                        table = $('.jdtDataTable').DataTable({
+
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: false,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ],
+                            columnDefs: [
+                                {
+                                    render: function (data, type, full, meta) {
+                                        return "<div class='text-wrap width-180'>" + data + "</div>";
+                                    },
+                                    targets: 5
+
+                                }
+                            ]
+
+                        });
+                    }
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+         }
+
+        function editClick(id) {
+
+            location.href = '../Contra/ContraEntry?MasterId=' + id + '';
+
+        }
+
+
+        function PrintReport(MasterId)
+        {
+            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
+            var reportValue = "AllVoucherReport";
+
+        $.ajax({
+            url: urlpath,
+            data: { MasterId: MasterId, reportValue: reportValue},
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+    </script>
+
+}                     

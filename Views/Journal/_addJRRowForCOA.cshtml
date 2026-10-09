@@ -1,0 +1,38 @@
+@* One GL line of the Journal "Voucher lines" table (wireframe 81). Element ids are the contract with the scripts in JRCreate.cshtml. *@
+
+@{
+    int sl = Convert.ToInt32(TempData["trSl"]);
+}
+<tr id="tr_@sl">
+    <td class="num" id="ts_@sl"></td>
+    <td class="hl">
+        <select class="form-select form-select-sm select2" id="COAId_@sl" style="width: 100%" onchange="GetDDlbyCOAId(@sl)"></select>
+    </td>
+    <td>
+        <select class="form-select form-select-sm select2" id="SubsidoryLedger_@sl" style="width: 100%"></select>
+    </td>
+    <td>
+        <select class="form-select form-select-sm select2" id="CostCenter_@sl" style="width: 100%"></select>
+    </td>
+    <td>
+        <select class="form-select form-select-sm select2" id="RefInfo_@sl" style="width: 100%"></select>
+    </td>
+    <td>
+        <input type="number" class="form-control form-control-sm text-end" id="amount_@sl" oninput="CalculateAll()" />
+    </td>
+    <td>
+        <input type="number" class="form-control form-control-sm text-end" readonly id="amount_FC_@sl" oninput="CalculateAll()" />
+    </td>
+    <td>
+        <select class="form-select form-select-sm" onchange="CalculateAll()" id="ddlDRCR_@sl">
+            <option value="Debit">DR</option>
+            <option value="Credit">CR</option>
+        </select>
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm" id="remarks_@sl" />
+    </td>
+    <td class="actionHide">
+        <button type="button" class="btn icon" style="width:28px;height:28px" title="Remove line" id="btnRemove_@sl" onclick="RemoveRow(@sl)"><svg width="14" height="14"><use href="#s-no"/></svg></button>
+    </td>
+</tr>

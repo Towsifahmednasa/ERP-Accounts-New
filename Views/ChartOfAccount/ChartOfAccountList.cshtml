@@ -1,0 +1,532 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\ChartOfAccount\ChartOfAccountList.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Chart Of Account List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-success mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class="">
+                                                Chart Of Account List
+                                            </span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="small blue button" href="@Url.Action("ChartOfAccountCreate", "ChartOfAccount")">
+                                            <span class="fa fa-plus"></span> Add New
+
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header" id="flush-headingOne">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                                        <i style="font-size: 1.4em !important" class="fadeIn animated bx bx-menu-alt-left"></i><span style="font-size: 1.1em !important">Filter</span>
+                                                    </button>
+
+                                                </h2>
+                                                <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                                    <div class="accordion-body">
+
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+
+                                                                <div class="form-group">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company:  </label></div>
+                                                                        <div class="col-md-8" id="divCompany">
+                                                                            <select class="form-select form-select-sm mb-3 select2 ddlCompany" style="width: 100%;" id="ddlCompany">
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+
+
+                                                            <div class="col-md-4">
+                                                                <div class="form-group">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Ledger Head:  </label></div>
+                                                                        <div class="col-md-8" id="divCompany">
+                                                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadControlLedger()" id="ddlLedgerHead"></select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Control Ledger:  </label></div>
+                                                                        <div class="col-md-8" id="divCompany">
+                                                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadSubsidaryLedger()" id="ddlControlLedger"></select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+
+                                                            <div class="col-md-4">
+
+                                                                <div class="form-group">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Sub Control Ledger:  </label></div>
+                                                                        <div class="col-md-8" id="divCompany">
+                                                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadSubSubControlLedger()" id="ddlSubControlLedger"></select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Sub Sub Control Ledger:  </label></div>
+                                                                        <div class="col-md-8" id="divCompany">
+                                                                            <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlSubSubControlLedger"></select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+
+
+
+
+
+
+
+
+                                                        </div>
+                                                        <div>
+
+                                                            <div class="wrapper">
+                                                                <div class="row">
+                                                                    <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                                                        <div class="form-group">
+
+                                                                            <button class="small blue button" onclick="ShowReport()">
+                                                                                <i class="fa fa-search" aria-hidden="true"></i>
+                                                                                Search
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable">
+                                        <thead>
+                                            <tr>
+                                                <th>SL#</th>
+                                                <th>Company</th>
+                                                <th>Ledger Head</th>
+                                                <th>Control Ledger</th>
+                                                <th>
+                                                    Sub-Control Ledger
+                                                </th>
+
+                                                <th>
+                                                    Sub Sub Control Ledger
+                                                </th>
+
+                                                <th>Chart Of Account</th>
+                                                <th>Description</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody id="manuallist">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .container-fluid {
+        margin: 5px; /* Adjust as needed */
+    }
+
+    .dataTables_filter {
+        float: right !important;
+        margin-right: -20px !important;
+        margin-bottom: 0px !important;
+    }
+
+    .dt-buttons {
+        text-align: center !important;
+    }
+</style>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        $(function () {
+
+            LoadCompany('ddlCompany');
+            LoadLadgerHead()
+           // ShowReport();
+        });
+
+        function un(o) {
+            return o != null ? o : '';
+        }
+
+        function ShowReport() {
+
+
+            var param = '';
+            var comID = $('#ddlCompany').val();
+            var HeadID = $('#ddlLedgerHead').val();
+            var ControlID = $('#ddlControlLedger').val();
+            var SubID = $('#ddlSubControlLedger').val();
+            var SubSubID = $('#ddlSubSubControlLedger').val();
+
+
+
+            if (jQuery.type(comID) === "undefined") { }
+            else {
+                if (comID !== "0" && comID !== null) {
+                    param = param + "  and AccountId in (select BankAccountId from tblCOACompanyPermission where CompanyId='" + comID + "')";
+                }
+            }
+
+            if (jQuery.type(HeadID) === "undefined") { }
+            else {
+                if (HeadID !== "0" && HeadID !== null) {
+                    param = param + " and tblLedgerHead.GLHeadId='" + HeadID + "'";
+                }
+            }
+
+
+            if (jQuery.type(ControlID) === "undefined") { }
+            else {
+                if (ControlID !== "0" && ControlID !== null) {
+                    param = param + " and tblControlLedger.ControlLId='" + ControlID + "'";
+                }
+            }
+
+
+            if (jQuery.type(SubID) === "undefined") { }
+            else {
+                if (SubID !== "0" && SubID !== null) {
+                    param = param + " and tblSubsidiaryLedger.SubsidiryLId='" + SubID + "'";
+                }
+            }
+
+
+            if (jQuery.type(SubSubID) === "undefined") { }
+            else {
+                if (SubSubID !== "0" && SubSubID !== null) {
+                    param = param + " and ss.SubSubControlLedgerId='" + SubSubID + "'";
+                }
+            }
+            $('#dtTb tbody').empty();
+            $('#manuallist').empty();
+
+
+
+            var urlpath = '@Url.Action("Get_ChartofAccount_List", "ChartOfAccount")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { param: param },
+                async: false,
+                beforeSend: function () {
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+
+                    data = JSON.parse(data);
+                 
+                    if (data.length > 0) {
+
+
+
+                        var row = "";
+                        var count = 1;
+                    
+
+                        var count = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+
+
+                            row += "<tr>";
+                            row += "<td >" + count + "</td>";
+                            row += "<td >" + data[i].CompanyName + "</td>";
+                            row += "<td >" + data[i].GLName + "</td>";
+                            row += "<td >" + data[i].ControlLName + "</td>";
+                            row += "<td >" + data[i].SubsidiryLName + "</td>";
+                            row += "<td >" + data[i].SubSubControlLedgerName + "</td>";
+                            row += "<td >" + un(data[i].AccountName) + "</td>";
+                            row += "<td >" + un(data[i].Description) + "</td>";
+
+
+
+                            if (data[i].IsActive == true) {
+                                row += "<td><span class='badge bg-success'>Active</span></td>";
+                            } else {
+                                row += "<td><span class='badge bg-danger'>Inactive</span></td>";
+                            }
+                            if (data[i].CashAccountId != 0 || data[i].BankAccountId != 0 || data[i].IsSystemDefine == true || data[i].IsDefaultGl == true) {
+                                row += "<td><button style='border-style:none; display:none' onclick='editClick(" + data[i].AccountId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button></td>";
+                            } else {
+                                row += "<td><button style='border-style:none' onclick='editClick(" + data[i].AccountId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button></td>";
+                            }
+
+
+
+                            row += "</tr>";
+                            count = count + 1;
+
+                        }
+                        $("#manuallist").html(row);
+                    }
+                },
+                complete: function () {
+
+
+ 
+
+                    if ($.fn.dataTable.isDataTable('.jdtDataTable')) {
+                        table = $('#dtTb').DataTable({
+                            paging: true,
+                            retrieve: true,
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+                            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                            lengthChange: true,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ]
+                        });
+                    }
+                    else {
+                        table = $('.jdtDataTable').DataTable({
+
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+                            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                            lengthChange: true,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ]
+                        });
+                    }
+
+                    $('#dtTb_length select').removeClass('form-select form-select-sm');
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+        function LoadLadgerHead() {
+            $.ajax({
+                url: "/Utility/GetLadgerHead",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    $('#ddlLedgerHead').empty();
+                    $('#ddlLedgerHead').append("<option value='0'>--Select  Ledger Head--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlLedgerHead').append($("<option></option>").val(data[i].GLHeadId).html(data[i].GLName));
+                    }
+                }
+            });
+        }
+
+
+
+        function LoadControlLedger() {
+            var LedgerHeadId = $("#ddlLedgerHead").val();
+            $.ajax({
+                url: "/Utility/LoadControlLedgerByLedgerHeadId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { LedgerHeadId: LedgerHeadId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlControlLedger').empty();
+                    $('#ddlControlLedger').append("<option value='0'>--Select Control Ledger--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlControlLedger').append($("<option></option>").val(data[i].ControlLId).html(data[i].ControlLName));
+                    }
+                }
+            });
+        }
+        function LoadSubsidaryLedger() {
+            var ControlLedgerId = $("#ddlControlLedger").val();
+            $.ajax({
+                url: "/Utility/LoadSubsidaryByControlLedgerId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { ControlLedgerId: ControlLedgerId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlSubControlLedger').empty();
+                    $('#ddlSubControlLedger').append("<option value='0'>--Select Control Ledger--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlSubControlLedger').append($("<option></option>").val(data[i].SubsidiryLId).html(data[i].SubsidiryLName));
+                    }
+                }
+            });
+        }
+
+        function LoadSubSubControlLedger() {
+            var SubControlLedgerId = $("#ddlSubControlLedger").val();
+            $.ajax({
+                url: "/Utility/LoadSubSubControlLedgerId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { SubControlLedgerId: SubControlLedgerId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlSubSubControlLedger').empty();
+                    $('#ddlSubSubControlLedger').append("<option value='0'>--Select Sub Sub Control Ledger--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlSubSubControlLedger').append($("<option></option>").val(data[i].SubSubControlLedgerId).html(data[i].SubSubControlLedgerName));
+                    }
+                }
+            });
+        }
+
+
+
+        function editClick(id) {
+            location.href = '@Url.Action("ChartOfAccountCreate", "ChartOfAccount")?id=' + id + '';
+        }
+    </script>
+
+}
+

@@ -1,0 +1,257 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Test\Index.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+ 
+@model IEnumerable<New_Accounts.Models.Accounts.TestMasterView>
+
+@{
+    ViewBag.Title = "Voucher List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-success mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+
+
+                                            <span class=""> Voucher List</span>
+
+
+
+
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="btn btn-outline-info" href="@Url.Action("Create", "Test")">
+                                            <span class="fa fa-plus"></span> Add New
+
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+                            <div class="row">
+
+                                <div class="col-md-3">
+                                    <div class="form-group" id="divCompany">
+                                        <label for="ddlCompany">Company</label>
+                                        <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany"></select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group" id="divFromDate">
+                                        <label for="txtFromDate">From  Date</label>
+                                        <input type="text" id="txtFromDate" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group" id="divToDate">
+                                        <label for="txtToDate">To  Date</label>
+                                        <input type="text" id="txtToDate" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <button style="margin-top: 17px;" class="btn btn-primary" onclick="ShowReport()">Search Voucher</button>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+                                        <table class="table table-bordered table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+
+                                                    <th>Company</th>
+
+
+                                                    <th>Currency Rate</th>
+                                                    <th>Total Amount</th>
+                                                    <th>Voucher Date</th>
+
+
+
+                                                    <th colspan="2">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody id="manuallist">
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+            LoadDate_P('#txtFromDate');
+            LoadDate_C('#txtToDate');
+
+            LoadCompany('ddlCompany');
+            $("#ddlCompany").val("1");
+
+        });
+
+
+
+         function ShowReport() {
+          //   
+            var fromdate;
+            var todate;
+            var companyId = '0';
+
+
+            if ($('#txtFromDate').val() == "") {
+                swal("Please input from order date");
+                return;
+            }
+            else {
+                fromdate = $('#txtFromDate').val();
+            }
+            if ($('#txtToDate').val() == "") {
+                swal("Please input to order date");
+                return;
+            }
+            else {
+                todate = $('#txtToDate').val();
+            }
+
+            if ($('#ddlCompany').val() == "0") {
+                companyId = '0';
+            }
+            else {
+                companyId = $('#ddlCompany').val();
+            }
+
+
+            var urlpath = '@Url.Action("TsetListData", "Test")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { fromdate: fromdate, todate: todate, CompanyId: companyId},
+                async: false,
+                success: function (data) {
+
+                    data = JSON.parse(data);
+                    $("#manuallist").html("");
+                    if (data.length > 0) {
+
+
+
+                        var row = "";
+                        var count = 1;
+                        $("#manuallist").html("");
+
+                        var count = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+                             
+
+                            row += "<tr>";
+                            row += "<td style='text-align:center'>" + count + "</td>";
+                            row += "<td style='text-align:center'>" + data[i].CompanyName + "</td>";
+                            row += "<td style='text-align:center'>" + data[i].CurrencyRate + "</td>";
+                            row += "<td style='text-align:center'>" + data[i].TotalAmount + "</td>";
+                            row += "<td style='text-align:center'>" + data[i].VoucherDate + "</td>";
+
+
+                            row += "<td><button  class='btn-outline-warning  btn-xs mb-1 mb-md-0' type='button'   onclick='editClick(" + data[i].TestId + ")'><i class='bx bxs-edit' aria-hidden='true'></i></button> </td>";
+
+                            row += "<td><button  class='btn-outline-info  btn-xs mb-1 mb-md-0' type='button'   onclick='LoadReportFinal(" + data[i].TestId + ")'><i class='fa fa-print' aria-hidden='true'></i></button> </td>";
+
+                            row += "</tr>";
+                            count = count + 1;
+
+                        }
+                        $("#manuallist").html(row);
+                    }
+                }
+            });
+        }
+
+
+
+        function editClick(id) {
+
+            location.href = '../Test/Create?id=' + id + '';
+
+        }
+
+
+         function LoadReportFinal(id) {
+            var urlpath = '@Url.Action("VoucherPrintReports", "Report")';
+
+
+            var reportValue = "VoucherPrint";
+
+            var voucherMasterId = id;
+
+            //  alert( id);
+
+            var jsonData = {};
+
+
+            jsonData["ReportValue"] = reportValue;
+            jsonData["VoucherMasterId"] = voucherMasterId;
+
+
+
+             
+            $.ajax({
+                url: urlpath,
+                data: jsonData,
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+
+
+
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+    </script>
+
+}

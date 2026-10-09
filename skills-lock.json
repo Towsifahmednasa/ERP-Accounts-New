@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "skills": {
+    "accounting-finance-system-skill": {
+      "source": "skills.volces.com",
+      "sourceUrl": "https://skills.volces.com/skills/clawhub/chipmunkrpa",
+      "sourceType": "well-known",
+      "computedHash": "1765672a2bd12eec1640924970618e0a713af12cce46194951059a29c7917022",
+      "wellKnownDigest": "sha256:3f2719c0e7c8ae8563d51847290388be977c7e3f3c17d3172fa970db2d3953f1"
+    },
+    "bank-recon-skill": {
+      "source": "skills.volces.com",
+      "sourceUrl": "https://skills.volces.com/skills/clawhub/chipmunkrpa",
+      "sourceType": "well-known",
+      "computedHash": "de1f9b84e251e07da5e18d1330c502d734f38177bce1fa68589f35b0666d5019",
+      "wellKnownDigest": "sha256:edb69eca0cb898871549bfe804f929debde7ec97ebe8ebac0acd95328e3110b4"
+    },
+    "brd-reviewer": {
+      "source": "skills.volces.com",
+      "sourceUrl": "https://skills.volces.com/skills/clawhub/chipmunkrpa",
+      "sourceType": "well-known",
+      "computedHash": "b1e4414f8987ac3c4efcd29f0283a8c83e6cc6b7899be3beda94a5b95875cae2",
+      "wellKnownDigest": "sha256:81cd7944aac4df8aa734d56c4aca6ec044f19e9cc183344fb6af83655aea8642"
+    },
+    "deposition-question-skill": {
+      "source": "skills.volces.com",
+      "sourceUrl": "https://skills.volces.com/skills/clawhub/chipmunkrpa",
+      "sourceType": "well-known",
+      "computedHash": "42cc1926a294bf6eb0a92fcf6a2617fb98d8b5fab1ca1450b241471eb28f3b21",
+      "wellKnownDigest": "sha256:29da01055eaa2f8531d720c0ff294ff6e68eeac7fe463e445c778fa773ed0b8d"
+    },
+    "finance-accounting": {
+      "source": "samuelcastro/startup-skills",
+      "sourceType": "github",
+      "skillPath": "finance-accounting/SKILL.md",
+      "computedHash": "ef74c0d16acec027a3f3cb63350e027b5d12cbadd7b4184c7bd580fa015fd179"
+    },
+    "finresearchclaw": {
+      "source": "skills.volces.com",
+      "sourceUrl": "https://skills.volces.com/skills/clawhub/chipmunkrpa",
+      "sourceType": "well-known",
+      "computedHash": "02252e9632b58714842ef96a7fbc8a2b190e08933154dfc975fab26cfbe24981",
+      "wellKnownDigest": "sha256:9649456bcce0a2838b58da0cc75f578493103b0d62ceb2bb6f5574bba5781e85"
+    },
+    "redline-contract": {
+      "source": "skills.volces.com",
+      "sourceUrl": "https://skills.volces.com/skills/clawhub/chipmunkrpa",
+      "sourceType": "well-known",
+      "computedHash": "e7b2fdd01a8d60e58fe2e147831448fa2625beb9abf477c893be47912bba28b2",
+      "wellKnownDigest": "sha256:7192e3cd00e406d0709b511b65d4969be8c8502cc5b6e2ebae6cbff4eb26e91c"
+    },
+    "sap-co": {
+      "source": "5throck/abap_vibe_coding_plugin",
+      "sourceType": "github",
+      "skillPath": "skills/sap-co/SKILL.md",
+      "computedHash": "f3fe4364409ffeeeb18c41e4da3eaa586a0ae2c4b949807ca6832966885e0344"
+    },
+    "sap-fi": {
+      "source": "5throck/abap_vibe_coding_plugin",
+      "sourceType": "github",
+      "skillPath": "skills/sap-fi/SKILL.md",
+      "computedHash": "eebf4805f466dcd60314ede9a2cde3cf08d4b11e0b7cad6d7967a96d916f9b8a"
+    },
+    "technical-accounting-research-skill": {
+      "source": "skills.volces.com",
+      "sourceUrl": "https://skills.volces.com/skills/clawhub/chipmunkrpa",
+      "sourceType": "well-known",
+      "computedHash": "787de8d83a47d6c6f0a2047ec205324bd211cf1ddaad77ea4f6aa29309e627ce",
+      "wellKnownDigest": "sha256:97999dd4efef27eb8b113c407c357038eff78b162d8d0b1b56a6da1dc8853368"
+    },
+    "usa-tax-return-review-1040": {
+      "source": "skills.volces.com",
+      "sourceUrl": "https://skills.volces.com/skills/clawhub/chipmunkrpa",
+      "sourceType": "well-known",
+      "computedHash": "6397d2bad77aa40c9f98772a28ada921f6a8bf8dffb9997d9630e53e7628e014",
+      "wellKnownDigest": "sha256:59457503162ba38cd37663e8b2269ce2b3d3d21943bfbc102a674f74351c9e06"
+    }
+  }
+}

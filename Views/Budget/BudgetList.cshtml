@@ -1,0 +1,559 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Budget\BudgetList.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Budget List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-success mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class="">
+                                                Budget List
+                                            </span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="small blue button" href="@Url.Action("BudgetEntry", "Budget")">
+                                            <span class="fa fa-plus"></span> Add New
+
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body ">
+                                        <div class="table table-responsive" style="overflow-x:auto; height:620px">
+                                            <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Company</th>
+                                                        <th>Fiscal Year </th>
+
+                                                      
+                                                        <th>Chart of Accounts</th>
+
+                                                        <th>Total Amount </th>
+                                                     
+                                                        <th>Entry By</th>
+                                                        <th>Entry Date</th>
+                                                        <th>Update By</th>
+                                                        <th>Update Date</th>
+
+                                                        <th>Actions</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="manuallist">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="viewModel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Budget Distribution View</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12" id="divCompany">
+                    <div class="table table-responsive">
+
+
+                        <div class="row">
+
+
+                            <div class="col-md-6">
+
+
+
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Sub Office/Unit Group: </label></div>
+                                        <div class="col-md-8" id="divCompany">   <label id="lblCompanyName"> </label> </div>
+                                    </div>
+                                </div>
+
+
+
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Fiscal Year: </label></div>
+                                        <div class="col-md-8" id="divCompany">    <label id="lblFinancialYearDesc"> </label> </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+
+
+
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Ministry: </label></div>
+                                        <div class="col-md-8" id="divCompany">    <label id="lblPayPointName"> </label> </div>
+                                    </div>
+                                </div>
+
+
+
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">মোট  বাজেট বরাদ্দ: </label></div>
+                                        <div class="col-md-8" id="divCompany">    <label id="lblTotalAmount"> </label> </div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">মোট  সংশোধিত বরাদ্দ: </label></div>
+                                        <div class="col-md-8" id="divCompany">    <label id="S_TotalAmount"> </label> </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <br />
+                        <br />
+
+                        <h4>Details</h4>
+                        <table class="table table-bordered table-striped table-hover" id="dtlTable">
+                            <thead>
+                                <tr>
+
+
+
+                                    <th>Chart of Accounts</th>
+                                    <th>বাজেট বরাদ্দ</th>
+                                    <th>সংশোধিত  বরাদ্দ</th>
+
+
+
+
+                                    <th>Remarks</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="tblDtllist"></tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        function un(o) {
+            return o != null ? o : '';
+        }
+        $(document).ready(function () {
+
+            ShowReport();
+
+        });
+
+
+         function ShowReport() {
+          //
+
+             var param = '';
+
+            var urlpath = '@Url.Action("GetBudgetList", "Budget")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { param: param},
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    data = JSON.parse(data);
+                    $("#manuallist").html("");
+                    if (data.length > 0) {
+
+
+
+                        var row = "";
+                        var count = 1;
+                        $("#manuallist").html("");
+
+                        var count = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+
+                            row += "<tr>";
+                            row += "<td  >" + count + "</td>";
+                            row += "<td  >" + un(data[i].CompanyName) + "</td>";
+
+                            row += "<td  >" + un(data[i].FinancialYearDesc) + "</td>";
+                  
+                            row += "<td  >" + un(data[i].COAIds) + "</td>";
+                            row += "<td  >" + un(data[i].TotalAmount) + "</td>"; 
+
+
+ 
+
+                            row += "<td  >" + un(data[i].EntryBy) + "</td>";
+                            row += "<td  >" + un(data[i].EntryDate) + "</td>";
+                            row += "<td  >" + un(data[i].UpdateBy) + "</td>";
+                            row += "<td  >" + un(data[i].UpdateDate) + "</td>";
+
+
+
+
+
+                            //if (un(data[i].ApprovalStatus) == 'Approved') {
+                            row += "<td><button style='border-style:none;'   onclick='editClick(" + data[i].BudgetMasterId + ")'><i class='fa  fa-pencil' style='color:#29cc39'></i> </button></td>";
+                            //} else {
+                            //    /* row += "<td><button style='border-style:none;'   onclick='editClick(" + data[i].VoucherMasterId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button> ";*/
+
+                            //    row += "<td> <button style='border-style:none;'   onclick='ViewClick(" + data[i].BudgetMasterId + ")'><i class='fa  fa-eye' style='color:#29cc39'></i></button>  ";
+
+                            //    row += " <button style='border-style:none;'   onclick='ApproveClick(" + data[i].BudgetMasterId + ")'><i class='fa fa-check' style='color:#31d2f2'></i></button>  ";
+
+                            //    row += " <button style='border-style:none;'   onclick='RejectClick(" + data[i].BudgetMasterId + ")'><i class='fa fa-ban' style='color:#d10b1e'></i></button> </td>";
+                            //}
+
+                    row += "</tr>";
+                            count = count + 1;
+
+                        }
+                        $("#manuallist").html(row);
+                    }
+                },
+                complete: function () {
+                    if ($.fn.dataTable.isDataTable('.jdtDataTable')) {
+                        table = $('#dtTb').DataTable({
+                            paging: true,
+                            retrieve: true,
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: false,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ],
+                            columnDefs: [
+                                {
+                                    render: function (data, type, full, meta) {
+                                        return "<div class='text-wrap width-180'>" + data + "</div>";
+                                    },
+                                    targets:6
+                                }
+                            ]
+                        });
+                    }
+                    else {
+                        table = $('.jdtDataTable').DataTable({
+
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: false,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ],
+                            columnDefs: [
+                                {
+                                    render: function (data, type, full, meta) {
+                                        return "<div class='text-wrap width-180'>" + data + "</div>";
+                                    },
+                                    targets:6
+
+                                }
+                            ]
+
+                        });
+                    }
+
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+         }
+
+
+
+        function editClick(id) {
+
+            location.href = '../Budget/BudgetEntry?Id=' + id + '';
+
+        }
+
+
+        function ViewClick(BudgetMasterId) {
+            $('#viewModel').modal('show');
+
+            ShowViewReport(BudgetMasterId);
+            //location.href = '../CreditVoucher/CVCreate?MasterId=' + id + '';
+
+        }
+
+        function ApproveClick(BudgetMasterId) {
+
+            SaveApproval(BudgetMasterId, "Approved");
+
+        }
+
+
+
+        function RejectClick(BudgetMasterId) {
+
+            SaveApproval(BudgetMasterId, "Rejected");
+
+        }
+
+
+
+        function SaveApproval(BudgetMasterId, Status) {
+            $("#overlay").fadeIn(300);
+
+
+
+
+                    var urlpath3 = '@Url.Action("Approve_Budget", "Budget")';
+
+                 $.ajax({
+                contentType: "application/json",
+                     data: JSON.stringify({ BudgetMasterId: BudgetMasterId, Status: Status }),
+                dataType: 'json',
+                     url: urlpath3,
+                type: "POST",
+                beforeSend: function () {
+                    $("#overlay").fadeIn(300);
+                }
+            })
+                .success(function (result) {
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                    if (result.isSuccess == true) {
+                        swal({
+                            title: " Submit Successfully",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                         }, function () {
+                                window.location.href = '@Url.Action("BgtList", "Budget")';
+
+                        });
+                    }
+
+                });
+
+
+        }
+
+        function ShowViewReport(BudgetMasterId) {
+          //
+
+              var urlpath = '@Url.Action("LoadBudgetViewDtlsList", "Budget")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { BudgetMasterId: BudgetMasterId },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    data = JSON.parse(data);
+                    $("#tblDtllist").html("");
+                    if (data.length > 0) {
+
+                        $('#lblFinancialYearDesc').html(un(data[0].FinancialYearDesc));
+                        $('#lblPayPointName').html(un(data[0].PayPointName));
+                        $('#lblCompanyName').html(un(data[0].CompanyName));
+                        $('#lblTotalAmount').html(un(data[0].TotalAmount));
+                        $('#S_TotalAmount').html(un(data[0].S_TotalAmount));
+
+                        var row = "";
+                        var count = 1;
+                        $("#tblDtllist").html("");
+
+                        var count = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+
+
+                            row += "<tr>";
+
+                            row += "<td  >" + un(data[i].COAName)   +"</td>";
+                            row += "<td  >" + un(data[i].Amount) + "</td>";
+                            row += "<td  >" + un(data[i].S_amount) + "</td>";
+                            row += "<td  >" + un(data[i].Remarks) + "</td>";
+
+
+
+
+
+
+
+
+                            row += "</tr>";
+                            count = count + 1;
+
+                        }
+                        $("#tblDtllist").html(row);
+                    }
+                },
+                complete: function () {
+
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+         }
+
+    function PrintReport(MasterId)
+        {
+            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
+            var reportValue = "AllVoucherReport";
+
+        $.ajax({
+            url: urlpath,
+            data: { MasterId: MasterId, reportValue: reportValue},
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+    </script>
+
+}

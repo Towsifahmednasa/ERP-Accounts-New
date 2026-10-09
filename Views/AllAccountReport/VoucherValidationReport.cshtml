@@ -1,0 +1,492 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\VoucherValidationReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@model New_Accounts.Models.ReportModel.VoucherValidationViewModel
+@{ ViewBag.Title = "Voucher Validation Report";
+                Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<style>
+    .table-xs th, .table-xs td {
+        padding: 0.35rem 0.5rem;
+        font-size: 12px;
+    }
+
+    .table-xs thead th {
+        background-color: #7a9ebd;
+        color: #fff;
+    }
+
+    .text-bold {
+        font-weight: bold;
+    }
+
+
+    /* Row highlight for different error types */
+    .tr-success {
+        /* optional: keep normal or very light */
+    }
+
+    .tr-amount-error {
+        background-color: #fff7e6 !important; /* soft amber for amount mismatch */
+    }
+
+    .tr-voucher-missing {
+        background-color: #fee2e2 !important; /* light red for voucher not found */
+    }
+
+    .tr-trans-missing {
+        background-color: #fee2e2 !important; /* light red for transaction not found */
+    }
+
+</style>
+
+<div id="loadingSpinner" style="display:none;">
+    <div class="overlay"></div>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div><i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i></div>
+                                        <h5 class="mb-0 text-dark cstlfs"><span>Accounts Integrity Report</span></h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="card-title d-flex align-items-center">
+                                            <div><i class="bx bxs-filter-alt me-1 font-22 text-primary"></i></div>
+                                            <h5 class="mb-0 text-primary">Filtering Criteria</h5>
+                                        </div>
+
+                                        <div class="row justify-content-center">
+                                            <div class="col-md-4">
+                                                <div class="card bg-light bg-gradient">
+                                                    <div class="card-body">
+                                                        <div class="p-3 text-dark rounded">
+
+                                                            <!-- Layout aligned with IncomeStatement card -->
+                                                            <div class="mb-2" style="display: none !important;" >
+                                                                <label class="bold col-form-label">Page Name:</label>
+                                                                <select class="form-select form-select-sm mb-3 select2" style="width:100%;" id="ddlPageName"></select>
+                                                            </div>
+
+                                                            <div class="mb-2">
+                                                                <label class="bold col-form-label">Status:</label>
+                                                                <select class="form-select form-select-sm mb-3" id="ddlStatus">
+                                                                    <option value="">All</option>
+                                                                    <option value="Success">Success</option>
+                                                                    <option value="Amount Incorrect Voucher">Amount Incorrect Voucher</option>
+                                                                    <option value="Voucher not Found">Voucher not Found</option>
+                                                                    <option value="Transaction not Found">Transaction not Found</option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="mb-2">
+                                                                <label class="bold col-form-label">From Date:</label>
+                                                                <input type="text" id="txtFromDate" class="form-control form-control-sm mb-3 datepicker" value="@(Model.Filter.FromDate?.ToString("dd MMMM, yyyy"))" />
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <label class="bold col-form-label">To Date:</label>
+                                                                <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@(Model.Filter.ToDate?.ToString("dd MMMM, yyyy"))" />
+                                                            </div>
+                                                            <br />
+
+                                                            <div class="d-flex justify-content-center">
+                                                                <button class="small blue button" id="btnLoad" type="button" style="min-width: 140px;">
+                                                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                                                    View Report
+                                                                </button>
+
+
+                                                                <button class="small green button ms-2" id="btnReprocess" type="button" style="min-width: 120px;">
+                                                                    <i class="fa fa-cogs" aria-hidden="true"></i>
+                                                                    Reprocess Voucher
+                                                                </button>
+
+                                                                
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row m-2">
+                                            <div class="col-12">
+                                                <div class="table-responsive" style="width: 99% !important; margin: 0 auto !important;">
+                                                    <table id="tblVoucherValidation" class="table table-bordered table-striped table-hover table-xs">
+                                                        <thead>
+                                                            <tr>
+                                                                <th colspan="13" style="text-align: center; font-weight: bold; font-size: 16px; color: blue;">Accounts Integrity Report </th>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th> <input type="checkbox" id="cbxAll"></th>
+                                                                <th>Page</th>
+                                                                <th>Transcation Reference</th>
+                                                                <th>Transcation Date</th>
+                                                                <th>Transaction Type</th>
+                                                                <th>Voucher Type</th>
+                                                                <th>Voucher Code</th>
+                                                                <th>Posting Date</th>
+                                                                <th>Voucher Reference</th>
+                                                                <th class="text-end">Transcation Amount</th>
+                                                                <th class="text-end">Voucher Amount</th>
+                                                                <th>Status</th>
+                                                            </tr>
+
+                                                            
+                                                        </thead>
+                                                        <tbody id="voucherRows">
+                                                            <tr><td colspan="13" class="text-center text-muted">Select filters and load the report.</td></tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+
+            loadPages();
+            $('#btnLoad').click(loadReport);
+
+            // Select All
+            $(document).on('change', '#cbxAll', function () {
+                if (this.checked) {
+                    // Check only enabled checkboxes
+                    $('.cbxSelect:enabled').prop('checked', true);
+                } else {
+                    $('.cbxSelect').prop('checked', false);
+                }
+            });
+
+            // Individual checkbox change updates "Select All"
+            $(document).on('change', '.cbxSelect', function () {
+                var total = $('.cbxSelect').length;
+                var checked = $('.cbxSelect:checked').length;
+                $('#cbxAll').prop('checked', total > 0 && total === checked);
+            });
+
+            // Reprocess click
+            $('#btnReprocess').click(onReprocessClick);
+        });
+
+
+        function onReprocessClick() {
+
+            var selected = [];
+
+            $('.cbxSelect:checked').each(function () {
+
+                var $tr = $(this).closest('tr');
+
+                var tableId = parseInt($tr.find('.hdnTableId').val() || '0', 10);
+                var commonPkId = parseInt($tr.find('.hdnCommonPkId').val() || '0', 10);
+                var voucherId = parseInt($tr.find('.hdnVoucherMasterId').val() || '0', 10);
+                var cusPayInvId = parseInt($tr.find('.hdnCusPaymentInvoiceId').val() || '0', 10);
+                var transcationId = parseInt($tr.find('.hdnTranscationId').val() || '0', 10);
+
+                // Get error type from badge text (VoucherLog)
+                var errorType = $tr.find('.status-badge').text() || '';
+
+                selected.push({
+                    TableId: tableId,
+                    CommonPkId: commonPkId,
+                    TransctionErrorType: errorType,
+                    VoucherMasterId: voucherId,
+                    CusPaymentInvoiceId: cusPayInvId,
+                    TranscationId: transcationId
+                });
+            });
+
+
+            console.log(selected);
+
+            if (selected.length === 0) {
+                alert('Please select at least one row to reprocess.');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to reprocess voucher for ' + selected.length + ' record(s)?')) {
+                return;
+            }
+
+            $.ajax({
+                url: '/VoucherValidation/Reprocess',
+                type: 'POST',
+                data: JSON.stringify(selected),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                beforeSend: function () {
+                    $("#loadingSpinner").show();
+                },
+                success: function (res) {
+
+                    // ResultResponse mapping: isSuccess, pk, Message
+
+                    if (res && res.isSuccess) {
+
+                        var countText = (res.pk && res.pk > 0) ? res.pk : selected.length;
+                        var msg = res.Message || ('Reprocess completed for ' + countText + ' record(s).');
+
+                        alert(msg);
+
+                        // Reload grid to reflect changes
+                        loadReport();
+
+                        // uncheck Select All
+                        $('#cbxAll').prop('checked', false);
+
+                    } else {
+
+                        var msg = (res && res.Message)
+                            ? res.Message
+                            : 'Reprocess failed.';
+
+                        alert(msg);
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'Error while reprocessing.';
+                    if (xhr.responseJSON && (xhr.responseJSON.Message || xhr.responseJSON.message)) {
+                        msg = xhr.responseJSON.Message || xhr.responseJSON.message;
+                    }
+                    alert(msg);
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            });
+        }
+
+
+
+        function loadPages() {
+
+            $.ajax({
+                type: "GET",
+                url: "/VoucherValidation/GetPages",
+                dataType: "json",
+                success: function (data) {
+                    $('#ddlPageName').empty();
+                    $('#ddlPageName').append("<option value=''>-- All Pages --</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlPageName').append($("<option></option>").val(data[i].PageName).html(data[i].PageName));
+                    }
+                },
+                error: function () {
+                    alert("Failed to load page list.");
+                }
+            });
+        }
+
+        function loadReport() {
+            var fromDate = $('#txtFromDate').val();
+            var toDate = $('#txtToDate').val();
+            var pageName = $('#ddlPageName').val();
+            var status = $('#ddlStatus').val();
+
+            $.ajax({
+                type: "GET",
+                url: "/VoucherValidation/GetData",
+                data: {
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    pageName: pageName,
+                    status: status
+                },
+                dataType: "json",
+                beforeSend: function () { $("#loadingSpinner").show(); },
+                success: function (data) {
+                    console.log(data);
+
+                    renderRows(data);
+                },
+                error: function (xhr) {
+                    var msg = "Failed to load data.";
+                    if (xhr.responseJSON && xhr.responseJSON.error) msg = xhr.responseJSON.error;
+                    alert(msg);
+                },
+                complete: function () { setTimeout(function () { $("#loadingSpinner").hide(); }, 400); }
+            });
+        }
+
+        function getStatusBadge(status) {
+
+            var s = safe(status);
+            if (!s) return '';
+
+            var cls = 'status-badge status-other';
+
+            if (s === 'Success') {
+                cls = 'status-badge status-success';
+            } else if (s === 'Amount Incorrect Voucher') {
+                cls = 'status-badge status-amount';
+            } else if (s === 'Voucher not Found') {
+                cls = 'status-badge status-voucher-not-found';
+            } else if (s === 'Transaction not Found') {
+                cls = 'status-badge status-trans-not-found';
+            }
+
+            return '<span class="' + cls + '">' + s + '</span>';
+        }
+
+
+        function renderRows(rows, append) {
+
+            var html = '';
+
+            if (!rows || rows.length === 0) {
+                if (!append) {
+                    html = "<tr><td colspan='13' class='text-center text-muted'>No records found.</td></tr>";
+                    $('#voucherRows').html(html);
+                }
+                return;
+            }
+
+            for (var i = 0; i < rows.length; i++) {
+
+                var vStatus = safe(rows[i].VoucherLog);
+                var rowClass = '';
+
+                // Row-level class based on status
+                if (vStatus === 'Success') {
+                    rowClass = 'tr-success';
+                } else if (vStatus === 'Amount Incorrect Voucher') {
+                    rowClass = 'tr-amount-error';
+                } else if (vStatus === 'Voucher not Found') {
+                    rowClass = 'tr-voucher-missing';
+                } else if (vStatus === 'Transaction not Found') {
+                    rowClass = 'tr-trans-missing';
+                }
+
+                html += '<tr class="' + rowClass + '">';
+
+                // # (SL No)
+                html += '<td>' + (i + 1) + '</td>';
+
+                // ---- Select column: checkbox only if VoucherLog != 'Success' ----
+                if (vStatus && vStatus !== 'Success') {
+                    html += "<td>";
+                    html += "<input type='checkbox' class='cbxSelect' />";
+
+                    // Hidden fields for processing
+                    html += "<input type='hidden' class='hdnCommonPkId' value='" + safe(rows[i].CommonPK_ID) + "' />";
+                    html += "<input type='hidden' class='hdnTableId' value='" + safe(rows[i].TableID) + "' />";
+                    html += "<input type='hidden' class='hdnTranscationId' value='" + safe(rows[i].TranscationId) + "' />";
+
+                    // include VoucherMasterId & CusPaymentInvoiceId (here we reuse InvoiceId)
+                    html += "<input type='hidden' class='hdnVoucherMasterId' value='" + safe(rows[i].VoucherMasterId) + "' />";
+                    html += "<input type='hidden' class='hdnCusPaymentInvoiceId' value='" + safe(rows[i].InvoiceId) + "' />";
+
+                    html += "</td>";
+                } else {
+                    html += "<td></td>";
+                }
+
+                // PageName
+                html += '<td>' + safe(rows[i].PageName) + '</td>';
+
+                // TransRefNo
+                html += '<td>' + safe(rows[i].TransRefNo) + '</td>';
+
+                // TransDate
+                html += '<td>' + rows[i].TransDate + '</td>';
+
+                // TransactionType  (JSON e ei naam)
+                html += '<td>' + safe(rows[i].TransactionType) + '</td>';
+
+                // VoucherType
+                html += '<td>' + safe(rows[i].VoucherType) + '</td>';
+
+
+
+                // VoucherCode
+                html += '<td>' + safe(rows[i].VoucherCode) + '</td>';
+
+                // PostingDate
+                html += '<td>' + rows[i].PostingDate + '</td>';
+
+                // SourceRefNo
+                html += '<td>' + safe(rows[i].SourceRefNo) + '</td>';
+
+                // TransactionAmount
+                html += '<td class="text-end">' + formatNumber(rows[i].TransactionAmount) + '</td>';
+
+                // VoucherAmount
+                html += '<td class="text-end">' + formatNumber(rows[i].VoucherAmount) + '</td>';
+
+                // Status cell – badge only
+                html += '<td>' + getStatusBadge(rows[i].VoucherLog) + '</td>';
+
+                html += '</tr>';
+            }
+
+            if (append) {
+                $('#voucherRows').append(html);
+            } else {
+                $('#voucherRows').html(html);
+            }
+        }
+
+        function safe(val) {
+            return val === null || val === undefined ? '' : val;
+        }
+
+        function formatDate(val) {
+            if (!val) return '';
+
+            // Handle .NET style date: /Date(1761974275473)/
+            if (typeof val === 'string') {
+                var match = /\/Date\((\d+)\)\//.exec(val);
+                if (match) {
+                    var ms = parseInt(match[1], 10);
+                    var d = new Date(ms);
+                    return isNaN(d.getTime()) ? '' : d.toLocaleDateString();
+                }
+            }
+
+            // If already a JS Date or ISO string
+            var d = new Date(val);
+            return isNaN(d.getTime()) ? '' : d.toLocaleDateString();
+        }
+
+
+        function formatNumber(val) {
+            var num = parseFloat(val || 0);
+            return num.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+        }
+    </script>
+}

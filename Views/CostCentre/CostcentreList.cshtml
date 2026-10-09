@@ -1,0 +1,346 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\CostCentre\CostcentreList.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Cost Centre List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            <span class=""> Cost Center List</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="small blue button" href="@Url.Action("CostcentreInformation", "CostCentre")">
+                                            <span class="fa fa-plus"></span> Add New
+
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                            <br />
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+                                        <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>SL#</th>
+                                                    <th>Company</th>
+                                                    <th>Description</th>
+                                                    <th>Start Date</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+
+                                                    @*<th>Entry By</th>
+        <th>Entry Date</th>
+        <th>Update By</th>
+        <th>Update Date</th>*@
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dtTableBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        $(function () {
+            Get_Reference();
+        });
+
+        function un(o) {
+            return o != null ? o : '';
+        }
+
+
+
+        function formatJsonDate(jsonDate) {
+            if (!jsonDate) {
+                return "N/A";
+            }
+
+            // Manually parse the date from the format "MM/DD/YYYY hh:mm:ss AM/PM"
+            var dateParts = jsonDate.split(' ');
+            var datePart = dateParts[0].split('/');
+            var timePart = dateParts[1].split(':');
+            var ampm = dateParts[2];
+
+            var month = parseInt(datePart[0]) - 1; // Months are zero-based in JavaScript
+            var day = parseInt(datePart[1]);
+            var year = parseInt(datePart[2]);
+
+            var hours = parseInt(timePart[0]);
+            var minutes = parseInt(timePart[1]);
+
+            // Handle AM/PM format
+            if (ampm === 'PM' && hours < 12) {
+                hours += 12;
+            } else if (ampm === 'AM' && hours === 12) {
+                hours = 0;
+            }
+
+            var date = new Date(year, month, day, hours, minutes);
+
+            // Check if the date is valid
+            if (isNaN(date.getTime())) {
+                return "Invalid Date";
+            }
+
+            // Get the month name
+            var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var monthName = monthNames[month];
+
+            // Format the date string
+            var formattedDate = `${monthName} ${day}, ${year} ${hours % 12 || 12}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+
+            return formattedDate;
+        }
+
+
+
+
+         function Get_Reference() {
+            var urlpath = '@Url.Action("Get_CostCentre_R", "CostCentre")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "Get",
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+
+
+                },
+                success: function (data) {
+                    $('#tabH').show();
+                    var result = JSON.parse(data);
+                    console.log(result);
+                    var row = "";
+                    $('#dtTableBody').html("");
+                    for (var i = 0; i <result.length; i++) {
+                        row += "<tr>";
+                        row += "<td>" + (i + 1) + "</td>";
+                        row += "<td>" + un(result[i].CompanyName) + "</td>";
+                        row += "<td>" + un(result[i].Description) + "</td>";
+                        row += "<td>" + un(result[i].CostCenterStartDate) + "</td>";
+                        if (result[i].IsActive == true) {
+                            row += "<td><span class='badge bg-success'>Active</span></td>";
+                        } else {
+                            row += "<td><span class='badge bg-danger'>Inactive</span></td>";
+                        }
+                        //row += "<td style='text-align:center'>" + un(data[i].EntryBy) + "</td>";
+                        //row += "<td style='text-align:center'>" + un(data[i].EntryDate) + "</td>";
+                        //row += "<td style='text-align:center'>" + un(data[i].UpdateBy) + "</td>";
+                        //row += "<td style='text-align:center'>" + un(data[i].UpdateDate) + "</td>";
+
+
+                     /*   <button style='border-style:none' onclick='delClick(" + result[i].CostCenterId + ")'><i class='fa fa-trash' style='color:#FF0000'></i></button>*/
+                        row += "<td><button style='border-style:none'   onclick='editClick(" + result[i].CostCenterId + ")'><i class='fa fa-pencil' style='color:#00BFFF'></i></button> </td>";
+                    }
+                    $('#dtTableBody').html(row);
+                },
+                complete: function () {
+
+                    if ($.fn.dataTable.isDataTable('.jdtDataTable')) {
+                        table = $('#dtTb').DataTable({
+                            paging: true,
+                            retrieve: true,
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: false,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ]
+                        });
+                    }
+                    else {
+                        table = $('.jdtDataTable').DataTable({
+
+                            "bInfo": true,
+                            "bFilter": true,
+                            processing: true,
+
+                            dom: '<"container-fluid"<"row"<"col"l><"col"B><"col"f>>>rtip',
+
+
+                            lengthChange: false,
+                            language: {
+                                searchPlaceholder: "Search records",
+                                search: ' ',
+                                "emptyTable": "No Data Found!"
+                            },
+
+                            buttons: [
+                                {
+                                    extend: 'copyHtml5',
+                                    text: '<i class="fa fa-files-o"></i>',
+                                    titleAttr: 'Copy', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fa fa-file-excel-o"></i>',
+                                    titleAttr: 'Excel', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'csvHtml5',
+                                    text: '<i class="fa fa-file-text-o"></i>',
+                                    titleAttr: 'CSV', className: 'btn  btn-sm'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fa fa-file-pdf-o"></i>',
+                                    titleAttr: 'PDF', className: 'btn  btn-sm'
+                                }
+                            ]
+                        });
+                    }
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+
+                    //table.buttons().container()
+                    //    .appendTo('#dtTb_wrapper .col-md-6:eq(0)');
+                }
+            });
+        }
+
+         function editClick(id) {
+             location.href = '@Url.Action("CostcentreInformation", "CostCentre")?id=' + id + '';
+        }
+
+
+
+
+function delClick(id) {
+    swal({
+        title: "Are you sure?",
+        text: "You will not be able to recover this record!",
+        type: "warning",
+        showCancelButton: true,
+        cancelButtonText: 'No, cancel!',
+        cancelButtonColor: '#FF0000',
+        confirmButtonColor: '#3498DB',
+        confirmButtonText: 'Yes, delete it!',
+        closeOnConfirm: false,
+        closeOnCancel: false
+    },
+    function (isConfirm) {
+        if (isConfirm) {
+            $.ajax({
+                url: "/CostCentre/Del_CostCenter_Info_By_Id",
+                dataType: 'json',
+                data: { id: id },
+                type: "POST",
+                async: true
+            }).done(function (result) {
+                setTimeout(function () {
+                    $("#overlay").fadeOut(300);
+                }, 500);
+
+                if (result.msg != "") {
+                    swal({
+                        title: "Deleted Successfully!",
+                        text: '',
+                        type: "success",
+                        showCancelButton: false,
+                        cancelButtonClass: 'btn-danger waves-effect waves-light',
+                        confirmButtonClass: 'btn-primary waves-effect waves-light',
+                        confirmButtonText: 'Yes!',
+                        closeOnConfirm: false
+                    }, function () {
+                        window.location.href = '@Url.Action("CostcentreList", "CostCentre")';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                    });
+                }
+            }).fail(function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong!',
+                });
+            });
+        } else {
+            swal("Cancelled", "Your record is safe :)", "error");
+        }
+    });
+}
+    </script>
+
+}
+

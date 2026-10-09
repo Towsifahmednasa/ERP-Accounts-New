@@ -1,0 +1,2183 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\Contra\ContraEntry.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Contra Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-group {
+        padding-bottom: 3px;
+    }
+</style>
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+
+                                        <h5 class="mb-0 text-dark cstlfs">Contra Info</h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                        <a class="small blue button" href="@Url.Action("ContraList", "Contra")">
+                                            <span class="fa fa-share"></span>  Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+
+                            <div class="col-md-12" style="margin-top:10px;">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divCompany">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select> </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlFyMain" class="bold col-form-label">Financial Year: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divFyMain">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFyMain"></select> </div>
+                                            </div>
+                                        </div>
+
+
+
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtPostingDate" class="bold col-form-label">Posting Date: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divPostingDate">     <input type="text" id="txtPostingDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group" id="divIsMannualVoucher">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtVoucherNo" class="bold col-form-label">Voucher No.:</label></div>
+                                                <div class="col-md-8">       <input type="text" id="txtVoucherNo" class="form-control form-control-sm mb-3" /></div>
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div class="form-group" id="divCurrency">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlCurrency" class="bold col-form-label">Currency: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCurrency"></select> </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtConversionRate" class="bold col-form-label">Conversion Rate: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divtConversionRate">       <input disabled type="text" id="txtConversionRate" class="form-control form-control-sm mb-3" value="1" /></div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToBankNarration" class="bold col-form-label">Narration: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">    <textarea id="txtToBankNarration" rows="4" cols="50" class="form-control form-control-sm"> </textarea> </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mt-3">
+                                            <div class="row">
+                                                <div class="col-md-12" id="divTransferType">
+                                                    <div class="d-flex flex-wrap gap-1" style="font-size: 1.05rem;">
+                                                        <!-- Font size increased -->
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="transferType" id="bankToBank" value="1" onchange="toggleTransferSections()">
+                                                            <label class="form-check-label" for="bankToBank">Bank to Bank</label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="transferType" id="cashToCash" value="2" onchange="toggleTransferSections()">
+                                                            <label class="form-check-label" for="cashToCash">Cash to Cash</label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="transferType" id="cashToBank" value="3" onchange="toggleTransferSections()">
+                                                            <label class="form-check-label" for="cashToBank">Cash to Bank</label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="transferType" id="bankToCash" value="4" onchange="toggleTransferSections()">
+                                                            <label class="form-check-label" for="bankToCash">Bank to Cash</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4">
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Bank to Bank Section -->
+                            <div class="col-md-12" style="margin-top:50px; display:none;" id="btb">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   </div>
+                                                <div class="col-md-8">   <h5>From:</h5> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlFromBankAccount" class="bold col-form-label">Bank Account: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divFromBankAccount">    <select class="form-select form-select-sm mb-3 select2" onchange="LoadFromBankInfo()" style="width: 100%;" id="ddlFromBankAccount"></select> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblFromBankBalance" class="bold col-form-label">Bank Balance: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBankBalance"></label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group d-none">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtFromChequeNo" class="bold col-form-label">Cheque No: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">   <input type="text" id="txtFromChequeNo" class="form-control form-control-sm mb-3" /></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group d-none">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtFromChequeDate" class="bold col-form-label">Cheque Date: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">     <input type="text" id="txtFromChequeDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group d-none">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblFromBankName" class="bold col-form-label">Bank Name: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBankName"></label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group d-none">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblFromBranchName" class="bold col-form-label">Branch Name: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBranchName"></label> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   </div>
+                                                <div class="col-md-8">   <h5>To:</h5> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlToBankAccount" class="bold col-form-label">Bank Account: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divToBankAccount">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadToBankInfo()" id="ddlToBankAccount"></select> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToBankBalance" class="bold col-form-label">Amount: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">    <input type="number" id="txtToBankBalance" class="form-control form-control-sm mb-3" step="0.01" /> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToChequeNo" class="bold col-form-label">Cheque No: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">       <input type="text" id="txtToChequeNo" class="form-control form-control-sm mb-3" /></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToChequeDate" class="bold col-form-label">Cheque Date: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">     <input type="text" id="txtToChequeDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblToBankName" class="bold col-form-label">Bank Name: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblToBankName"></label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblToBranchName" class="bold col-form-label">Branch Name: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblToBranchName"></label> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cash to Cash Section -->
+                            <div class="col-md-12" style="margin-top: 50px; display: none;" id="ctc">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   </div>
+                                                <div class="col-md-8">   <h5>From:</h5> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlFromCashAccount" class="bold col-form-label">Cash Account : <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divFromCashAccount">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadFromCashInfo()" id="ddlFromCashAccount"></select> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblFromCashBalance" class="bold col-form-label">Cash Balance: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromCashBalance"></label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group d-none">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtFromRefNo" class="bold col-form-label">Ref. No:  </label></div>
+                                                <div class="col-md-8">       <input type="text" id="txtFromRefNo" class="form-control form-control-sm mb-3" /></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group d-none">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtFromRefDate" class="bold col-form-label">Ref. Date:  </label></div>
+                                                <div class="col-md-8">     <input type="text" id="txtFromRefDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   </div>
+                                                <div class="col-md-8">   <h5>To:</h5> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlToCashAccount" class="bold col-form-label">Cash Account : <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divToCashAccount">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadToCashInfo()" id="ddlToCashAccount"></select> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToCashBalance" class="bold col-form-label">Amount: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">    <input type="number" id="txtToCashBalance" class="form-control form-control-sm mb-3" step="0.01" /> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToRefNo" class="bold col-form-label">Ref. No:  </label></div>
+                                                <div class="col-md-8">       <input type="text" id="txtToRefNo" class="form-control form-control-sm mb-3" /></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToRefDate" class="bold col-form-label">Ref. Date:  </label></div>
+                                                <div class="col-md-8">     <input type="text" id="txtToRefDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cash to Bank Section -->
+                            <div class="col-md-12" style="margin-top: 50px; display: none;" id="ctb">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   </div>
+                                                <div class="col-md-8">   <h5>From:</h5> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlFromCashAccountCB" class="bold col-form-label">Cash Account : <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divFromCashAccountCB">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadFromCashInfo()" id="ddlFromCashAccountCB"></select> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblFromCashBalanceCB" class="bold col-form-label">Cash Balance: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromCashBalanceCB"></label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtFromRefNoCB" class="bold col-form-label">Ref. No:  </label></div>
+                                                <div class="col-md-8">       <input type="text" id="txtFromRefNoCB" class="form-control form-control-sm mb-3" /></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtFromRefDateCB" class="bold col-form-label">Ref. Date:  </label></div>
+                                                <div class="col-md-8">     <input type="text" id="txtFromRefDateCB" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   </div>
+                                                <div class="col-md-8">   <h5>To:</h5> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlToBankAccountCB" class="bold col-form-label">Bank Account: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divToBankAccountCB">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadToBankInfo()" id="ddlToBankAccountCB"></select> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToBankBalanceCB" class="bold col-form-label">Amount: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">    <input type="number" id="txtToBankBalanceCB" class="form-control form-control-sm mb-3" step="0.01" /> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblBankNameCB" class="bold col-form-label">Bank Name: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblBankNameCB"></label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblBranchNameCB" class="bold col-form-label">Branch Name: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblBranchNameCB"></label> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bank to Cash Section -->
+                            <div class="col-md-12" style="margin-top: 50px; display: none;" id="btc">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   </div>
+                                                <div class="col-md-8">   <h5>From:</h5> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlFromBankAccountBC" class="bold col-form-label">Bank Account: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divFromBankAccountBC">    <select class="form-select form-select-sm mb-3 select2" onchange="LoadFromBankInfo()" style="width: 100%;" id="ddlFromBankAccountBC"></select> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblFromBankBalanceBC" class="bold col-form-label">Bank Balance: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBankBalanceBC"></label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtChequeNoBC" class="bold col-form-label">Cheque No: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">       <input type="text" id="txtChequeNoBC" class="form-control form-control-sm mb-3" /></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtChequeDateBC" class="bold col-form-label">Cheque Date: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">     <input type="text" id="txtChequeDateBC" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblFromBankNameBC" class="bold col-form-label">Bank Name: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBankNameBC"></label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="lblFromBranchNameBC" class="bold col-form-label">Branch Name: </label></div>
+                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBranchNameBC"></label> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   </div>
+                                                <div class="col-md-8">   <h5>To:</h5> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="ddlToCashAccountBC" class="bold col-form-label">Cash Account : <span class="required"> *</span></label></div>
+                                                <div class="col-md-8" id="divToCashAccountBC">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadToCashInfo()" id="ddlToCashAccountBC"></select> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToCashBalanceBC" class="bold col-form-label">Amount: <span class="required"> *</span></label></div>
+                                                <div class="col-md-8">    <input type="number" id="txtToCashBalanceBC" class="form-control form-control-sm mb-3" step="0.01" /> </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToRefNoBC" class="bold col-form-label">Ref. No:  </label></div>
+                                                <div class="col-md-8">       <input type="text" id="txtToRefNoBC" class="form-control form-control-sm mb-3" /></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">   <label for="txtToRefDateBC" class="bold col-form-label">Ref. Date:  </label></div>
+                                                <div class="col-md-8">     <input type="text" id="txtToRefDateBC" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display:none">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">   <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required"> *</span></label></div>
+                                        <div class="col-md-8">     <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">   <label for="txtToDate" class="bold col-form-label">To Date: <span class="required"> *</span></label></div>
+                                        <div class="col-md-8">     <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div style="padding-top: 1.5%">
+
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+
+                                                <button class="small blue button" id="btnSave" onclick="SaveContra()">
+
+                                                    Submit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loadingSpinner" style="display:none;">
+    <div class="overlay"></div>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
+<input id="masterId" value="@ViewBag.MasterId" style="display:none" />
+
+@section Scripts
+{
+
+    <script type="text/javascript">
+
+        let MasterId = $('#masterId').val();
+        $(document).ready(function () {
+            LoadCompany('ddlCompany');
+            LoadCompany('ddlToCompany');
+            //LoadFinansialYearSingle();
+            LoadCurrency();
+            $("#ddlCurrency").val("1");
+            $("#ddlCurrency").prop("disabled", true);
+
+            if (MasterId > 0) {
+                GetContraMaster(MasterId);
+                toggleTransferSections();
+            } else {
+
+            }
+            $("#bankToBank").prop("checked", true);
+            toggleTransferSections();
+
+        });
+
+
+
+        function toggleTransferSections() {
+
+            $("#loadingSpinner").show();
+            // Hide all sections first
+            $("#btb").hide(); // Bank to Bank
+            $("#ctc").hide(); // Cash to Cash
+            $("#ctb").hide(); // Cash to Bank
+            $("#btc").hide(); // Bank to Cash
+
+            // Show the selected section
+            var selectedValue = $('input[name="transferType"]:checked').val();
+
+            switch (selectedValue) {
+                case "1": // Bank to Bank
+                    $("#btb").show();
+                    LoadFromBankAccount();
+                    LoadToBankAccount();
+                    break;
+                case "2": // Cash to Cash
+                    $("#ctc").show();
+                    LoadFromCashAccount();
+                    LoadToCashAccount();
+                    break;
+                case "3": // Cash to Bank
+                    $("#ctb").show();
+                    LoadFromCashAccountCB();
+                    LoadToBankAccountCB();
+                    break;
+                case "4": // Bank to Cash
+                    $("#btc").show();
+                    LoadFromBankAccountBC();
+                    LoadToCashAccountBC();
+                    break;
+            }
+
+           
+                $("#loadingSpinner").hide();
+             
+        }
+
+
+        function LoadFromBankAccount() {
+            var companyId = $("#ddlCompany").val();
+            if (companyId && companyId != "0") {
+                $.ajax({
+                    url: "/Utility/GetBankAccountComId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlFromBankAccount').empty();
+                        $('#ddlFromBankAccount').append("<option value='0'>--Select Bank Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlFromBankAccount').append($("<option></option>").val(data[i].BankAccountId).html(data[i].BankAccountName));
+                        }
+                        $('#ddlFromBankAccount').select2();
+                    }
+                });
+            }
+        }
+
+        function LoadToBankAccount() {
+            var companyId = $("#ddlCompany").val();
+            if (companyId && companyId != "0") {
+                $.ajax({
+                    url: "/Utility/GetBankAccountComId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlToBankAccount').empty();
+                        $('#ddlToBankAccount').append("<option value='0'>--Select Bank Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlToBankAccount').append($("<option></option>").val(data[i].BankAccountId).html(data[i].BankAccountName));
+                        }
+                        $('#ddlToBankAccount').select2();
+                    }
+                });
+            }
+        }
+
+        function LoadFromCashAccount() {
+            var companyId = $("#ddlCompany").val();
+            if (companyId && companyId != "0") {
+                $.ajax({
+                    url: "/Utility/GetCashAccountComId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlFromCashAccount').empty();
+                        $('#ddlFromCashAccount').append("<option value='0'>--Select Cash Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlFromCashAccount').append($("<option></option>").val(data[i].CashAccountId).html(data[i].CashAccountName));
+                        }
+                        $('#ddlFromCashAccount').select2();
+                    }
+                });
+            }
+        }
+
+        function LoadToCashAccount() {
+            var companyId = $("#ddlCompany").val();
+            if (companyId && companyId != "0") {
+                $.ajax({
+                    url: "/Utility/GetCashAccountComId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlToCashAccount').empty();
+                        $('#ddlToCashAccount').append("<option value='0'>--Select Cash Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlToCashAccount').append($("<option></option>").val(data[i].CashAccountId).html(data[i].CashAccountName));
+                        }
+                        $('#ddlToCashAccount').select2();
+                    }
+                });
+            }
+        }
+
+        // Cash to Bank specific functions
+        function LoadFromCashAccountCB() {
+            var companyId = $("#ddlCompany").val();
+            if (companyId && companyId != "0") {
+                $.ajax({
+                    url: "/Utility/GetCashAccountComId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlFromCashAccountCB').empty();
+                        $('#ddlFromCashAccountCB').append("<option value='0'>--Select Cash Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlFromCashAccountCB').append($("<option></option>").val(data[i].CashAccountId).html(data[i].CashAccountName));
+                        }
+                        $('#ddlFromCashAccountCB').select2();
+                    }
+                });
+            }
+        }
+
+        function LoadToBankAccountCB() {
+            var companyId = $("#ddlCompany").val();
+            if (companyId && companyId != "0") {
+                $.ajax({
+                    url: "/Utility/GetBankAccountComId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlToBankAccountCB').empty();
+                        $('#ddlToBankAccountCB').append("<option value='0'>--Select Bank Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlToBankAccountCB').append($("<option></option>").val(data[i].BankAccountId).html(data[i].BankAccountName));
+                        }
+                        $('#ddlToBankAccountCB').select2();
+                    }
+                });
+            }
+        }
+
+        // Bank to Cash specific functions
+        function LoadFromBankAccountBC() {
+            var companyId = $("#ddlCompany").val();
+            if (companyId && companyId != "0") {
+                $.ajax({
+                    url: "/Utility/GetBankAccountComId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlFromBankAccountBC').empty();
+                        $('#ddlFromBankAccountBC').append("<option value='0'>--Select Bank Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlFromBankAccountBC').append($("<option></option>").val(data[i].BankAccountId).html(data[i].BankAccountName));
+                        }
+                        $('#ddlFromBankAccountBC').select2();
+                    }
+                });
+            }
+        }
+
+        function LoadToCashAccountBC() {
+            var companyId = $("#ddlCompany").val();
+            if (companyId && companyId != "0") {
+                $.ajax({
+                    url: "/Utility/GetCashAccountComId",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    type: "Get",
+                    data: { companyId: companyId },
+                    async: false,
+                    success: function (data) {
+                        $('#ddlToCashAccountBC').empty();
+                        $('#ddlToCashAccountBC').append("<option value='0'>--Select Cash Account--</option>");
+                        for (var i = 0; i < data.length; i++) {
+                            $('#ddlToCashAccountBC').append($("<option></option>").val(data[i].CashAccountId).html(data[i].CashAccountName));
+                        }
+                        $('#ddlToCashAccountBC').select2();
+                    }
+                });
+            }
+        }
+
+        function LoadDDlbyComTo() {
+
+            Contra_Readonly();
+
+            $("#overlay").fadeIn(300);
+
+            LoadFinansialYearTo();
+            //LoadBankCashAccountTo();
+            _loadCOAbyComTo();
+            setTimeout(function () {
+                $("#overlay").fadeOut(300);
+            }, 500);
+        }
+
+
+        function LoadDDlbyCom() {
+            $("#overlay").fadeIn(300);
+            LoadFinansialYearSingle();
+            Contra_Readonly();
+            LoadFinansialYear();
+            LoadBankCashAccount();
+            _loadCOAbyCom();
+            toggleTransferSections();
+            setTimeout(function () {
+                $("#overlay").fadeOut(300);
+            }, 500);
+        }
+
+
+
+        function LoadFromBankInfo() {
+            console.log("LoadFromBankInfo called"); // CHANGED: Added console logging
+            var transferType = $('input[name="transferType"]:checked').val();
+            var CompanyID = $('#ddlCompany').val();
+            var BankAccountID = '';
+            var BankName = '';
+
+            console.log("Transfer Type: " + transferType); // CHANGED: Added console logging
+            console.log("Company ID: " + CompanyID);
+
+            // Get the appropriate dropdown based on transfer type
+            switch(transferType) {
+                case "1": // Bank to Bank
+                    BankAccountID = $('#ddlFromBankAccount').val();
+                    BankName = $("#ddlFromBankAccount option:selected").text();
+                    break;
+                case "4": // Bank to Cash
+                    BankAccountID = $('#ddlFromBankAccountBC').val();
+                    BankName = $("#ddlFromBankAccountBC option:selected").text();
+                    break;
+            }
+
+            console.log("Bank Account ID: " + BankAccountID); // CHANGED: Added console logging
+            console.log("Bank Name: " + BankName);
+
+            if (!BankAccountID || BankAccountID == '0') {
+                console.log("No bank account selected, returning"); // CHANGED: Added console logging
+                return;
+            }
+
+            var FinancialYearID = $('#ddlFyMain').val();
+            // CHANGED: Fixed date format to use proper format for controller
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+            var BankBookFinancialYearStartDate = $('#txtfrmDate').val();
+
+            console.log("Financial Year ID: " + FinancialYearID); // CHANGED: Added console logging
+            console.log("From Date: " + FromDate);
+            console.log("To Date: " + ToDate);
+
+            var urlpath = '@Url.Action("GetBankInfoMasterId", "BankPayments")';
+            console.log("URL Path: " + urlpath); // CHANGED: Added console logging
+
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "GET", // CHANGED: Standardized to GET
+                data: {
+                    CompanyID: CompanyID,
+                    BankAccountID: BankAccountID,
+                    FinancialYearID: FinancialYearID,
+                    FromDate: FromDate,
+                    ToDate: ToDate,
+                    BankNAme: BankName,
+                    BankBookFinancialYearStartDate: BankBookFinancialYearStartDate
+                },
+                async: false,
+                beforeSend: function () {
+                    // Show the full-screen loading spinner
+                    $("#loadingSpinner").show();
+                },
+                success: function (data) {
+                    console.log("Success response received:", data); // CHANGED: Added success logging
+                    switch(transferType) {
+                        case "1": // Bank to Bank
+                            $("#lblFromBankBalance").html(data.BankBlnc || '0.00'); // CHANGED: Added null safety
+                            $("#lblFromBankName").html(data.BankName || '');
+                            $("#lblFromBranchName").html(data.BranchName || '');
+                            break;
+                        case "4": // Bank to Cash
+                            $("#lblFromBankBalanceBC").html(data.BankBlnc || '0.00'); // CHANGED: Added null safety
+                            $("#lblFromBankNameBC").html(data.BankName || '');
+                            $("#lblFromBranchNameBC").html(data.BranchName || '');
+                            break;
+                    }
+                },
+                error: function(xhr, status, error) { // CHANGED: Enhanced error handling
+                    console.log("AJAX Error Details:");
+                    console.log("Status: " + status);
+                    console.log("Error: " + error);
+                    console.log("Response Text: " + xhr.responseText);
+                    console.log("Status Code: " + xhr.status);
+
+                    if (xhr.status === 404) {
+                        console.log("Controller action not found - check routing");
+                    } else if (xhr.status === 500) {
+                        console.log("Server error - check controller implementation");
+                    }
+                },
+                complete: function () {
+                    setTimeout(function () {
+                        $("#loadingSpinner").hide();
+                    }, 500);
+                }
+            });
+        }
+
+        function LoadToBankInfo() {
+            console.log("LoadToBankInfo called"); // CHANGED: Added console logging
+            var transferType = $('input[name="transferType"]:checked').val();
+            var CompanyID = $('#ddlCompany').val();
+            var BankAccountID = '';
+            var BankName = '';
+
+            // Get the appropriate dropdown based on transfer type
+            switch(transferType) {
+                case "1": // Bank to Bank
+                    BankAccountID = $('#ddlToBankAccount').val();
+                    BankName = $("#ddlToBankAccount option:selected").text();
+                    break;
+                case "3": // Cash to Bank
+                    BankAccountID = $('#ddlToBankAccountCB').val();
+                    BankName = $("#ddlToBankAccountCB option:selected").text();
+                    break;
+            }
+
+            if (!BankAccountID || BankAccountID == '0') return;
+
+            var FinancialYearID = $('#ddlFyMain').val();
+            // CHANGED: Fixed date format
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+            var BankBookFinancialYearStartDate = $('#txtfrmDate').val();
+
+            var urlpath = '@Url.Action("GetBankInfoMasterId", "BankPayments")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "GET", // CHANGED: Standardized to GET
+                data: {
+                    CompanyID: CompanyID,
+                    BankAccountID: BankAccountID,
+                    FinancialYearID: FinancialYearID,
+                    FromDate: FromDate,
+                    ToDate: ToDate,
+                    BankNAme: BankName,
+                    BankBookFinancialYearStartDate: BankBookFinancialYearStartDate
+                },
+                async: false,
+                beforeSend: function () {
+                    // Show the full-screen loading spinner
+                    $("#loadingSpinner").show();
+                },
+                success: function (data) {
+                    console.log("Check Data:-", data);
+                    switch(transferType) {
+                        case "1": // Bank to Bank
+                            $("#lblToBankBalance").html(data.BankBlnc || '0.00'); // CHANGED: Added null safety
+                            $("#lblToBankName").html(data.BankName || '');
+                            $("#lblToBranchName").html(data.BranchName || '');
+                            break;
+                        case "3": // Cash to Bank
+                            $("#lblToBankBalanceCB").html(data.BankBlnc || '0.00'); // CHANGED: Added null safety
+                            $("#lblBankNameCB").html(data.BankName || '');
+                            $("#lblBranchNameCB").html(data.BranchName || '');
+                            break;
+                    }
+                },
+                error: function(xhr, status, error) { // CHANGED: Added error handling
+                    console.log("LoadToBankInfo Error: " + error);
+                    console.log("Status: " + status);
+                    console.log("Response: " + xhr.responseText);
+                },
+                complete: function () {
+                    setTimeout(function () {
+                        $("#loadingSpinner").hide();
+                    }, 500);
+                }
+            });
+        }
+
+        function LoadFromCashInfo() {
+            var transferType = $('input[name="transferType"]:checked').val();
+            var CompanyID = $('#ddlCompany').val();
+            var CashAccountID = '';
+            var CashbookName = '';
+
+            // Get the appropriate dropdown based on transfer type
+            switch(transferType) {
+                case "2": // Cash to Cash
+                    CashAccountID = $('#ddlFromCashAccount').val();
+                    CashbookName = $("#ddlFromCashAccount option:selected").text();
+                    break;
+                case "3": // Cash to Bank
+                    CashAccountID = $('#ddlFromCashAccountCB').val();
+                    CashbookName = $("#ddlFromCashAccountCB option:selected").text();
+                    break;
+            }
+
+            if (!CashAccountID || CashAccountID == '0') return;
+
+            var FinancialYearID = $('#ddlFyMain').val();
+            // CHANGED: Fixed date format
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+            var CashBookFinancialYearStartDate = $('#txtfrmDate').val();
+            var urlpath = '@Url.Action("GetCashInfoIndoById", "BankPayments")';
+
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "GET", // CHANGED: Standardized to GET
+                data: {
+                    CompanyID: CompanyID,
+                    CashAccountID: CashAccountID,
+                    FinancialYearID: FinancialYearID,
+                    FromDate: FromDate,
+                    ToDate: ToDate,
+                    CashbookNAme: CashbookName,
+                    CashBookFinancialYearStartDate: CashBookFinancialYearStartDate
+                },
+                async: false,
+                beforeSend: function () {
+                    // Show the full-screen loading spinner
+                    $("#loadingSpinner").show();
+                },
+                success: function (data) {
+                    switch(transferType) {
+                        case "2": // Cash to Cash
+                            $("#lblFromCashBalance").html(data.BankBlnc || '0.00'); // CHANGED: Added null safety
+                            break;
+                        case "3": // Cash to Bank
+                            $("#lblFromCashBalanceCB").html(data.BankBlnc || '0.00'); // CHANGED: Added null safety
+                            break;
+                    }
+                },
+                error: function(xhr, status, error) { // CHANGED: Added error handling
+                    console.log("LoadFromCashInfo Error: " + error);
+                },
+                complete: function () {
+                    setTimeout(function () {
+                        $("#loadingSpinner").hide();
+                    }, 500);
+                }
+            });
+        }
+
+        function LoadToCashInfo() {
+            var transferType = $('input[name="transferType"]:checked').val();
+            var CompanyID = $('#ddlCompany').val();
+            var CashAccountID = '';
+            var CashbookName = '';
+
+            // Get the appropriate dropdown based on transfer type
+            switch(transferType) {
+                case "2": // Cash to Cash
+                    CashAccountID = $('#ddlToCashAccount').val();
+                    CashbookName = $("#ddlToCashAccount option:selected").text();
+                    break;
+                case "4": // Bank to Cash
+                    CashAccountID = $('#ddlToCashAccountBC').val();
+                    CashbookName = $("#ddlToCashAccountBC option:selected").text();
+                    break;
+            }
+
+            if (!CashAccountID || CashAccountID == '0') return;
+
+            var FinancialYearID = $('#ddlFyMain').val();
+            // CHANGED: Fixed date format
+            var FromDate = $('#txtfrmDate').val();
+            var ToDate = $('#txtToDate').val();
+            var CashBookFinancialYearStartDate = $('#txtfrmDate').val();
+
+            var urlpath = '@Url.Action("GetCashInfoIndoById", "BankPayments")';
+
+            $.ajax({
+                url: urlpath,
+                dataType: 'json',
+                type: "GET", // CHANGED: Standardized to GET
+                data: {
+                    CompanyID: CompanyID,
+                    CashAccountID: CashAccountID,
+                    FinancialYearID: FinancialYearID,
+                    FromDate: FromDate,
+                    ToDate: ToDate,
+                    CashbookNAme: CashbookName,
+                    CashBookFinancialYearStartDate: CashBookFinancialYearStartDate
+                },
+                async: false,
+                beforeSend: function () {
+                    // Show the full-screen loading spinner
+                    $("#loadingSpinner").show();
+                },
+                success: function (data) {
+                    switch(transferType) {
+                        case "2": // Cash to Cash
+                            $("#lblToCashBalance").html(data.BankBlnc || '0.00'); // CHANGED: Added null safety
+                            break;
+                        case "4": // Bank to Cash
+                            $("#lblToCashBalanceBC").html(data.BankBlnc || '0.00'); // CHANGED: Added null safety
+                            break;
+                    }
+                },
+                error: function(xhr, status, error) { // CHANGED: Added error handling
+                    console.log("LoadToCashInfo Error: " + error);
+                },
+                complete: function () {
+                    setTimeout(function () {
+                        $("#loadingSpinner").hide();
+                    }, 500);
+                }
+            });
+        }
+
+        //function LoadDaterangebyFiscal() {
+        //    var companyId = $("#ddlCompany").val();
+        //    var FinancialYearId = $("#ddlFinansialYear").val();
+        //    $.ajax({
+        //        url: "/Utility/GetDaterangebyFiscal",
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: 'json',
+        //        type: "Get",
+        //        data: { companyId: companyId, FinancialYearId: FinancialYearId },
+        //        async: false,
+        //        success: function (data) {
+
+        //            $('#txtfrmDate').val((data.StartDate));
+        //            $('#txtToDate').val((data.EndDate));
+        //        }
+        //    });
+        //}
+
+        function LoadCurrency() {
+            $.ajax({
+                url: "/Utility/GetCurrency",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: {},
+                async: false,
+                success: function (data) {
+
+                    $('#ddlCurrency').empty();
+                    $('#ddlCurrency').append("<option value='0'>--Select Currency--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlCurrency').append($("<option></option>").val(data[i].CurrencyId).html(data[i].CurrencyName));
+                    }
+                }
+            });
+        }
+        function LoadFinansialYear() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(10);
+
+
+                },
+                success: function (data) {
+
+                    $('#ddlFinansialYear').empty();
+                    $('#ddlFinansialYear').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYear').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                    if (data.length > 0) {
+                        // Select the first real financial year (index 1)
+                        $('#ddlFinansialYear').val(data[0].FinancialYearId).trigger('change');
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+        function LoadFinansialYearTo() {
+            var companyId = $("#ddlToCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+
+
+                },
+                success: function (data) {
+
+                    $('#ddlFinansialYearTo').empty();
+                    $('#ddlFinansialYearTo').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFinansialYearTo').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+        function LoadFinansialYearSingle() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetFinansialYearComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+
+
+                },
+                success: function (data) {
+
+                    $('#ddlFyMain').empty();
+                    $('#ddlFyMain').append("<option value='0'>--Select Financial Year--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFyMain').append($("<option></option>").val(data[i].FinancialYearId).html(data[i].FinancialYearDesc));
+                    }
+                    if (data.length > 0) {
+                        // Select the first real financial year (index 1)
+                        $('#ddlFyMain').val(data[0].FinancialYearId).trigger('change');
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+        $('#ddlFyMain').on('change', function () {
+            LoadDaterangebyFiscal();
+        });
+
+        function LoadDaterangebyFiscal() {
+
+            var companyId = $("#ddlCompany").val();
+            var FinancialYearId = $("#ddlFyMain").val();
+            $.ajax({
+                url: "/Utility/GetDaterangebyFiscal",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId, FinancialYearId: FinancialYearId },
+                async: false,
+                success: function (data) {
+
+                    $('#txtfrmDate').val((data.StartDate));
+                    $('#txtToDate').val((data.EndDate));
+                }
+            });
+        }
+
+        function LoadBankCashAccount() {
+            var companyId = $("#ddlCompany").val();
+            $.ajax({
+                url: "/Utility/GetAllBankCashAccountComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+
+
+                },
+                success: function (data) {
+
+                    $('#ddlFromBankAccount').empty();
+                    $('#ddlFromBankAccount').append("<option value='0'>--Select  Account--</option>");
+
+                    //$('#ddlToBankAccount').empty();
+                    //$('#ddlToBankAccount').append("<option value='0'>--Select  Account--</option>");
+
+                    //$('#ddlToBankAccount').empty();
+                    //$('#ddlToBankAccount').append("<option value='0'>--Select To Bank Account--</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlFromBankAccount').append($("<option></option>").val(data[i].BankAccountId).html(data[i].BankAccountName));
+
+                    /*  $('#ddlToBankAccount').append($("<option></option>").val(data[i].BankAccountId).html(data[i].BankAccountName));*/
+                    }
+                },
+                complete: function () {
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+        }
+
+
+
+        function _loadCOAbyCom() {
+            var companyId = $("#ddlCompany").val();
+
+            $.ajax({
+                url: "/Utility/GetCOAComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlcoa').empty();
+                    $('#ddlcoa').append("<option value='0'>--Select  Chart of Account  --</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlcoa').append($("<option></option>").val(data[i].AccountId).html(data[i].AccountName));
+                    }
+                }
+            });
+        }
+
+
+        function _loadCOAbyComTo() {
+            var companyId = $("#ddlToCompany").val();
+
+            $.ajax({
+                url: "/Utility/GetCOAComId",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                type: "Get",
+                data: { companyId: companyId },
+                async: false,
+                success: function (data) {
+
+                    $('#ddlcoaTo').empty();
+                    $('#ddlcoaTo').append("<option value='0'>--Select  Chart of Account  --</option>");
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        $('#ddlcoaTo').append($("<option></option>").val(data[i].AccountId).html(data[i].AccountName));
+                    }
+                }
+            });
+        }
+
+        //function LoadBankCashAccountTo() {
+        //    var companyId = $("#ddlToCompany").val();
+        //    $.ajax({
+        //        url: "/Utility/GetAllBankCashAccountComId",
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: 'json',
+        //        type: "Get",
+        //        data: { companyId: companyId },
+        //        async: false,
+        //        beforeSend: function () {
+
+        //            $("#overlay").fadeIn(300);
+
+
+        //        },
+        //        success: function (data) {
+
+
+
+        //            $('#ddlToBankAccount').empty();
+        //            $('#ddlToBankAccount').append("<option value='0'>--Select To Bank Account--</option>");
+
+        //            for (var i = 0; i < data.length; i++) {
+
+
+        //                $('#ddlToBankAccount').append($("<option></option>").val(data[i].BankAccountId).html(data[i].BankAccountName));
+        //            }
+        //        },
+        //        complete: function () {
+
+        //            setTimeout(function () {
+        //                $("#overlay").fadeOut(300);
+        //            }, 500);
+        //        }
+        //    });
+        //}
+
+
+             function SaveContra() {
+
+                 if (Contra_Validation() == true) {
+
+                   SaveContraFinal();
+
+
+            }
+        }
+
+
+        function SaveContraFinal() {
+
+
+            swal({
+                title: "Are you sure?",
+                text: "Do you want to save this data?",
+                type: "warning",
+                showCancelButton: true,
+                cancelButtonClass: 'btn-secondary waves-effect',
+                confirmButtonClass: 'btn-success waves-effect waves-light',
+                confirmButtonText: 'Yes, Save it!',
+                cancelButtonText: 'Cancel',
+                closeOnConfirm: false, // Don't close on confirm
+                closeOnCancel: false // Don't close on cancel
+            }, function (isConfirm) {
+                if (isConfirm) {
+ 
+                    $('#btnSave').prop('disabled', true);
+
+                    // Show the loading overlay
+                    $("#overlay").fadeIn(300);
+
+            var jsonData = {};
+
+            jsonData["VoucherMasterId"] = $('#masterId').val();
+            jsonData["CompanyInfoId"] = $('#ddlCompany').val();
+            jsonData["FinancialYearId"] = $('#ddlFyMain').val(); // Updated to match validation
+            jsonData["PostingDate"] = $('#txtPostingDate').val();
+            jsonData["VoucherNo"] = $('#txtVoucherNo').val();
+            jsonData["CurrencyId"] = $('#ddlCurrency').val();
+            jsonData["CurrencyCovRate"] = $('#txtConversionRate').val();
+            jsonData["Narration"] = $('#txtToBankNarration').val();
+
+            var transferType = $('input[name="transferType"]:checked').val();
+            jsonData["TransferType"] = transferType;
+
+            // Initialize fields that may not be used
+            jsonData["CashAccountId"] = null;
+            jsonData["BankAccountId"] = null;
+            jsonData["ChequeNo"] = null;
+            jsonData["ChequeDate"] = null;
+            jsonData["Narration"] = null;
+            jsonData["TotalAmount"] = null;
+
+            // Set data based on transfer type (matching validation logic)
+            switch (transferType) {
+                case '1': // Bank to Bank
+                    jsonData["BankAccountId"] = $('#ddlFromBankAccount').val(); // From Bank
+                    jsonData["CashAccountId"] = $('#ddlToBankAccount').val(); // To Bank (using CashAccountId field)
+                    jsonData["TotalAmount"] = $('#txtToBankBalance').val();
+                    jsonData["ChequeNo"] = $('#txtToChequeNo').val();
+                    jsonData["ChequeDate"] = $('#txtToChequeDate').val();
+                    break;
+
+                case '2': // Cash to Cash
+                    jsonData["CashAccountId"] = $('#ddlFromCashAccount').val(); // From Cash
+                    jsonData["BankAccountId"] = $('#ddlToCashAccount').val(); // To Cash (using BankAccountId field)
+                    jsonData["TotalAmount"] = $('#txtToCashBalance').val();
+                    jsonData["CashRefNo"] = $('#txtToRefNo').val();
+                    jsonData["CashRefDate"] = $('#txtToRefDate').val();
+                    break;
+
+                case '3': // Cash to Bank
+                    jsonData["CashAccountId"] = $('#ddlFromCashAccountCB').val(); // From Cash
+                    jsonData["BankAccountId"] = $('#ddlToBankAccountCB').val(); // To Bank
+                    jsonData["TotalAmount"] = $('#txtToBankBalanceCB').val();
+                    jsonData["CashRefNo"] = $('#txtFromRefNoCB').val();
+                    jsonData["CashRefDate"] = $('#txtFromRefDateCB').val();
+                    break;
+
+                case '4': // Bank to Cash
+                    jsonData["BankAccountId"] = $('#ddlFromBankAccountBC').val(); // From Bank
+                    jsonData["CashAccountId"] = $('#ddlToCashAccountBC').val(); // To Cash
+                    jsonData["TotalAmount"] = $('#txtToCashBalanceBC').val();
+                    jsonData["CashRefNo"] = $('#txtToRefNo').val();
+                    jsonData["CashRefDate"] = $('#txtToRefDate').val();
+                    jsonData["ChequeNo"] = $('#txtChequeNoBC').val();
+                    jsonData["ChequeDate"] = $('#txtChequeDateBC').val();
+                    break;
+            }
+
+            var urlpath = '@Url.Action("SaveContra", "Contra")';
+         $.ajax({
+                contentType: "application/json",
+                data: JSON.stringify(jsonData),
+                dataType: 'json',
+                url: urlpath,
+                type: "POST",
+                success: function (result) {
+                    // Hide the overlay and re-enable the button after success
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                        $('#btnSave').prop('disabled', false); // Re-enable the button
+                    }, 500);
+
+                    if (result.pk > 0) {
+                        swal({
+                            title: "Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                        }, function () {
+                            window.location.href = '@Url.Action("ContraList", "Contra")';
+                        });
+                    }
+                },
+                error: function () {
+                    // In case of error, hide the overlay and re-enable the button
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                        $('#btnSave').prop('disabled', false); // Re-enable the button
+                    }, 500);
+
+                    swal({
+                        title: "Error!",
+                        text: 'Something went wrong while saving data.',
+                        type: "error",
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+                } else {
+                    swal.close(); 
+            // If user cancels, re-enable the button and hide the loading overlay
+                    $('#btnSave').prop('disabled', false);
+            $("#overlay").fadeOut(300);
+        }
+    });
+}
+
+        @*function SaveContraFinal() {
+
+            var jsonData = {};
+
+
+            jsonData["VoucherMasterId"] = $('#masterId').val();
+            jsonData["CompanyInfoId"] = $('#ddlCompany').val();
+
+            jsonData["FinancialYearId"] = $('#ddlFinansialYear').val();
+            jsonData["PostingDate"] = $('#txtPostingDate').val();
+
+            jsonData["VoucherNo"] = $('#txtVoucherNo').val();
+
+            var voucherType = 0;
+            //var voucherType = 0;
+            //if ($('#bankRadio').is(':checked')) {
+            //    voucherType = 1;
+            //}
+            //if ($('#cashRadio').is(':checked')) {
+            //    voucherType = 2;
+            //}
+
+            jsonData["VoucherCategoryID"] = voucherType;
+
+            jsonData["CurrencyId"] = $('#ddlCurrency').val();
+
+            jsonData["CurrencyCovRate"] = $('#txtConversionRate').val();
+            jsonData["Narration"] = $('#txtNaration').val();
+
+            jsonData["TotalAmount"] = $('#txtAmount').val();//parseFloat($('#lblTotalAmountAmount').html());
+            jsonData["CashAccountId"] = $('#ddlToBankAccount').val();
+            jsonData["BankAccountId"] = $('#ddlFromBankAccount').val();
+            jsonData["ChequeNo"] = $('#txtChequeNo').val();
+
+            jsonData["ChequeDate"] = $('#txtChequeDate').val();
+
+
+
+            jsonData["RefNo"] = $('#txtRefNo').val();
+
+
+            jsonData["RefDate"] = $('#txtRefDate').val();
+
+
+            jsonData["ToCompanyInfoId"] = $('#ddlToCompany').val();
+
+            jsonData["ToFinancialYearId"] = $('#ddlFinansialYearTo').val();
+
+
+            jsonData["ToCompanyInfoId"] = $('#ddlToCompany').val();
+
+            jsonData["ToFinancialYearId"] = $('#ddlFinansialYearTo').val();
+
+            var FrmCom = $('#ddlCompany').val();
+            var ToCom = $('#ddlToCompany').val();
+
+            jsonData["FromCoaId"] = null;
+
+            jsonData["ToCoaId"] = null;
+
+            if (FrmCom != "0" && ToCom != "0") {
+                if (FrmCom != ToCom) {
+
+
+
+                    jsonData["FromCoaId"] = $('#ddlcoa').val();
+
+                    jsonData["ToCoaId"] = $('#ddlcoaTo').val();
+                }
+            }
+
+
+
+            var urlpath = '@Url.Action("SaveContra", "Contra")';
+            $.ajax({
+                contentType: "application/json",
+                data: JSON.stringify(jsonData),
+                dataType: 'json',
+                url: urlpath,
+                type: "POST",
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+
+
+                }
+            })
+                .success(function (result) {
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                    if (result.pk > 0) {
+                        swal({
+                            title: " Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                         }, function () {
+                            window.location.href = '@Url.Action("ContraList", "Contra")';
+                        });
+                    }
+
+                });
+        }*@
+
+
+        function Contra_Readonly() {
+            $("#ddlcoa").prop("disabled", true);
+            $("#ddlcoaTo").prop("disabled", true);
+
+
+            var FrmCom = $('#ddlCompany').val();
+            var ToCom = $('#ddlToCompany').val();
+
+            if (FrmCom != "0" && ToCom != "0") {
+                if (FrmCom != ToCom) {
+                    $("#ddlcoa").prop("disabled", false);
+                    $("#ddlcoaTo").prop("disabled", false);
+                }
+            }
+
+        }
+
+
+        function Contra_Validation() {
+            var isValid = true;
+            var message = "Some Values Required";
+
+            // Basic form validation
+            if ($('#ddlCompany').val() == 0 || $('#ddlCompany').val() == '') {
+                ValidationColorChangeNew("ddlCompany", "divCompany", "Company Required", true);
+                isValid = false;
+            }
+
+            if ($('#ddlFyMain').val() == 0 || $('#ddlFyMain').val() == '' || $('#ddlFyMain').val() == null) {
+                ValidationColorChangeNew("ddlFyMain", "divFyMain", "Financial Year Required", true);
+                isValid = false;
+            }
+
+            if ($('#txtPostingDate').val() == '' || $('#txtPostingDate').val() == null) {
+                ValidationColorChangeNew("txtPostingDate", "divPostingDate", "Posting Date Required", false);
+                isValid = false;
+            }
+
+            if ($('#ddlCurrency').val() == 0 || $('#ddlCurrency').val() == '' || $('#ddlCurrency').val() == null) {
+                ValidationColorChangeNew("ddlCurrency", "divCurrency", "Currency Required", true);
+                isValid = false;
+            }
+
+            if ($('#txtConversionRate').val() == '' || $('#txtConversionRate').val() == null) {
+                ValidationColorChangeNew("txtConversionRate", "divtConversionRate", "Currency Rate Required", false);
+                isValid = false;
+            }
+            if ($('#txtToBankNarration').val().trim() == '' || $('#txtToBankNarration').val().trim() == null) {
+                ValidationColorChangeNew("txtToBankNarration", "", "Narration Required", false);
+                isValid = false;
+            }
+            // Check if transfer type is selected
+            var transferType = $('input[name="transferType"]:checked').val();
+            if (!transferType) {
+                swal("Please select a transfer type!", "", "error");
+                isValid = false;
+                return isValid;
+            }
+
+            // Validate based on transfer type
+            switch (transferType) {
+                case '1': // Bank to Bank
+                    if ($('#ddlFromBankAccount').val() == 0 || $('#ddlFromBankAccount').val() == '' || $('#ddlFromBankAccount').val() == null) {
+                        ValidationColorChangeNew("ddlFromBankAccount", "divFromBankAccount", "From Bank Account Required", true);
+                        isValid = false;
+                    }
+                    // Check from bank balance
+                    var fromBankBalance = parseFloat($('#lblFromBankBalance').text().replace(/[^0-9.-]/g, '')) || 0;
+                    if (fromBankBalance <= 0) {
+                        ValidationColorChangeNew("ddlFromBankAccount", "divFromBankAccount", "From Bank Account has insufficient balance", true);
+                        isValid = false;
+                    }
+                    if ($('#ddlToBankAccount').val() == 0 || $('#ddlToBankAccount').val() == '' || $('#ddlToBankAccount').val() == null) {
+                        ValidationColorChangeNew("ddlToBankAccount", "divToBankAccount", "To Bank Account Required", true);
+                        isValid = false;
+                    }
+                    if ($('#txtToBankBalance').val().trim() == '' || $('#txtToBankBalance').val().trim() == null) {
+                        ValidationColorChangeNew("txtToBankBalance", "", "Amount Required", false);
+                        isValid = false;
+                    }
+                    // Check if transfer amount exceeds available balance
+                    var transferAmount = parseFloat($('#txtToBankBalance').val()) || 0;
+                    if (transferAmount > 0 && transferAmount > fromBankBalance) {
+                        ValidationColorChangeNew("txtToBankBalance", "", "Transfer amount exceeds available balance", false);
+                        isValid = false;
+                    }
+                    if ($('#txtToChequeNo').val().trim() == '' || $('#txtToChequeNo').val().trim() == null) {
+                        ValidationColorChangeNew("txtToChequeNo", "", "Cheque No Required", false);
+                        isValid = false;
+                    }
+                    if ($('#txtToChequeDate').val() == '' || $('#txtToChequeDate').val() == null) {
+                        ValidationColorChangeNew("txtToChequeDate", "", "Cheque Date Required", false);
+                        isValid = false;
+                    }
+                    // Check if same accounts selected
+                    if (isValid && $('#ddlFromBankAccount').val() == $('#ddlToBankAccount').val()) {
+                        swal("From Account & To Account cannot be same!", "", "error");
+                        isValid = false;
+                    }
+                    break;
+
+                case '2': // Cash to Cash
+                    if ($('#ddlFromCashAccount').val() == 0 || $('#ddlFromCashAccount').val() == '' || $('#ddlFromCashAccount').val() == null) {
+                        ValidationColorChangeNew("ddlFromCashAccount", "divFromCashAccount", "From Cash Account Required", true);
+                        isValid = false;
+                    }
+                    // Check from cash balance
+                    var fromCashBalance = parseFloat($('#lblFromCashBalance').text().replace(/[^0-9.-]/g, '')) || 0;
+                    if (fromCashBalance <= 0) {
+                        ValidationColorChangeNew("ddlFromCashAccount", "divFromCashAccount", "From Cash Account has insufficient balance", true);
+                        isValid = false;
+                    }
+                    if ($('#ddlToCashAccount').val() == 0 || $('#ddlToCashAccount').val() == '' || $('#ddlToCashAccount').val() == null) {
+                        ValidationColorChangeNew("ddlToCashAccount", "divToCashAccount", "To Cash Account Required", true);
+                        isValid = false;
+                    }
+                    if ($('#txtToCashBalance').val().trim() == '' || $('#txtToCashBalance').val().trim() == null) {
+                        ValidationColorChangeNew("txtToCashBalance", "", "Amount Required", false);
+                        isValid = false;
+                    }
+                    // Check if transfer amount exceeds available balance
+                    var transferAmount = parseFloat($('#txtToCashBalance').val()) || 0;
+                    if (transferAmount > 0 && transferAmount > fromCashBalance) {
+                        ValidationColorChangeNew("txtToCashBalance", "", "Transfer amount exceeds available balance", false);
+                        isValid = false;
+                    }
+                    // Check if same accounts selected
+                    if (isValid && $('#ddlFromCashAccount').val() == $('#ddlToCashAccount').val()) {
+                        swal("From Account & To Account cannot be same!", "", "error");
+                        isValid = false;
+                    }
+                    break;
+
+                case '3': // Cash to Bank
+                    if ($('#ddlFromCashAccountCB').val() == 0 || $('#ddlFromCashAccountCB').val() == '' || $('#ddlFromCashAccountCB').val() == null) {
+                        ValidationColorChangeNew("ddlFromCashAccountCB", "divFromCashAccountCB", "From Cash Account Required", true);
+                        isValid = false;
+                    }
+                    // Check from cash balance
+                    var fromCashBalanceCB = parseFloat($('#lblFromCashBalanceCB').text().replace(/[^0-9.-]/g, '')) || 0;
+                    if (fromCashBalanceCB <= 0) {
+                        ValidationColorChangeNew("ddlFromCashAccountCB", "divFromCashAccountCB", "From Cash Account has insufficient balance", true);
+                        isValid = false;
+                    }
+                    if ($('#ddlToBankAccountCB').val() == 0 || $('#ddlToBankAccountCB').val() == '' || $('#ddlToBankAccountCB').val() == null) {
+                        ValidationColorChangeNew("ddlToBankAccountCB", "divToBankAccountCB", "To Bank Account Required", true);
+                        isValid = false;
+                    }
+                    if ($('#txtToBankBalanceCB').val().trim() == '' || $('#txtToBankBalanceCB').val().trim() == null) {
+                        ValidationColorChangeNew("txtToBankBalanceCB", "", "Amount Required", false);
+                        isValid = false;
+                    }
+                    if ($('#txtFromRefNoCB').val().trim() == '' || $('#txtFromRefNoCB').val().trim() == null) {
+                        ValidationColorChangeNew("txtFromRefNoCB", "", "Ref No Required", false);
+                        isValid = false;
+                    }
+                    if ($('#txtFromRefDateCB').val().trim() == '' || $('#txtFromRefDateCB').val().trim() == null) {
+                        ValidationColorChangeNew("txtFromRefDateCB", "", "Ref Date Required", false);
+                        isValid = false;
+                    }
+                    // Check if transfer amount exceeds available balance
+                    var transferAmountCB = parseFloat($('#txtToBankBalanceCB').val()) || 0;
+                    if (transferAmountCB > 0 && transferAmountCB > fromCashBalanceCB) {
+                        ValidationColorChangeNew("txtToBankBalanceCB", "", "Transfer amount exceeds available balance", false);
+                        isValid = false;
+                    }
+                    break;
+
+                case '4': // Bank to Cash
+                    if ($('#ddlFromBankAccountBC').val() == 0 || $('#ddlFromBankAccountBC').val() == '' || $('#ddlFromBankAccountBC').val() == null) {
+                        ValidationColorChangeNew("ddlFromBankAccountBC", "divFromBankAccountBC", "From Bank Account Required", true);
+                        isValid = false;
+                    }
+                    // Check from bank balance
+                    var fromBankBalanceBC = parseFloat($('#lblFromBankBalanceBC').text().replace(/[^0-9.-]/g, '')) || 0;
+                    if (fromBankBalanceBC <= 0) {
+                        ValidationColorChangeNew("ddlFromBankAccountBC", "divFromBankAccountBC", "From Bank Account has insufficient balance", true);
+                        isValid = false;
+                    }
+                    if ($('#ddlToCashAccountBC').val() == 0 || $('#ddlToCashAccountBC').val() == '' || $('#ddlToCashAccountBC').val() == null) {
+                        ValidationColorChangeNew("ddlToCashAccountBC", "divToCashAccountBC", "To Cash Account Required", true);
+                        isValid = false;
+                    }
+                    if ($('#txtToCashBalanceBC').val().trim() == '' || $('#txtToCashBalanceBC').val().trim() == null) {
+                        ValidationColorChangeNew("txtToCashBalanceBC", "", "Amount Required", false);
+                        isValid = false;
+                    }
+                    if ($('#txtChequeDateBC').val().trim() == '' || $('#txtChequeDateBC').val().trim() == null) {
+                        ValidationColorChangeNew("txtChequeDateBC", "", "Amount Required", false);
+                        isValid = false;
+                    }
+                    if ($('#txtChequeNoBC').val().trim() == '' || $('#txtChequeNoBC').val().trim() == null) {
+                        ValidationColorChangeNew("txtChequeNoBC", "", "Amount Required", false);
+                        isValid = false;
+                    }
+
+                    // Check if transfer amount exceeds available balance
+                    var transferAmountBC = parseFloat($('#txtToCashBalanceBC').val()) || 0;
+                    if (transferAmountBC > 0 && transferAmountBC > fromBankBalanceBC) {
+                        ValidationColorChangeNew("txtToCashBalanceBC", "", "Transfer amount exceeds available balance", false);
+                        isValid = false;
+                    }
+                    break;
+            }
+
+            return isValid;
+        }
+
+
+        //function Contra_Validation() {
+
+        //    var isValid = true;
+        //    var message = "Some Values Required";
+        //    if ($('#ddlCompany').val() == 0 || $('#ddlCompany').val() == '') {
+        //        ValidationColorChangeNew("ddlCompany", "divCompany", "Company Required", true);
+        //        isValid = false;
+        //    }
+
+        //    if ($('#ddlFinansialYear').val() == 0 || $('#ddlFinansialYear').val() == '' || $('#ddlFinansialYear').val() == null) {
+        //        ValidationColorChangeNew("ddlFinansialYear", "divFinansialYear", "Financial Year Required", true);
+        //        isValid = false;
+        //    }
+
+        //    if ($('#txtPostingDate').val() == '' || $('#txtPostingDate').val() == null) {
+        //        ValidationColorChangeNew("txtPostingDate", "divPostingDate", "Posting Date Required", false);
+        //        isValid = false;
+        //    }
+
+        //    if ($('#txtConversionRate').val() == '' || $('#txtConversionRate').val() == null) {
+        //        ValidationColorChangeNew("txtConversionRate", "divtConversionRate", "Currency Rate Required", false);
+        //        isValid = false;
+        //    }
+
+
+
+
+
+
+
+
+        //    if ($('#txtNaration').val().trim() == '' || $('#txtNaration').val().trim() == null) {
+        //        ValidationColorChangeNew("txtNaration", "divNaration", "Narration Required", false);
+        //        isValid = false;
+        //    }
+
+
+        //    if ($('#ddlFromBankAccount').val() == 0 || $('#ddlFromBankAccount').val() == '' || $('#ddlFromBankAccount').val() == null) {
+        //        ValidationColorChangeNew("ddlFromBankAccount", "divFromBankAccount", "From Account Required", true);
+        //        isValid = false;
+        //    }
+
+
+        //    if ($('#ddlToBankAccount').val() == 0 || $('#ddlToBankAccount').val() == '' || $('#ddlToBankAccount').val() == null) {
+        //        ValidationColorChangeNew("ddlToBankAccount", "divToBankAccount", "To Account Required", true);
+        //        isValid = false;
+        //    }
+
+
+        //    if ($('#txtAmount').val().trim() == '' || $('#txtAmount').val().trim() == null) {
+        //        ValidationColorChangeNew("txtAmount", "divAmount", "Amount Required", false);
+        //        isValid = false;
+        //    }
+
+
+        //    var FrmB = $('#ddlFromBankAccount').val();
+        //    var ToB = $('#ddlToBankAccount').val();
+
+        //    if (isValid) {
+        //        if (FrmB == ToB) {
+        //            swal("From Account & To Account can not be same! ", "", "error");
+        //            e.preventDefault();
+        //        }
+
+        //    }
+
+
+        //    var FrmCom = $('#ddlCompany').val();
+        //    var ToCom = $('#ddlToCompany').val();
+
+        //    if (isValid) {
+        //        if (FrmCom != ToCom) {
+
+        //            if ($('#ddlcoa').val() == 0 || $('#ddlcoa').val() == '' || $('#ddlcoa').val() == null) {
+        //                ValidationColorChangeNew("ddlcoa", "divCoa", "Inter Company Loan Account Required", true);
+        //        isValid = false;
+        //            }
+
+        //            if ($('#ddlcoaTo').val() == 0 || $('#ddlcoaTo').val() == '' || $('#ddlcoaTo').val() == null) {
+        //                ValidationColorChangeNew("ddlcoaTo", "divcoaTo", "Liability Account Required", true);
+        //                isValid = false;
+        //            }
+
+        //            //swal("From Account & To Account can not be same! ", "", "error");
+        //            //e.preventDefault();
+        //        }
+
+        //    }
+
+
+        //    return isValid;
+
+
+        //}
+
+
+ function GetContraMaster(id) {
+  var urlpath = '@Url.Action("GetContraMasterId", "Contra")'
+  $.ajax({
+    url: urlpath,
+    dataType: "json",
+    type: "Get",
+    data: { id: id },
+    async: false,
+    beforeSend: () => {
+      $("#loadingSpinner").show()
+    },
+    success: (data) => {
+      try {
+        // Set basic form fields
+        $("#ddlCompany").val(data.CompanyInfoId).trigger("change")
+
+        // Load dependent dropdowns
+        LoadDDlbyCom()
+        LoadFinansialYearSingle()
+
+        // Set financial year after loading
+        setTimeout(() => {
+          $("#ddlFyMain").val(data.FinancialYearId).trigger("change")
+        }, 100)
+
+        // Set other basic fields
+        $("#txtPostingDate").val(data.PostingDateStr || "")
+        $("#txtVoucherNo").val(data.VoucherNo || "")
+        $("#ddlCurrency").val(data.CurrencyId || 1)
+        $("#txtConversionRate").val(data.CurrencyCovRate || 1)
+
+        // Set transfer type radio button with proper timing and triggering
+        var transferType = data.VoucherCategoryID || 1
+        console.log("Setting transfer type:", transferType) // Debug log
+
+        // Clear all radio buttons first
+        $('input[name="transferType"]').prop("checked", false)
+
+        // Use a small delay to ensure DOM is ready
+        setTimeout(() => {
+          switch (transferType) {
+            case 1: // Bank to Bank
+              $("#bankToBank").prop("checked", true)
+              console.log("Set Bank to Bank radio")
+              break
+            case 2: // Cash to Cash
+              $("#cashToCash").prop("checked", true)
+              console.log("Set Cash to Cash radio")
+              break
+            case 3: // Cash to Bank
+              $("#cashToBank").prop("checked", true)
+              console.log("Set Cash to Bank radio")
+              break
+            case 4: // Bank to Cash
+              $("#bankToCash").prop("checked", true)
+              console.log("Set Bank to Cash radio")
+              break
+            default:
+              $("#bankToBank").prop("checked", true)
+              console.log("Set default Bank to Bank radio")
+              break
+          }
+
+          // Verify the radio button was set
+          var checkedValue = $('input[name="transferType"]:checked').val()
+          console.log("Radio button set to value:", checkedValue)
+
+          // Manually trigger the change event to show appropriate section
+          $('input[name="transferType"]:checked').trigger("change")
+
+          // Also call toggleTransferSections directly as backup
+          toggleTransferSections()
+        }, 200) // Small delay to ensure DOM is ready
+
+        // Show appropriate section and load data
+        //toggleTransferSections()
+
+        // Set form fields based on transfer type after ensuring sections are visible
+        setTimeout(() => {
+          populateFormFields(data, transferType)
+        }, 1000) // Increased delay to 1500ms to ensure sections are loaded
+      } catch (error) {
+        console.log("Error in GetContraMaster success: ", error)
+      }
+    },
+    error: (xhr, status, error) => {
+      console.log("GetContraMaster Error: " + error)
+      console.log("Status: " + status)
+      console.log("Response: " + xhr.responseText)
+    },
+    complete: () => {
+      setTimeout(() => {
+        $("#loadingSpinner").hide()
+      }, 1000)
+    },
+  })
+}
+
+function populateFormFields(data, transferType) {
+  console.log("populateFormFields called with transferType:", transferType)
+  console.log("Data received:", data)
+
+  try {
+    switch (transferType) {
+      case 1: // Bank to Bank
+        // Load dropdowns first, then set values
+        LoadFromBankAccount()
+        LoadToBankAccount()
+
+        // Wait for dropdowns to load, then set values
+        setTimeout(() => {
+          if (data.BankAccountId) {
+            console.log("Setting From Bank Account:", data.BankAccountId)
+            $("#ddlFromBankAccount").val(data.BankAccountId).trigger("change")
+            // Wait a bit more for the change to process, then load info
+            setTimeout(() => {
+              LoadFromBankInfo()
+            }, 200)
+          }
+          if (data.CashAccountId) {
+            console.log("Setting To Bank Account:", data.CashAccountId)
+            $("#ddlToBankAccount").val(data.CashAccountId).trigger("change")
+            setTimeout(() => {
+              LoadToBankInfo()
+            }, 200)
+          }
+          $("#txtToBankBalance").val(data.TotalAmount || "")
+          $("#txtToChequeNo").val(data.ChequeNo || "")
+          $("#txtToChequeDate").val(data.ChequeDateStr || "")
+          $("#txtToBankNarration").val(data.Narration || "")
+        }, 300)
+        break
+
+      case 2: // Cash to Cash
+        LoadFromCashAccount()
+        LoadToCashAccount()
+
+        setTimeout(() => {
+          if (data.CashAccountId) {
+              console.log("Setting From Cash Account:", data.BankAccountId)
+              $("#ddlFromCashAccount").val(data.BankAccountId).trigger("change")
+            setTimeout(() => {
+              LoadFromCashInfo()
+            }, 200)
+          }
+          if (data.BankAccountId) {
+              console.log("Setting To Cash Account:", data.CashAccountId)
+              $("#ddlToCashAccount").val(data.CashAccountId).trigger("change")
+            setTimeout(() => {
+              LoadToCashInfo()
+            }, 200)
+          }
+          $("#txtToCashBalance").val(data.TotalAmount || "")
+          $("#txtToRefNo").val(data.CashRefNo || "")
+          $("#txtToRefDate").val(data.CashRefDateStr || "")
+          $("#txtToBankNarration").val(data.Narration || "")
+        }, 500)
+        break
+
+      case 3: // Cash to Bank
+        LoadFromCashAccountCB()
+        LoadToBankAccountCB()
+
+        setTimeout(() => {
+          if (data.CashAccountId) {
+              console.log("Setting From Cash Account CB:", data.BankAccountId)
+              $("#ddlFromCashAccountCB").val(data.BankAccountId).trigger("change")
+            setTimeout(() => {
+              LoadFromCashInfo()
+            }, 200)
+          }
+          if (data.BankAccountId) {
+              console.log("Setting To Bank Account CB:", data.CashAccountId)
+              $("#ddlToBankAccountCB").val(data.CashAccountId).trigger("change")
+            setTimeout(() => {
+              LoadToBankInfo()
+            }, 200)
+          }
+          $("#txtToBankBalanceCB").val(data.TotalAmount || "")
+          //$("#txtChequeNoCB").val(data.ChequeNo || "")
+          //$("#txtChequeDateCB").val(data.ChequeDateStr || "")
+            $("#txtToBankNarration").val(data.Narration || "")
+        }, 500)
+        break
+
+      case 4: // Bank to Cash
+        LoadFromBankAccountBC()
+        LoadToCashAccountBC()
+
+        setTimeout(() => {
+          if (data.BankAccountId) {
+              console.log("Setting From Bank Account BC:", data.CashAccountId)
+              $("#ddlFromBankAccountBC").val(data.CashAccountId).trigger("change")
+            setTimeout(() => {
+              LoadFromBankInfo()
+            }, 500)
+          }
+          if (data.CashAccountId) {
+              console.log("Setting To Cash Account BC:", data.BankAccountId)
+              $("#ddlToCashAccountBC").val(data.BankAccountId).trigger("change")
+            setTimeout(() => {
+              LoadToCashInfo()
+            }, 500)
+          }
+          $("#txtToCashBalanceBC").val(data.TotalAmount || "")
+          $("#txtToRefNoBC").val(data.CashRefNo || "")
+          $("#txtToRefDateBC").val(data.CashRefDateStr || "")
+            $("#txtToBankNarration").val(data.Narration || "")
+        }, 500)
+        break
+    }
+  } catch (error) {
+    console.log("Error in populateFormFields: ", error)
+  }
+}
+    </script>
+
+}

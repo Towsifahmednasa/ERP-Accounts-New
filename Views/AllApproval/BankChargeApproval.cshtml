@@ -1,0 +1,440 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllApproval\BankChargeApproval.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+@{
+    ViewBag.Title = "Bank Charge Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-success mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+
+
+                                            <span class=""> Bank Charge Approval List</span>
+
+
+
+
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <div class="btn-group">
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="detailsR" class="card-box ">
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+
+                                    <div class="col">
+                                        <div class="card radius-10  bg-gradient">
+                                            <div class="card-body">
+                                                <div class="text-center">
+                                                    <div>
+                                                        <div class="form-group">
+
+                                                            <label style="font-weight: bold">Approval Status:&nbsp;<span style="color: #a52a2a">*</span></label>
+                                                            <input type="radio" checked id="Approve" name="rbApprove" value="Approve">
+                                                            <label for="Approve">Approve</label>
+                                                            <input type="radio" id="Cancel" name="rbApprove" value="Reject">
+                                                            <label for="Cancel">Cancel</label><br>
+                                                            <br />
+
+                                                            <input type="button" name="next" class="small blue button" onclick="SaveApproval()" value="Submit Information" />
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-body ">
+                                        <div class="table table-responsive" style="overflow-x: auto; max-height: 620px">
+
+                                            <table id="dtTb" class="table table-bordered table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th><input type="checkbox" id="CheckAll" name="CheckAll"></th>
+                                                        <th style="padding:3px !important; text-align:center!important;">
+                                                            Business Unit
+                                                        </th>
+                                                        <th style="padding:3px !important; text-align:center!important;">Supplier Type</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">Supplier</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">LC No</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">LC Open Date</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">Currency</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">Conversion Rate</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">Payment Type</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">ChargeBasisof</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">TotalAmountBDT</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">TotalAmountFC</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">Payment From</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">Loan Account</th>
+                                                        <th style="padding:3px !important; text-align:center!important;">Bank Account</th>
+                                                        @*<th style="padding:3px !important; text-align:center!important;">Entry By</th>
+        <th style="padding:3px !important; text-align:center!important;">Entry Date</th>
+        <th style="padding:3px !important; text-align:center!important;">Update By</th>
+        <th style="padding:3px !important; text-align:center!important;">Update Date</th>*@
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="manuallist">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        function un(o) {
+            return o != null ? o : '';
+        }
+
+        var RowId = 0;
+        $("#CheckAll").click(function () {
+
+            for (var i = 0; i < $('#dtTb tr').length; i++) {
+                RowId = i;
+                RowId++;
+                $("input[name='CheckBox[" + RowId + "].rowCount']").not(this).prop('checked', this.checked);
+            }
+
+
+        });
+
+        $(document).ready(function () {
+        //    LoadFilterData();
+           // ShowReport();
+
+        });
+
+
+              function LoadFilterData() {
+            var urlpath = '@Url.Action("LoadFilterInPartialView", "Dashboard")';
+
+
+
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                async: true,
+                data: { },
+                beforeSend: function () {
+                    $('#detailsR').empty();
+
+
+
+                },
+                success: function (data) {
+
+                    $('#detailsR').append(data);
+                    // $('#reportTable1').dataTable();
+                }
+            });
+
+
+
+
+        }
+
+         function ShowReport() {
+             //
+
+
+             var param = '';
+
+
+             var comID = $('#ddlCompany').val();
+             var finID = $('#ddlFinansialYear').val();
+             var frmD = $('#txtPostingFDate').val();
+             var toD = $('#txtPostingTDate').val();
+             var Status = $('#ddlApprovalStatus').val();
+
+
+
+             if (jQuery.type(comID) === "undefined") { }
+             else {
+                 if (comID !== "0" && comID !== null) {
+                     param = param + " and prp.BusinessUnitId='" + comID + "'";
+                 }
+             }
+             
+             param = param + " and  ISNULL(mas.ApproveStatus, 'Posted') = 'Posted'";
+
+            var urlpath = '@Url.Action("Get_BankChargeList", "LCRelatedBankPayment")';
+            $.ajax({
+                url: urlpath,
+                dataType: 'html',
+                type: "Get",
+                data: { param: param},
+                async: false,
+                beforeSend: function () {
+
+                    $("#overlay").fadeIn(300);
+                },
+                success: function (data) {
+
+                    data = JSON.parse(data);
+                    $("#manuallist").html("");
+                    if (data.length > 0) {
+
+
+
+                        var row = "";
+                        var count = 1;
+                        $("#manuallist").html("");
+
+                        var count = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+                            RowId++;
+
+                            row += "<tr>";
+                            row += "<td  >" + count + "</td>";
+                            row += "<td>" + '<input type = "hidden" style = "text-align:center" id = "HfFieldName"  name ="DoctorList[' + RowId + '].BankChargeId" value = "' + data[i].BankChargeId + '" />' + '<input type="checkbox" id="CheckBox" name="CheckBox[' + RowId + '].rowCount">' + "</td>";
+
+                            row += "<td>" + un(data[i].CompanyName) + "</td>";
+                            row += "<td>" + un(data[i].SupplierTypeName) + "</td>";
+                            row += "<td>" + un(data[i].SupplierName) + "</td>";
+                            row += "<td>" + un(data[i].LCNo) + "</td>";
+                            row += "<td>" + un(data[i].LCDate) + "</td>";
+                            row += "<td>" + un(data[i].CurrencyName) + "</td>";
+                            row += "<td>" + un(data[i].Conversionrate) + "</td>";
+                            row += "<td>" + un(data[i].TypeName) + "</td>";
+
+                            row += "<td>" + un(data[i].ChargeBasisof) + "</td>";
+                            row += "<td>" + un(data[i].TotalAmountBDT) + "</td>";
+                            row += "<td>" + un(data[i].TotalAmountFC) + "</td>";
+                            row += "<td>" + un(data[i].PaymentFrom) + "</td>";
+                            row += "<td>" + un(data[i].LoanAccID) + "</td>";
+                            row += "<td>" + un(data[i].COAID) + "</td>";
+                            //row += "<td>" + un(data[i].EntryBy) + "</td>";
+                            //row += "<td>" + un(data[i].EntryDate) + "</td>";
+                            //row += "<td>" + un(data[i].Updateby) + "</td>";
+                            //row += "<td>" + un(data[i].Updatedate) + "</td>";
+                           
+
+                            row += "</tr>";
+                            count = count + 1;
+
+                        }
+                        $("#manuallist").html(row);
+                    }
+                },
+                complete: function () {
+
+
+
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            });
+         }
+
+
+
+        function editClick(id) {
+
+            location.href = '../Journal/JRCreate?MasterId=' + id + '';
+
+        }
+
+
+
+    function PrintReport(MasterId)
+        {
+            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
+        var reportValue = "AllVoucherReport";
+
+        $.ajax({
+            url: urlpath,
+            data: { MasterId: MasterId, reportValue: reportValue},
+                dataType: 'json',
+                type: "Get",
+                success: function (data) {
+                    if (data.isSuccess) {
+                        //OpenPopUp('BasicReportViewer.aspx');
+                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
+                    }
+                }
+            });
+        }
+
+
+
+
+        function validation() {
+
+            var Isvalid = true;
+            var NotValid = false;
+
+            var countCh = 0;
+
+            for (var i = 0; i < $('#dtTb tr').length; i++) {
+                RowId = i;
+                RowId++;
+
+                var Cb = $("input[name='CheckBox[" + RowId + "].rowCount']").is(':checked');
+
+                if (Cb != true) {
+                    countCh++;
+                }
+
+
+            }
+
+            if (countCh == i) {
+
+                alert("Please select at least one row from List!!!")
+                return NotValid;
+            }
+
+            return Isvalid;
+        }
+
+
+        function SaveApproval() {
+            $("#overlay").fadeIn(300);
+            if (validation()) {
+
+                var jsonData = {};
+                jsonData["Id"] = 0;
+
+                // var jsonObjs = [];
+
+                var MyArry = [];
+
+                var id = "";
+
+                for (var i = 0; i < $('#dtTb tr').length; i++) {
+
+                    RowId = i;
+                    RowId++;
+
+                    var BankChargeId = $("input[name='DoctorList[" + RowId + "].BankChargeId']").val();
+                    var check = $("input[name='CheckBox[" + RowId + "].rowCount']").is(':checked');
+                    if (check == true) {
+
+
+                        id = id + BankChargeId + ',';
+                     }
+
+
+                }
+
+                var index = id.lastIndexOf(',');
+
+                var srt = id.substring(0, index);
+
+
+                var radioValue = $("input[name='rbApprove']:checked").val();
+
+                var rbValue = true;
+                if (radioValue == "Approve") {
+                    rbValue = true;
+                }
+                else {
+                    rbValue = false;
+
+                }
+
+                //  console.log(MyArry);
+
+
+                    var urlpath3 = '@Url.Action("Approve_AllBankCharge", "AllApproval")';
+
+                 $.ajax({
+                contentType: "application/json",
+                     data: JSON.stringify({ MyArry: srt, rbValue: rbValue }),
+                dataType: 'json',
+                     url: urlpath3,
+                type: "POST",
+                beforeSend: function () {
+                    $("#overlay").fadeIn(300);
+                }
+            })
+                .success(function (result) {
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                    if (result.isSuccess == true) {
+                        swal({
+                            title: " Submit Successfully",
+                            text: '',
+                            type: "success",
+                            showCancelButton: false,
+                            cancelButtonClass: 'btn-secondary waves-effect',
+                            confirmButtonClass: 'btn-success waves-effect waves-light',
+                            confirmButtonText: 'Yes!',
+                            closeOnConfirm: false
+                         }, function () {
+                                window.location.href = '@Url.Action("BankChargeApproval", "AllApproval")';
+
+                        });
+                    }
+
+                });
+
+            }
+        }
+
+
+
+    </script>
+
+}
+

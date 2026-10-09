@@ -1,0 +1,124 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\ReconcileBankAccount\_partialRBAccount.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+
+
+
+@model IEnumerable<New_Accounts.Models.Accounts.DebitVoucherView>
+
+<table class="table table-bordered table-striped" id="tblIssueQC">
+    <thead style="background-color:#cceeff;font-weight:bold;">
+        <tr>
+            <th> <input class="checkAll" type="checkbox" id="checkAll" name="checkAll" value="1" onchange="CheckAll()" /></th>
+            <th>Reconcile Date</th>
+            <th>Company Name</th>
+            <th>Voucher Code</th>
+            <th>Voucher No</th>
+            <th>Posting Date</th>
+
+            <th>Voucher Type</th>
+            <th>Cheque No.</th>
+            <th>Cheque Date</th>
+            <th>Narration</th>
+            <th>Total Amount(BDT)</th>
+            <th>Status</th>
+            <th>Approve By</th>
+            <th>Approve Date</th>
+            @*<th>Update By</th>
+                <th>Update Date</th>*@
+
+            <th>Print</th>
+
+        </tr>
+    </thead>
+    <tbody id="tbodyid">
+        @{ int count = 1;}
+        @foreach (var item in Model)
+        {
+            <tr id="tr_@item.VoucherMasterId">
+
+                @if (item.IsReconcile == true)
+
+                {
+                    <td>
+                        @*<input type="checkbox" style="display:none" checked="checked" id="chk_@item.VoucherMasterId" value="@item.VoucherMasterId" />*@
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        <input type="checkbox" class="chk_gg" id="chk_@item.VoucherMasterId" value="@item.VoucherMasterId" />
+                    </td>
+                }
+
+
+
+
+                @if (item.IsReconcile == true)
+                {
+
+                    <td id="ReconcileDate_@item.VoucherMasterId">@item.ReconcileDate</td>
+                }
+                else
+                {
+                    <td id="ReconcileDate_@item.VoucherMasterId">
+                        <input type="text" class="form-control form-control-sm mb-3 datepicker" id="txtReconcileDate_@item.VoucherMasterId" value="@item.ReconcileDate" />
+                    </td>
+                }
+
+
+                <td>@item.CompanyName</td>
+                <td>@item.VoucherCode</td>
+                <td>@item.VoucherNo</td>
+                <td>@item.PostingDate</td>
+                <td>@item.VoucherType</td>
+                <td>@item.BankCheckNo</td>
+                <td>@item.BankCheckDate</td>
+
+                <td>@item.Narration</td>
+                <td>@item.TotalAmountBDT</td>
+
+                @if (item.ActionStatus == "Approved")
+                {
+                    <td><span class='badge bg-success'>Approved</span></td>
+                    ;
+                }
+                else if (item.ActionStatus == "Canceled")
+                {
+                    <td><span class='badge bg-danger'>Canceled</span></td>
+                    ;
+                }
+
+                else
+                {
+
+                    <td><span class='badge bg-warning'>Posting</span></td>
+                    ;
+                }
+
+                <td>@item.ApprovedBy</td>
+                <td>@item.ApprovedDate</td>
+                @*<td>@item.UpdateDate</td>
+
+                    <td>@item.UpdateDate</td>*@
+                <td> <button onclick="PrintReport(@item.VoucherMasterId)"><i class='fa fa-print' style='color:#04AA6D'></i></button></td>
+
+            </tr>
+            count++;
+        }
+    </tbody>
+</table>
+
+
+<script type="text/javascript">
+
+    $('.datepicker').pickadate({
+        selectMonths: true,
+        selectYears: true
+    })
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+        placeholder: $(this).data('placeholder'),
+        allowClear: Boolean($(this).data('allow-clear')),
+    });
+    
+</script>

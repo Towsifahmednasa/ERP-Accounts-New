@@ -1,0 +1,630 @@
+@* Ported from Accounts\CSTL_Pro_to_Pay\Views\BalanceSheet\BSCreate.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@{
+    ViewBag.Title = "Balance Sheet Setup";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-group {
+        padding-bottom: 3px;
+    }
+
+    #incomeStatementTable tbody tr.is-row {
+        cursor: default;
+    }
+
+    #incomeStatementTable tbody tr.drag-over {
+        border-top: 3px solid #007bff;
+        background-color: #e8f0fe !important;
+    }
+
+    #incomeStatementTable tbody tr.dragging {
+        opacity: 0.4;
+    }
+
+    .drag-handle {
+        cursor: grab;
+        color: #999;
+        font-size: 14px;
+        padding: 0 4px;
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .sl-number {
+        font-weight: bold;
+    }
+
+    .form-panel {
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .form-panel legend {
+        font-size: 14px;
+        font-weight: bold;
+        width: auto;
+        padding: 0 8px;
+    }
+
+    .setup-company-row {
+        justify-content: center;
+        margin-bottom: 26px;
+    }
+
+    .setup-grid-wrap {
+        overflow-x: auto;
+        padding-top: 14px;
+    }
+
+    #incomeStatementTable {
+        min-width: 1320px;
+        margin-bottom: 0;
+    }
+
+    #incomeStatementTable thead th {
+        background-color: #f8f9fa;
+        color: #212529;
+        font-weight: 700;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+        padding: 12px 10px;
+    }
+
+    #incomeStatementTable tbody td {
+        vertical-align: middle;
+        padding: 10px;
+    }
+
+    #incomeStatementTable .form-control-sm {
+        min-height: 34px;
+    }
+
+    #incomeStatementTable .setup-action-cell .button {
+        min-width: 42px;
+        text-align: center;
+        margin: 0 2px;
+    }
+
+    .formula-type-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 3px 8px;
+        margin-top: 5px;
+        font-size: 11px;
+        line-height: 1.2;
+    }
+
+    .formula-type-options label {
+        margin-bottom: 0;
+        white-space: nowrap;
+        font-weight: normal;
+    }
+
+    .formula-type-options input {
+        margin-right: 3px;
+        vertical-align: middle;
+    }
+
+    .formula-type-options.disabled {
+        opacity: 0.55;
+    }
+</style>
+
+<div id="popDiv"></div>
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="row">
+            <div class="col">
+                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
+                    <div class="card-body" style="border-style: none !important;">
+                        <div class="border p-2 rounded">
+
+                            <!-- Page Header -->
+                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
+                                <div class="breadcrumb-title pe-3">
+                                    <div class="card-title d-flex align-items-center">
+                                        <div>
+                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark cstlfs">
+                                            Balance Sheet Setup
+                                        </h5>
+                                    </div>
+                                </div>
+                                @*<div class="ms-auto">
+                                    <div class="btn-group">
+                                        <a class="small blue button" href="@Url.Action("ISList", "IncomeStatement")">
+                                            <span class="fa fa-share"></span> Back to List
+                                        </a>
+                                    </div>
+                                </div>*@
+                            </div>
+
+                            <!-- Company Dropdown -->
+                            <div class="col-md-12" style="margin-top: 10px;">
+                                <div class="row setup-company-row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-3 text-end">
+                                                    <label for="ddlCompany" class="bold col-form-label">
+                                                        Company: <span class="required">*</span>
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-9" id="divCompany">
+                                                    <select class="form-select form-select-sm mb-3 select2"
+                                                            style="width: 100%;"
+                                                            id="ddlCompany">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="row setup-grid-wrap">
+                                <div class="col-md-12">
+                                    <div class="card-body">
+
+                                        <div class="row mb-2">
+                                            <div class="col-md-12 text-center">
+                                                <h6>Balance Sheet Information</h6>
+                                            </div>
+                                        </div>
+
+                                        <table class="table table-bordered table-striped table-hover"
+                                               id="incomeStatementTable">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 60px; text-align:center;">SL</th>
+                                                    <th style="width: 320px;">Particular</th>
+                                                    <th style="width: 520px;">COA Formula</th>
+                                                    <th style="width: 360px;">Remarks</th>
+                                                    <th style="width: 80px; text-align:center;">Is Bold</th>
+                                                    <th style="width: 110px; text-align:center;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="isTableBody">
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit -->
+                            <div style="padding-top: 1.5%">
+                                <div class="wrapper">
+                                    <div class="row">
+                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
+                                            <div class="form-group">
+                                                <button class="small blue button" id="btnSubmit" onclick="SaveBalanceSheet()">
+                                                    <i class="fa fa-check"></i> Submit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script type="text/javascript">
+
+    var rowCounter = 0;
+    var dragSrcRow = null;
+
+    // ─────────────────────────────────────────────────────────────
+    // Document Ready
+    // ─────────────────────────────────────────────────────────────
+    $(document).ready(function () {
+        LoadCompany('ddlCompany');
+        AddBulkRows(50);
+
+        $('#ddlCompany').on('change', function () {
+            OnCompanyChange();
+        });
+    });
+
+    // ─────────────────────────────────────────────────────────────
+    // Company Change → Load Existing Data
+    // ─────────────────────────────────────────────────────────────
+    function OnCompanyChange() {
+        var companyId = $('#ddlCompany').val();
+        if (!companyId || companyId == '0') return;
+
+        $("#overlay").fadeIn(300);
+
+        $.ajax({
+            url: '@Url.Action("GetByCompany", "BalanceSheet")',
+            type: 'GET',
+            dataType: 'json',
+            data: { companyId: companyId },
+            success: function (data) {
+                ClearAllRows();
+
+                if (data && data.length > 0) {
+                    for (var i = 0; i < data.length; i++) {
+                        var tr = AddRow();
+                        $('#detailId_' + tr).val(data[i].BalanceSheetDetailId);
+                        $('#particular_' + tr).val(data[i].Particular);
+                        $('#coaFormula_' + tr).val(data[i].COAFormula);
+                        $('#remarks_' + tr).val(data[i].Remarks);
+                        $('#isBold_' + tr).prop('checked', data[i].IsBold === true);
+                        SetFormulaType(tr, data[i]);
+                        ToggleFormulaTypeState(tr);
+                    }
+
+                    // Fill remaining rows up to 50
+                    var existing = $('#isTableBody tr').length;
+                    if (existing < 50) {
+                        AddBulkRows(50 - existing);
+                    }
+                } else {
+                    AddBulkRows(50);
+                }
+
+                SerialTable();
+            },
+            error: function () {
+                toastr.error("Failed to load income statement data.");
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $("#overlay").fadeOut(300);
+                }, 300);
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Add Rows
+    // ─────────────────────────────────────────────────────────────
+    function AddBulkRows(count) {
+        for (var i = 0; i < count; i++) {
+            AddRow();
+        }
+        SerialTable();
+    }
+
+    function AddRow() {
+        rowCounter++;
+        var tr = rowCounter;
+
+        var rowHtml =
+            '<tr id="tr_' + tr + '" class="is-row" draggable="true">' +
+            '  <td style="width:60px; text-align:center;">' +
+            '    <span class="drag-handle" title="Drag to reorder"><i class="fa fa-bars"></i></span>&nbsp;' +
+            '    <span id="ts_' + tr + '" class="sl-number"></span>' +
+            '    <input type="hidden" id="detailId_' + tr + '" value="0" />' +
+            '  </td>' +
+            '  <td style="width:320px;">' +
+            '    <input type="text" id="particular_' + tr + '"' +
+            '           class="form-control form-control-sm"' +
+            '           placeholder="Enter Particular" />' +
+            '  </td>' +
+            '  <td style="width:520px;">' +
+            '    <input type="text" id="coaFormula_' + tr + '"' +
+            '           class="form-control form-control-sm"' +
+            '           placeholder="e.g. [1001]+[1002]-[1003]" />' +
+            '    <div class="formula-type-options">' +
+            '      <label><input type="radio" name="formulaType_' + tr + '" value="ControlLedger" checked />Control Ledger</label>' +
+            '      <label><input type="radio" name="formulaType_' + tr + '" value="SubControlLedger" />Sub Control Ledger</label>' +
+            '      <label><input type="radio" name="formulaType_' + tr + '" value="SubSubControlLedger" />Sub Sub Control Ledger</label>' +
+            '      <label><input type="radio" name="formulaType_' + tr + '" value="ChartOfAccount" />Chart Of Account</label>' +
+            '    </div>' +
+            '  </td>' +
+            '  <td style="width:360px;">' +
+            '    <input type="text" id="remarks_' + tr + '"' +
+            '           class="form-control form-control-sm"' +
+            '           placeholder="Remarks" />' +
+            '  </td>' +
+            '  <td style="width:80px; text-align:center;">' +
+            '    <input type="checkbox" id="isBold_' + tr + '" class="form-check-input" onchange="ToggleFormulaTypeState(' + tr + ')" />' +
+            '  </td>' +
+            '  <td class="setup-action-cell" style="width:110px; text-align:center;">' +
+            '    <button type="button" class="small green_New button"' +
+            '            onclick="AddRow()" title="Add Row">' +
+            '      <i class="fa fa-plus"></i>' +
+            '    </button>' +
+            '    <button type="button" class="small redBtn_New button"' +
+            '            onclick="RemoveRow(' + tr + ')" title="Remove Row">' +
+            '      <i class="fa fa-minus"></i>' +
+            '    </button>' +
+            '  </td>' +
+            '</tr>';
+
+        $('#isTableBody').append(rowHtml);
+        BindDragEvents(tr);
+        return tr;
+    }
+
+    function RemoveRow(id) {
+        var visibleCount = $('#isTableBody tr').length;
+        if (visibleCount <= 1) {
+            $('#particular_' + id).val('');
+            $('#coaFormula_' + id).val('');
+            $('#remarks_' + id).val('');
+            $('#isBold_' + id).prop('checked', false);
+            $('input[name="formulaType_' + id + '"][value="ControlLedger"]').prop('checked', true);
+            $('#detailId_' + id).val('0');
+            SerialTable();
+            return;
+        }
+        $('#tr_' + id).remove();
+        SerialTable();
+    }
+
+    function ClearAllRows() {
+        $('#isTableBody').empty();
+        rowCounter = 0;
+    }
+
+    function SetFormulaType(rowId, data) {
+        var type = 'ControlLedger';
+        var isBold = data.IsBold === true;
+        var hasFormulaType = data.IsControlLedgerCode === true ||
+            data.IsSubcontrolLedgerCode === true ||
+            data.IsSubSubControlLedgercode === true ||
+            data.IsChartOfAccount === true;
+
+        if (isBold && !hasFormulaType) {
+            $('input[name="formulaType_' + rowId + '"]').prop('checked', false);
+            return;
+        }
+
+        if (data.IsSubcontrolLedgerCode === true) {
+            type = 'SubControlLedger';
+        } else if (data.IsSubSubControlLedgercode === true) {
+            type = 'SubSubControlLedger';
+        } else if (data.IsChartOfAccount === true) {
+            type = 'ChartOfAccount';
+        }
+
+        $('input[name="formulaType_' + rowId + '"][value="' + type + '"]').prop('checked', true);
+    }
+
+    function GetFormulaType(rowId) {
+        return $('input[name="formulaType_' + rowId + '"]:checked').val() || 'ControlLedger';
+    }
+
+    function ToggleFormulaTypeState(rowId) {
+        var isBold = $('#isBold_' + rowId).is(':checked');
+        var options = $('input[name="formulaType_' + rowId + '"]');
+        if (isBold) {
+            options.prop('checked', false);
+        } else if (options.filter(':checked').length === 0) {
+            options.filter('[value="ControlLedger"]').prop('checked', true);
+        }
+        options.prop('disabled', isBold);
+        options.closest('.formula-type-options').toggleClass('disabled', isBold);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Serial Numbering
+    // ─────────────────────────────────────────────────────────────
+    function SerialTable() {
+        $('#isTableBody tr').each(function (index) {
+            var idr = $(this).attr('id');
+            var id = idr.substring(3);
+            $('#ts_' + id).html(index + 1);
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Drag & Drop
+    // ─────────────────────────────────────────────────────────────
+    function BindDragEvents(tr) {
+        var row = document.getElementById('tr_' + tr);
+        if (!row) return;
+
+        row.addEventListener('dragstart', function (e) {
+            dragSrcRow = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        row.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            $('#isTableBody tr').removeClass('drag-over');
+            this.classList.add('drag-over');
+        });
+
+        row.addEventListener('dragleave', function () {
+            this.classList.remove('drag-over');
+        });
+
+        row.addEventListener('drop', function (e) {
+            e.preventDefault();
+            if (dragSrcRow && dragSrcRow !== this) {
+                var tbody = document.getElementById('isTableBody');
+                var rows = Array.from(tbody.querySelectorAll('tr'));
+                var srcIdx = rows.indexOf(dragSrcRow);
+                var tgtIdx = rows.indexOf(this);
+
+                if (srcIdx < tgtIdx) {
+                    tbody.insertBefore(dragSrcRow, this.nextSibling);
+                } else {
+                    tbody.insertBefore(dragSrcRow, this);
+                }
+                SerialTable();
+            }
+            this.classList.remove('drag-over');
+        });
+
+        row.addEventListener('dragend', function () {
+            this.classList.remove('dragging');
+            $('#isTableBody tr').removeClass('drag-over');
+            dragSrcRow = null;
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Validation
+    // ─────────────────────────────────────────────────────────────
+    function Validate() {
+        var companyId = $('#ddlCompany').val();
+        if (!companyId || companyId == '0') {
+            ValidationColorChangeNew("ddlCompany", "divCompany", "Company Required", true);
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "timeOut": "5000"
+            };
+            toastr.warning("Please select a Company.");
+            return false;
+        }
+
+        var hasData = false;
+        $('#isTableBody tr').each(function () {
+            var idr = $(this).attr('id');
+            var id = idr.substring(3);
+            var particular = $('#particular_' + id).val().trim();
+            if (particular !== '') {
+                hasData = true;
+                return false;
+            }
+        });
+
+        if (!hasData) {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "timeOut": "5000"
+            };
+            toastr.warning("Please enter at least one Particular.");
+            return false;
+        }
+
+        return true;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Save
+    // ─────────────────────────────────────────────────────────────
+    function SaveBalanceSheet() {
+        if (!Validate()) return;
+
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to save this data?",
+            type: "warning",
+            showCancelButton: true,
+            cancelButtonClass: 'btn-secondary waves-effect',
+            confirmButtonClass: 'btn-success waves-effect waves-light',
+            confirmButtonText: 'Yes, Save it!',
+            cancelButtonText: 'Cancel',
+            closeOnConfirm: false,
+            closeOnCancel: false
+        }, function (isConfirm) {
+            if (!isConfirm) {
+                swal.close();
+                $('#btnSubmit').prop('disabled', false);
+                $("#overlay").fadeOut(300);
+                return;
+            }
+
+            $('#btnSubmit').prop('disabled', true);
+            $("#overlay").fadeIn(300);
+
+            var jsonData = {};
+            jsonData["CompanyId"] = $('#ddlCompany').val();
+
+            var details = [];
+            var sl = 1;
+
+            $('#isTableBody tr').each(function () {
+                var idr = $(this).attr('id');
+                var id = idr.substring(3);
+
+                var particular = $('#particular_' + id).val().trim();
+                var coaFormula = $('#coaFormula_' + id).val().trim();
+                var remarks    = $('#remarks_' + id).val().trim();
+                var isBold     = $('#isBold_' + id).is(':checked');
+                var formulaType = isBold ? '' : GetFormulaType(id);
+
+                // Skip completely empty rows
+                if (particular === '' && coaFormula === '' && remarks === '') return;
+
+                details.push({
+                    OrderSl    : sl,
+                    Particular : particular,
+                    COAFormula : coaFormula,
+                    Remarks    : remarks,
+                    IsBold     : isBold,
+                    IsControlLedgerCode      : !isBold && formulaType === 'ControlLedger',
+                    IsSubcontrolLedgerCode   : !isBold && formulaType === 'SubControlLedger',
+                    IsSubSubControlLedgercode: !isBold && formulaType === 'SubSubControlLedger',
+                    IsChartOfAccount         : !isBold && formulaType === 'ChartOfAccount'
+                });
+                sl++;
+            });
+
+            jsonData["Details"] = details;
+
+            $.ajax({
+                url: '@Url.Action("SaveBalanceSheet", "BalanceSheet")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(jsonData),
+                dataType: 'json',
+                success: function (result) {
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                        $('#btnSubmit').prop('disabled', false);
+                    }, 300);
+
+                    if (result.isSuccess) {
+                        swal({
+                            title: "Saved Successfully!",
+                            text: '',
+                            type: "success",
+                            confirmButtonText: 'OK',
+                            closeOnConfirm: false
+                        }, function () {
+                            OnCompanyChange();
+                            swal.close();
+                        });
+                    } else {
+                        swal({
+                            title: "Error!",
+                            text: 'Could not save data.',
+                            type: "error",
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function () {
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                        $('#btnSubmit').prop('disabled', false);
+                    }, 300);
+                    swal({
+                        title: "Error!",
+                        text: 'Something went wrong while saving.',
+                        type: "error",
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        });
+    }
+
+</script>
+}

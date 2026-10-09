@@ -1,0 +1,42 @@
+@* Launchpad (legacy Dashboard/Index.cshtml was static demo markup with fabricated figures - GAP-PLT-004 - and
+   Dashboard/UserDashboard.cshtml a welcome page). Wireframe "Launchpad" tiles built from the user's own DB menu. *@
+@model System.Collections.Generic.List<New_Accounts.Models.ApprovalMenuList>
+@{
+    ViewBag.Title = "Home";
+    var session = new LegacySession(Context.Session);
+    var menu = session.Get<System.Collections.Generic.List<MenuStepOne>>("MenuList") ?? new System.Collections.Generic.List<MenuStepOne>();
+    var groups = MenuMap.Build(menu);
+    string userName = session["username"] as string ?? "";
+}
+<div class="ophead" style="border-radius:12px;box-shadow:var(--sapContent_Shadow0);padding-bottom:14px;margin-bottom:18px">
+    <div class="op-title">
+        <div class="op-avatar">@(string.IsNullOrEmpty(userName) ? "U" : char.ToUpperInvariant(userName[0]).ToString())</div>
+        <div>
+            <h1 class="op-h1">Welcome, @userName</h1>
+            <div class="op-sub">ERP &mdash; Accounts &amp; Finance &middot; @groups.Sum(g => g.Items.Count) pages available to you</div>
+        </div>
+    </div>
+</div>
+@foreach (var group in groups)
+{
+    <div class="sect-title">@group.Title @if (group.Number > 0) {<span class="cnt">&middot; screen @group.Number</span>}<span class="cnt">&middot; @group.Items.Count</span></div>
+    <div class="tiles">
+        @foreach (var item in group.Items)
+        {
+            <a class="tile" href="@item.Href" style="text-decoration:none;color:inherit">
+                <div class="t">@item.Title</div>
+                <div class="s">@item.LegacyGroup</div>
+                <div class="body"><svg class="icon" width="34" height="34"><use href="#@item.Icon"/></svg></div>
+                <div class="foot"><svg width="13" height="13"><use href="#s-doc"/></svg>@item.Controller</div>
+            </a>
+        }
+    </div>
+}
+@if (groups.Count == 0)
+{
+    <div class="statebox"><div class="sb">
+        <div class="illu"><svg width="28" height="28"><use href="#s-grid"/></svg></div>
+        <h5>No menu entries</h5>
+        <p>Your user has no Accounts &amp; Finance menu rights (module 13). Ask an administrator to assign menu access.</p>
+    </div></div>
+}
