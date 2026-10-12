@@ -19,11 +19,27 @@ namespace New_Accounts.DAL.Account_Master
         public ResultResponse Save_CostCenter(FinancialYearDao aFinancialYearEntry)
         {
             ResultResponse aResponse = new ResultResponse();
+            if (aFinancialYearEntry.StartDate == null || aFinancialYearEntry.EndDate == null)
+            {
+                aResponse.msg = "Start Date and End Date are required.";
+                return aResponse;
+            }
+            if (aFinancialYearEntry.EndDate <= aFinancialYearEntry.StartDate)
+            {
+                aResponse.msg = "End Date must be after Start Date.";
+                return aResponse;
+            }
+            if (!(aFinancialYearEntry.CompanyId > 0))
+            {
+                aResponse.msg = "Company is required.";
+                return aResponse;
+            }
+            aFinancialYearEntry.Status = aFinancialYearEntry.Status == "Active" ? "Active" : "Inactive";
             try
             {
                 accessManager.SqlConnectionOpen(DataBase.CSTL_ERP_DB);
                 List<SqlParameter> aSqlParameterlist = new List<SqlParameter>();
-                
+
                 aSqlParameterlist.Add(new SqlParameter("@FinancialYearId", aFinancialYearEntry.FinancialYearId));
                 aSqlParameterlist.Add(new SqlParameter("@StartDate", aFinancialYearEntry.StartDate));
                 aSqlParameterlist.Add(new SqlParameter("@EndDate", aFinancialYearEntry.EndDate));
@@ -61,12 +77,19 @@ namespace New_Accounts.DAL.Account_Master
                         aResponse.msg = "Already Exist!";
                     }
 
-                    if (aResponse.pk == -2)
+                    if (aResponse.pk == -3)
                     {
                         aResponse.isSuccess = false;
-                        aResponse.msg = "The financial year is currently active. You cannot insert new records until the financial year is closed or set to inactive for this company.";
+                        aResponse.msg = "These dates overlap another financial year of this company.";
                     }
+
                 }
+            }
+            catch (SqlException ex) when (ex.Number == 50001) // business-rule THROW from sp_UD_FinancialYear_New
+            {
+                aResponse.isSuccess = false;
+                aResponse.pk = 0;
+                aResponse.msg = ex.Message;
             }
             catch (Exception exception)
             {
@@ -74,7 +97,7 @@ namespace New_Accounts.DAL.Account_Master
                 aResponse.isSuccess = false;
                 aResponse.msg = exception.Message;
 
-                throw exception;
+                throw;
             }
             finally
             {
@@ -114,7 +137,7 @@ namespace New_Accounts.DAL.Account_Master
                 aResponse.isSuccess = false;
                 aResponse.msg = exception.Message;
 
-                throw exception;
+                throw;
             }
             finally
             {
@@ -152,7 +175,7 @@ namespace New_Accounts.DAL.Account_Master
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -183,7 +206,7 @@ namespace New_Accounts.DAL.Account_Master
             catch (Exception exception)
             {
 
-                throw exception;
+                throw;
             }
             finally
             {

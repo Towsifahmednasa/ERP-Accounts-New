@@ -98,7 +98,7 @@
                                     <div class="row">
                                         <div class="col-md-5" style="margin: 0 44.5% !important;">
                                             <div class="form-group">
-                                                <button class="small blue button" onclick="Save()">   Submit</button>
+                                                <button id="btnSave" class="small blue button" onclick="Save()">   Submit</button>
                                             </div>
                                         </div>
                                     </div>
@@ -127,7 +127,7 @@
             }
         });
 
-        function LoadCompany(elementId) {
+        function LoadCompany(elementId, setId) {
            $.ajax({
                 url: "/Utility/LoadCompanyInfo",
                 contentType: "application/json; charset=utf-8",
@@ -141,6 +141,7 @@
                     for (var i = 0; i < data.length; i++) {
                         $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
                     }
+                    if (setId) { $('#' + elementId + '').val(setId); }
                 }
             });
         }
@@ -184,8 +185,7 @@
                         if (isConfirm) {
                 FinalSave();
                         } else {
-                            swal("Cancelled", ")", "error");
-                            e.preventDefault();
+                            swal("Cancelled", "", "error");
                         }
                     });
             };
@@ -264,63 +264,15 @@
                 async: true,
                 success: function (data) {
                     $("#btnSave").html("Update");
-                    _LoadCompany('ddlcompany', data.CompanyId);
+                    LoadCompany('ddlcompany', data.CompanyId);
+                    // company assignment is fixed once the year exists (SAP: company <-> fiscal year variant)
+                    $('#ddlcompany').prop('disabled', true);
                     $('#txtEndDate').val(data._EndDate);
                     $('#txtStartDate').val(data._StartDate);
-
-                    if (data.Status=="Active") {
-                        $('#customSwitch1').prop('checked', true);
-                    } else {
-
-                        alert("check");
-                        $('#customSwitch1').prop('checked', false);
-                    }
+                    $('#customSwitch1').prop('checked', data.Status == "Active");
                 },
             });
         }
-
-        function _LoadCompany(elementId, SetId) {
-            $.ajax({
-                url: "/Utility/LoadCompanyInfo",
-                contentType: "application/json; charset=utf-8",
-                dataType: 'json',
-                type: "Get",
-                data: {},
-                async: false,
-                success: function (data) {
-                    $('#' + elementId + '').empty();
-                    $('#' + elementId + '').append("<option value='0'>--Select Company--</option>");
-                    for (var i = 0; i < data.length; i++) {
-                        $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
-                    }
-                },
-                complete: function () {
-                    $('#' + elementId + '').val(SetId);
-                }
-            });
-        }
-
-        function Load_Company_ById(elementId) {
-        $.ajax({
-            url: "/Utility/LoadCompanyInfo",
-            contentType: "application/json; charset=utf-8",
-            dataType: 'json',
-            type: "Get",
-            data: {},
-            async: false,
-            success: function (data) {
-
-                $('#' + elementId + '').empty();
-                $('#' + elementId + '').append("<option value='0'>--Select Company--</option>");
-
-                for (var i = 0; i < data.length; i++) {
-
-                    $('#' + elementId + '').append($("<option></option>").val(data[i].CompanyId).html(data[i].CompanyName));
-                }
-            }
-        });
-        }
-
 
     </script>
 
