@@ -89,6 +89,8 @@ namespace New_Accounts.Models.Accounts_Master_M
 
     public class SubsidiaryInfoDAO
     {
+        public bool IsLocked { get; set; }
+
         public int? SubsidiaryTypeId { get; set; }
 
         public int? S_Info_Id { get; set; }

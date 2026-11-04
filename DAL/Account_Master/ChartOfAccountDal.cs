@@ -512,26 +512,11 @@ namespace New_Accounts.DAL.Account_Master
                 accessManager.SqlConnectionOpen(DataBase.CSTL_ERP_DB);
                 bool result = false;
 
-                int SubsidiaryTypeId = Convert.ToInt32(aList.First().SubsidiaryTypeId);
-
-                var selectedIds = string.Join(",",
-                    aList.Where(x => x.S_Info_Id != null)
-                         .Select(x => x.S_Info_Id.ToString())
-                );
-
-                List<SqlParameter> deleteParams = new List<SqlParameter>
-        {
-            new SqlParameter("@SubsidiaryTypeId", SubsidiaryTypeId),
-            new SqlParameter("@SelectedIds", selectedIds)
-        };
-
-                result = accessManager.SaveData("sp_DEL_SubsidiaryInfoDtlsNew", deleteParams);
-
-                if (result == false)
-                    return false;
-
+                // insert-only: nothing is ever deleted from tblSubsidiaryInfo
+                result = true; // all-locked submit: nothing to insert
                 foreach (var item in aList)
                 {
+                    if (item.IsLocked) continue; // already in tblSubsidiaryInfo
                     List<SqlParameter> aSqlParameterlist = new List<SqlParameter>
             {
                 new SqlParameter("@SubsidiaryTypeId", (object)item.SubsidiaryTypeId ?? DBNull.Value),

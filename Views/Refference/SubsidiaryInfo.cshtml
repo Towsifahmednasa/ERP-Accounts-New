@@ -396,6 +396,7 @@
 
                           jsonData["S_Info_Id"] = id;
                           jsonData["IsSelect"] = true;
+                          jsonData["IsLocked"] = $('#chk_' + id).is(':disabled');
                           jsonData["SubsidiaryTypeId"] = SubsidiaryTypeId;
 
                           jsonObj.push(jsonData);

@@ -25,14 +25,8 @@
                 @if (item.isrefrence == 1)
                 {
 
-                     if (item.isReadOnly == 1)
-                    {
-                        <td class="text-center"  style="padding-left: 20px"><input type="checkbox" class="chk" value="@item.S_Info_Id" id="chk_@item.S_Info_Id" disabled="disabled" checked="checked" /></td>
-                    }
-                    else
-                    {
-                        <td class="text-center" style="padding-left: 20px"><input type="checkbox" class="chk" value="@item.S_Info_Id" id="chk_@item.S_Info_Id" checked="checked" /></td>
-                    }
+                    @* already in tblSubsidiaryInfo for this type -> locked, never re-saved *@
+                    <td class="text-center"  style="padding-left: 20px"><input type="checkbox" class="chk" value="@item.S_Info_Id" id="chk_@item.S_Info_Id" disabled="disabled" checked="checked" /></td>
 
 
                 }
