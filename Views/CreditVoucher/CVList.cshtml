@@ -146,7 +146,7 @@
         }
 
               function LoadFilterData() {
-            var urlpath = '@Url.Action("LoadFilterInPartialView", "Dashboard")';
+            var urlpath = '@Url.Action("LoadFilterInPartialView", "Dashboard", new { days = 0 })';
 
 
 
@@ -165,6 +165,7 @@
                 success: function (data) {
 
                     $('#detailsR').append(data);
+                    ShowReport(); // list loads once the filter exists (restores pre-port behaviour)
                     // $('#reportTable1').dataTable();
                 }
             });
@@ -271,6 +272,9 @@
                             }
                             else if (un(data[i].ActionStatus) == 'Canceled') {
                                 row += "<td><span class='badge bg-danger'>Canceled</span></td>";
+                            }
+                            else if (un(data[i].ActionStatus) == 'Parked') {
+                                row += "<td><span class='badge bg-primary'>Parked</span></td>";
                             }
 
                             else {

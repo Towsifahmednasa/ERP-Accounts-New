@@ -34,7 +34,7 @@ namespace New_Accounts.Controllers.Reports
                 int FinancialYearID = Convert.ToInt32(financialYearId);
                 DateTime FromDate = Convert.ToDateTime(fromDate);
                 DateTime ToDate = Convert.ToDateTime(toDate);
-                string BankNAme = bankBookBankName;
+                string BankNAme = bankBookBankName ?? ""; // empty query value binds to null; SqlParameter(null) is not sent -> "expects parameter"
 
                 bool LedgerOtherCurrency = Convert.ToBoolean(Request.Query["LedgerOtherCurrency"].ToString());
 
@@ -75,119 +75,8 @@ namespace New_Accounts.Controllers.Reports
 
 
 
-                if (category == "coa")
-                {
-                    allDataTable2 = accountsReport.GetOpeningBalanceReportDALNew(CompanyID, FinancialYearID, BankAccountID, subsidiaryId,
-                        FromDate, ToDate, BankNAme, BankBookFinancialYearStartDate).Copy();
-                }
-                else if (category == "subsidiary")
-                {
-                    allDataTable2 = accountsReport.GetOpeningBalancesubsidiary(CompanyID, FinancialYearID, BankAccountID, subsidiaryId,
-                        FromDate, ToDate, BankNAme, BankBookFinancialYearStartDate).Copy();
-                }
-                else if (category == "cost-center" || category == "reference")
-                {
-                    allDataTable2 = accountsReport.GetOpeningBalancereferenceId(CompanyID, FinancialYearID, BankAccountID, referenceId,
-                        FromDate, ToDate, BankNAme, BankBookFinancialYearStartDate).Copy();
-                }
-                else
-                {
-                    allDataTable2 = accountsReport.GetOpeningBalanceReportDALNew(CompanyID, FinancialYearID, BankAccountID, subsidiaryId,
-                        FromDate, ToDate, BankNAme, BankBookFinancialYearStartDate).Copy();
-                }
-
-
-                /////MonthlyCalculation start
-
-                DataTable dtMonthly = new DataTable();
-                // dtMonthly.Columns.Add("MonthlyOpeningBalance");
-                dtMonthly.Columns.Add("DebitAmount");
-                dtMonthly.Columns.Add("CreditAmount");
-                dtMonthly.Columns.Add("DebitAmountBDT");
-                dtMonthly.Columns.Add("CreditAmountBDT");
-                dtMonthly.Columns.Add("VoucherMonth");
-                dtMonthly.Columns.Add("VoucherYear");
-                dtMonthly.Columns.Add("MonthYear");
-
-
-                dtMonthly = accountsReport.GetBankBookReportMonthlySummeryDAL(CompanyID, BankAccountID, FinancialYearID,
-                    FromDate, ToDate, BankNAme, BankBookFinancialYearStartDate).Copy();
-                dtMonthly.Columns.Add("MonthlyOpeningBalance");
-                dtMonthly.Columns.Add("MonthlyClosingBalance");
-
-
-                string GLName = allDataTable2.Rows[0]["GLName"].ToString();
-                decimal openingBal = Convert.ToDecimal(allDataTable2.Rows[0]["OpeningBalance"].ToString());
-                decimal closingBal = 0;
-
-                decimal debitAmountBDT = 0;
-                decimal creditAmountBDT = 0;
-
-
-                for (int i = 0; i < dtMonthly.Rows.Count; i++)
-                {
-                    debitAmountBDT = 0;
-                    creditAmountBDT = 0;
-                    if (i == 0)
-                    {
-                        dtMonthly.Rows[i]["MonthlyOpeningBalance"] = openingBal;
-
-                        if (GLName == "Assets" || GLName == "Expenses")
-                        {
-                            debitAmountBDT = Convert.ToDecimal(dtMonthly.Rows[i]["DebitAmountBDT"].ToString()) + openingBal;
-                            creditAmountBDT = Convert.ToDecimal(dtMonthly.Rows[i]["CreditAmountBDT"].ToString());
-                            dtMonthly.Rows[i]["MonthlyClosingBalance"] = (debitAmountBDT - creditAmountBDT).ToString();
-                            closingBal = (debitAmountBDT - creditAmountBDT);
-                            openingBal = closingBal;
-                        }
-                        else
-                        {
-                            debitAmountBDT = Convert.ToDecimal(dtMonthly.Rows[i]["DebitAmountBDT"].ToString());
-                            creditAmountBDT = Convert.ToDecimal(dtMonthly.Rows[i]["CreditAmountBDT"].ToString()) +
-                                              openingBal;
-                            dtMonthly.Rows[i]["MonthlyClosingBalance"] = (creditAmountBDT - debitAmountBDT).ToString();
-                            closingBal = (creditAmountBDT - debitAmountBDT);
-                            openingBal = closingBal;
-                        }
-
-
-                    }
-                    else
-                    {
-                        dtMonthly.Rows[i]["MonthlyOpeningBalance"] = openingBal;
-
-                        if (GLName == "Assets" || GLName == "Expenses")
-                        {
-                            debitAmountBDT = Convert.ToDecimal(dtMonthly.Rows[i]["DebitAmountBDT"].ToString()) + openingBal;
-                            creditAmountBDT = Convert.ToDecimal(dtMonthly.Rows[i]["CreditAmountBDT"].ToString());
-                            dtMonthly.Rows[i]["MonthlyClosingBalance"] = (debitAmountBDT - creditAmountBDT).ToString();
-                            closingBal = (debitAmountBDT - creditAmountBDT);
-                            openingBal = closingBal;
-                        }
-                        else
-                        {
-                            debitAmountBDT = Convert.ToDecimal(dtMonthly.Rows[i]["DebitAmountBDT"].ToString());
-                            creditAmountBDT = Convert.ToDecimal(dtMonthly.Rows[i]["CreditAmountBDT"].ToString()) +
-                                              openingBal;
-                            dtMonthly.Rows[i]["MonthlyClosingBalance"] = (creditAmountBDT - debitAmountBDT).ToString();
-                            closingBal = (creditAmountBDT - debitAmountBDT);
-                            openingBal = closingBal;
-                        }
-                    }
-
-                }
-
-                /////MonthlyCalculation end
-                DataTable allDataTable3 = new DataTable();
-
-                allDataTable3 = accountsReport.GetOpeningBalanceReport2DAL(companyName, FYname, CompanyID, BankAccountID, FinancialYearID,FromDate, ToDate, BankNAme, BankBookFinancialYearStartDate).Copy();
-
-                if (allDataTable.Rows.Count > 0)
-                {
-                    allDataTable.TableName = "BankBookDataTable";
-                    dtMonthly.TableName = "dtMonthly";
-
-                }
+                // opening balance / monthly summary were computed here but never returned; they only added failure points
+                // (an empty opening-balance table made Rows[0] throw and the ledger never loaded)
 
                 string JSONresult;
                 JSONresult = JsonConvert.SerializeObject(allDataTable);
@@ -214,7 +103,7 @@ namespace New_Accounts.Controllers.Reports
                 int FinancialYearID = Convert.ToInt32(financialYearId);
                 DateTime FromDate = Convert.ToDateTime(fromDate);
                 DateTime ToDate = Convert.ToDateTime(toDate);
-                string BankNAme = bankBookBankName;
+                string BankNAme = bankBookBankName ?? ""; // empty query value binds to null; SqlParameter(null) is not sent -> "expects parameter"
 
                 bool LedgerOtherCurrency = Convert.ToBoolean(Request.Query["LedgerOtherCurrency"].ToString());
 
@@ -262,9 +151,7 @@ namespace New_Accounts.Controllers.Reports
         {
             if (Session["LoginUserId"] != null)
             {
-                
-                return View();
-
+                return RedirectToAction("COAReport"); // reports are listed in the sidebar now
             }
             else
             {

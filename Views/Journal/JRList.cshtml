@@ -173,7 +173,7 @@
 
         function LoadFilterData() {
 
-            var urlpath = '@Url.Action("LoadFilterInPartialView", "Dashboard")';
+            var urlpath = '@Url.Action("LoadFilterInPartialView", "Dashboard", new { days = 0 })';
 
 
             $.ajax({
@@ -191,6 +191,7 @@
                 success: function (data) {
 
                     $('#detailsR').append(data);
+                    ShowReport(); // list loads once the filter exists (restores pre-port behaviour)
                     // $('#reportTable1').dataTable();
                 }
             });

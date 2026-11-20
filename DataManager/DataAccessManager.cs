@@ -54,7 +54,7 @@ namespace New_Accounts.DataManager
         {
             try
             {
-                if (sqlConnection.State == ConnectionState.Open)
+                if (sqlConnection != null && sqlConnection.State == ConnectionState.Open)
                 {
                     if (sqlTransaction != null)
                     {

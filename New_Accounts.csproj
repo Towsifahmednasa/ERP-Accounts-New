@@ -22,6 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Accounts Integrity Dashboard detector queries, read at run time from the output folder -->
+    <None Update="Sql\**\*.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="tests\**;docs\**" />
     <Content Remove="tests\**;docs\**" />
     <None Remove="tests\**;docs\**" />

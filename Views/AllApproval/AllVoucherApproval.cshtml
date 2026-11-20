@@ -1,4 +1,4 @@
-@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllApproval\AllVoucherApproval.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+﻿@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllApproval\AllVoucherApproval.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
 
 @{
     ViewBag.Title = "All Voucher Approval";
@@ -179,6 +179,8 @@
                 success: function (data) {
 
                     $('#detailsR').append(data);
+                    // The approval queue lists Parked and Posted vouchers only.
+                    $('#ddlApprovalStatus').html('<option value="0">All</option><option value="Parked">Parked</option><option value="Posted">Posted</option>').val('0');
                     // $('#reportTable1').dataTable();
                 }
             });
@@ -231,7 +233,7 @@
              if (jQuery.type(Status) === "undefined") { }
              else {
                  if (Status !== "0" && Status !== null) {
-                     param = param + " and mas.ActionStatus='" + Status + "'";
+                     param = param + " and ISNULL(mas.ActionStatus,'Posted')='" + Status + "'";
                  }
              }
 
@@ -285,6 +287,8 @@
 
                             if (un(data[i].ActionStatus) == 'Approved') {
                                 row += "<td><span class='badge bg-success'>Approved</span></td>";
+                            } else if (un(data[i].ActionStatus) == 'Parked') {
+                                row += "<td><span class='badge bg-primary'>Parked</span></td>";
                             } else {
                                 row += "<td><span class='badge bg-warning'>Posting</span></td>";
                             }
@@ -326,21 +330,7 @@
 
     function PrintReport(MasterId)
         {
-            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
-        var reportValue = "AllVoucherReport";
-
-        $.ajax({
-            url: urlpath,
-            data: { MasterId: MasterId, reportValue: reportValue},
-                dataType: 'json',
-                type: "Get",
-                success: function (data) {
-                    if (data.isSuccess) {
-                        //OpenPopUp('BasicReportViewer.aspx');
-                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
-                    }
-                }
-            });
+            window.open('@Url.Action("VoucherPrint", "AccountingTaskReport")?MasterId=' + MasterId, "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=yes, menubar=no,resizable=yes,directories=no,location=no");
         }
 
 
@@ -377,7 +367,6 @@
 
 
         function SaveApproval() {
-            $("#overlay").fadeIn(300);
             if (validation()) {
 
                 var jsonData = {};

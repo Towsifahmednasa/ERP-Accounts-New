@@ -6,511 +6,322 @@
 }
 
 <style>
-    .form-group {
-        padding-bottom: 3px;
-    }
+    .jr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px 24px; }
+    .jr-sides { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
+    .jr-pay { flex: 1; min-width: 300px; border: 1px solid var(--sapList_BorderColor); border-radius: 9px; padding: 11px 13px; }
+    .jr-pay .jr-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px 18px; }
+    .jr-pay h5 { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 0 0 10px; }
+    .jr-pay label.form-control { background: #f5f6f7; }
+    .jr-foot { background: #fff; border-radius: 12px; box-shadow: var(--sapContent_Shadow0); padding: 10px 14px; margin-bottom: 14px; display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; }
+    .jr-types { background: #fff; border-radius: 12px; box-shadow: var(--sapContent_Shadow0); padding: 11px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .jr-types .lbl { font-size: 12px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--sapContent_LabelColor); }
+    .jr-file { display: flex; align-items: center; gap: 8px; border: 1px solid var(--sapList_BorderColor); border-radius: 8px; padding: 7px 11px; margin-bottom: 5px; font-size: 13px; }
+    .jr-file a { color: var(--sapLinkColor); font-weight: 600; text-decoration: none; }
+    .jr-file a:hover { text-decoration: underline; }
 </style>
 
 <div id="popDiv"></div>
-<div class="page-wrapper">
-    <div class="page-content">
-        <div class="row">
-            <div class="col">
-                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
-                    <div class="card-body" style="border-style: none !important;">
-                        <div class="border p-2 rounded">
 
-                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
-                                <div class="breadcrumb-title pe-3">
-                                    <div class="card-title d-flex align-items-center">
-                                        <div>
-                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
-                                        </div>
+<div class="strip info" id="parkedStrip" style="display:none">
+    <svg width="16" height="16" style="flex:none;margin-top:1px"><use href="#s-alert"/></svg>
+    <div><b>Parked voucher.</b> It is saved as a draft and is not in the approval queue. Submit posts it; Park keeps it as a draft.</div>
+</div>
 
-                                        <h5 class="mb-0 text-dark cstlfs">Contra Info</h5>
-                                    </div>
-                                </div>
+<div class="strip err" id="periodStrip" style="display:none">
+    <svg width="16" height="16" style="flex:none;margin-top:1px;color:var(--sapNegativeColor)"><use href="#s-no"/></svg>
+    <div><b>Posting blocked &mdash; <span id="periodText"></span> is closed for financial accounting.</b>
+        Change the posting date to an open period, park the voucher as a draft, or re-open the period.
+        <div style="margin-top:7px"><a class="btn sm" href="@Url.Action("PeriodClose", "Journal")">Period-close status</a></div>
+    </div>
+</div>
 
-                                <div class="ms-auto">
-                                    <div class="btn-group">
+<div class="jr-types">
+    <span class="lbl">Voucher type</span>
+    <a class="btn" href="@Url.Action("JRCreate", "Journal")"><svg width="14" height="14"><use href="#s-doc"/></svg>Journal</a>
+    <a class="btn" href="@Url.Action("Create", "BankPayments")"><svg width="14" height="14"><use href="#s-money"/></svg>Debit Voucher</a>
+    <a class="btn" href="@Url.Action("CVCreate", "CreditVoucher")"><svg width="14" height="14"><use href="#s-dn"/></svg>Credit Voucher</a>
+    <a class="btn emph" href="@Url.Action("ContraEntry", "Contra")"><svg width="14" height="14"><use href="#s-up"/></svg>Contra</a>
+    <div style="margin-left:auto">
+        <a class="btn" href="@Url.Action("ContraList", "Contra")"><span class="fa fa-share"></span> Back to List</a>
+    </div>
+</div>
 
-                                        <a class="small blue button" href="@Url.Action("ContraList", "Contra")">
-                                            <span class="fa fa-share"></span>  Back to List
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+<div class="opsect">
+    <h4>Voucher header</h4>
+    <div class="jr-grid">
+        <div class="fld">
+            <label for="ddlCompany">Company <span class="required">*</span></label>
+            <div id="divCompany"><select class="form-select form-select-sm select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select></div>
+        </div>
+        <div class="fld">
+            <label for="ddlFyMain">Financial Year <span class="required">*</span></label>
+            <div id="divFyMain"><select class="form-select form-select-sm select2" style="width: 100%;" id="ddlFyMain"></select></div>
+        </div>
+        <div class="fld">
+            <label for="txtPostingDate">Posting Date <span class="required">*</span></label>
+            <div id="divPostingDate"><input type="text" id="txtPostingDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /></div>
+        </div>
+        <div class="fld" id="divIsMannualVoucher">
+            <label for="txtVoucherNo">Voucher No.</label>
+            <input type="text" id="txtVoucherNo" class="form-control form-control-sm" />
+        </div>
+        <div class="fld" id="divCurrency">
+            <label for="ddlCurrency">Currency <span class="required">*</span></label>
+            <select class="form-select form-select-sm select2" style="width: 100%;" id="ddlCurrency"></select>
+        </div>
+        <div class="fld">
+            <label for="txtConversionRate">Conversion Rate <span class="required">*</span></label>
+            <div id="divtConversionRate"><input disabled type="text" id="txtConversionRate" class="form-control form-control-sm" value="1" /></div>
+        </div>
+        <div class="fld" style="grid-column: span 2">
+            <label for="txtToBankNarration">Narration <span class="required">*</span></label>
+            <textarea id="txtToBankNarration" rows="1" class="form-control form-control-sm"> </textarea>
+        </div>
+    </div>
+</div>
 
+<div class="opsect">
+    <h4>Transfer details</h4>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px" id="divTransferType">
+        <span class="mini" style="font-weight:700;letter-spacing:.4px;text-transform:uppercase">Transfer type</span>
+        <input type="radio" name="transferType" id="bankToBank" value="1" onchange="toggleTransferSections()">
+        <label for="bankToBank" style="font-weight:bold">Bank to Bank</label>
+        <input type="radio" name="transferType" id="cashToCash" value="2" onchange="toggleTransferSections()">
+        <label for="cashToCash" style="font-weight:bold">Cash to Cash</label>
+        <input type="radio" name="transferType" id="cashToBank" value="3" onchange="toggleTransferSections()">
+        <label for="cashToBank" style="font-weight:bold">Cash to Bank</label>
+        <input type="radio" name="transferType" id="bankToCash" value="4" onchange="toggleTransferSections()">
+        <label for="bankToCash" style="font-weight:bold">Bank to Cash</label>
+    </div>
 
-                            <!-- /.card-header -->
-                            <!-- form start -->
-
-
-                            <div class="col-md-12" style="margin-top:10px;">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                    </div>
-
-                                    <div class="col-md-4">
-
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divCompany">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select> </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlFyMain" class="bold col-form-label">Financial Year: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divFyMain">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFyMain"></select> </div>
-                                            </div>
-                                        </div>
-
-
-
-
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtPostingDate" class="bold col-form-label">Posting Date: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divPostingDate">     <input type="text" id="txtPostingDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                            </div>
-                                        </div>
-
-
-                                        <div class="form-group" id="divIsMannualVoucher">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtVoucherNo" class="bold col-form-label">Voucher No.:</label></div>
-                                                <div class="col-md-8">       <input type="text" id="txtVoucherNo" class="form-control form-control-sm mb-3" /></div>
-                                            </div>
-
-                                        </div>
-
-
-
-                                        <div class="form-group" id="divCurrency">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlCurrency" class="bold col-form-label">Currency: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCurrency"></select> </div>
-                                            </div>
-                                        </div>
-
-
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtConversionRate" class="bold col-form-label">Conversion Rate: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divtConversionRate">       <input disabled type="text" id="txtConversionRate" class="form-control form-control-sm mb-3" value="1" /></div>
-                                            </div>
-
-                                        </div>
-
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToBankNarration" class="bold col-form-label">Narration: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">    <textarea id="txtToBankNarration" rows="4" cols="50" class="form-control form-control-sm"> </textarea> </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group mt-3">
-                                            <div class="row">
-                                                <div class="col-md-12" id="divTransferType">
-                                                    <div class="d-flex flex-wrap gap-1" style="font-size: 1.05rem;">
-                                                        <!-- Font size increased -->
-                                                        <div class="form-check form-check-inline">
-                                                            <input class="form-check-input" type="radio" name="transferType" id="bankToBank" value="1" onchange="toggleTransferSections()">
-                                                            <label class="form-check-label" for="bankToBank">Bank to Bank</label>
-                                                        </div>
-                                                        <div class="form-check form-check-inline">
-                                                            <input class="form-check-input" type="radio" name="transferType" id="cashToCash" value="2" onchange="toggleTransferSections()">
-                                                            <label class="form-check-label" for="cashToCash">Cash to Cash</label>
-                                                        </div>
-                                                        <div class="form-check form-check-inline">
-                                                            <input class="form-check-input" type="radio" name="transferType" id="cashToBank" value="3" onchange="toggleTransferSections()">
-                                                            <label class="form-check-label" for="cashToBank">Cash to Bank</label>
-                                                        </div>
-                                                        <div class="form-check form-check-inline">
-                                                            <input class="form-check-input" type="radio" name="transferType" id="bankToCash" value="4" onchange="toggleTransferSections()">
-                                                            <label class="form-check-label" for="bankToCash">Bank to Cash</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md-4">
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <!-- Bank to Bank Section -->
-                            <div class="col-md-12" style="margin-top:50px; display:none;" id="btb">
-                                <div class="row">
-                                    <div class="col-md-2">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   </div>
-                                                <div class="col-md-8">   <h5>From:</h5> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlFromBankAccount" class="bold col-form-label">Bank Account: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divFromBankAccount">    <select class="form-select form-select-sm mb-3 select2" onchange="LoadFromBankInfo()" style="width: 100%;" id="ddlFromBankAccount"></select> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblFromBankBalance" class="bold col-form-label">Bank Balance: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBankBalance"></label> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group d-none">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtFromChequeNo" class="bold col-form-label">Cheque No: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">   <input type="text" id="txtFromChequeNo" class="form-control form-control-sm mb-3" /></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group d-none">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtFromChequeDate" class="bold col-form-label">Cheque Date: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">     <input type="text" id="txtFromChequeDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group d-none">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblFromBankName" class="bold col-form-label">Bank Name: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBankName"></label> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group d-none">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblFromBranchName" class="bold col-form-label">Branch Name: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBranchName"></label> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   </div>
-                                                <div class="col-md-8">   <h5>To:</h5> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlToBankAccount" class="bold col-form-label">Bank Account: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divToBankAccount">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadToBankInfo()" id="ddlToBankAccount"></select> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToBankBalance" class="bold col-form-label">Amount: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">    <input type="number" id="txtToBankBalance" class="form-control form-control-sm mb-3" step="0.01" /> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToChequeNo" class="bold col-form-label">Cheque No: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">       <input type="text" id="txtToChequeNo" class="form-control form-control-sm mb-3" /></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToChequeDate" class="bold col-form-label">Cheque Date: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">     <input type="text" id="txtToChequeDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblToBankName" class="bold col-form-label">Bank Name: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblToBankName"></label> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblToBranchName" class="bold col-form-label">Branch Name: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblToBranchName"></label> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Cash to Cash Section -->
-                            <div class="col-md-12" style="margin-top: 50px; display: none;" id="ctc">
-                                <div class="row">
-                                    <div class="col-md-2">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   </div>
-                                                <div class="col-md-8">   <h5>From:</h5> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlFromCashAccount" class="bold col-form-label">Cash Account : <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divFromCashAccount">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadFromCashInfo()" id="ddlFromCashAccount"></select> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblFromCashBalance" class="bold col-form-label">Cash Balance: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromCashBalance"></label> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group d-none">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtFromRefNo" class="bold col-form-label">Ref. No:  </label></div>
-                                                <div class="col-md-8">       <input type="text" id="txtFromRefNo" class="form-control form-control-sm mb-3" /></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group d-none">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtFromRefDate" class="bold col-form-label">Ref. Date:  </label></div>
-                                                <div class="col-md-8">     <input type="text" id="txtFromRefDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   </div>
-                                                <div class="col-md-8">   <h5>To:</h5> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlToCashAccount" class="bold col-form-label">Cash Account : <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divToCashAccount">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadToCashInfo()" id="ddlToCashAccount"></select> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToCashBalance" class="bold col-form-label">Amount: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">    <input type="number" id="txtToCashBalance" class="form-control form-control-sm mb-3" step="0.01" /> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToRefNo" class="bold col-form-label">Ref. No:  </label></div>
-                                                <div class="col-md-8">       <input type="text" id="txtToRefNo" class="form-control form-control-sm mb-3" /></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToRefDate" class="bold col-form-label">Ref. Date:  </label></div>
-                                                <div class="col-md-8">     <input type="text" id="txtToRefDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Cash to Bank Section -->
-                            <div class="col-md-12" style="margin-top: 50px; display: none;" id="ctb">
-                                <div class="row">
-                                    <div class="col-md-2">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   </div>
-                                                <div class="col-md-8">   <h5>From:</h5> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlFromCashAccountCB" class="bold col-form-label">Cash Account : <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divFromCashAccountCB">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadFromCashInfo()" id="ddlFromCashAccountCB"></select> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblFromCashBalanceCB" class="bold col-form-label">Cash Balance: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromCashBalanceCB"></label> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtFromRefNoCB" class="bold col-form-label">Ref. No:  </label></div>
-                                                <div class="col-md-8">       <input type="text" id="txtFromRefNoCB" class="form-control form-control-sm mb-3" /></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtFromRefDateCB" class="bold col-form-label">Ref. Date:  </label></div>
-                                                <div class="col-md-8">     <input type="text" id="txtFromRefDateCB" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   </div>
-                                                <div class="col-md-8">   <h5>To:</h5> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlToBankAccountCB" class="bold col-form-label">Bank Account: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divToBankAccountCB">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadToBankInfo()" id="ddlToBankAccountCB"></select> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToBankBalanceCB" class="bold col-form-label">Amount: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">    <input type="number" id="txtToBankBalanceCB" class="form-control form-control-sm mb-3" step="0.01" /> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblBankNameCB" class="bold col-form-label">Bank Name: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblBankNameCB"></label> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblBranchNameCB" class="bold col-form-label">Branch Name: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblBranchNameCB"></label> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Bank to Cash Section -->
-                            <div class="col-md-12" style="margin-top: 50px; display: none;" id="btc">
-                                <div class="row">
-                                    <div class="col-md-2">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   </div>
-                                                <div class="col-md-8">   <h5>From:</h5> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlFromBankAccountBC" class="bold col-form-label">Bank Account: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divFromBankAccountBC">    <select class="form-select form-select-sm mb-3 select2" onchange="LoadFromBankInfo()" style="width: 100%;" id="ddlFromBankAccountBC"></select> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblFromBankBalanceBC" class="bold col-form-label">Bank Balance: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBankBalanceBC"></label> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtChequeNoBC" class="bold col-form-label">Cheque No: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">       <input type="text" id="txtChequeNoBC" class="form-control form-control-sm mb-3" /></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtChequeDateBC" class="bold col-form-label">Cheque Date: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">     <input type="text" id="txtChequeDateBC" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblFromBankNameBC" class="bold col-form-label">Bank Name: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBankNameBC"></label> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="lblFromBranchNameBC" class="bold col-form-label">Branch Name: </label></div>
-                                                <div class="col-md-8">    <label class="form-control form-control-sm mb-3" id="lblFromBranchNameBC"></label> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   </div>
-                                                <div class="col-md-8">   <h5>To:</h5> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="ddlToCashAccountBC" class="bold col-form-label">Cash Account : <span class="required"> *</span></label></div>
-                                                <div class="col-md-8" id="divToCashAccountBC">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" onchange="LoadToCashInfo()" id="ddlToCashAccountBC"></select> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToCashBalanceBC" class="bold col-form-label">Amount: <span class="required"> *</span></label></div>
-                                                <div class="col-md-8">    <input type="number" id="txtToCashBalanceBC" class="form-control form-control-sm mb-3" step="0.01" /> </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToRefNoBC" class="bold col-form-label">Ref. No:  </label></div>
-                                                <div class="col-md-8">       <input type="text" id="txtToRefNoBC" class="form-control form-control-sm mb-3" /></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">   <label for="txtToRefDateBC" class="bold col-form-label">Ref. Date:  </label></div>
-                                                <div class="col-md-8">     <input type="text" id="txtToRefDateBC" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style="display:none">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-md-4">   <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required"> *</span></label></div>
-                                        <div class="col-md-8">     <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                    </div>
-                                </div>
-
-
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-md-4">   <label for="txtToDate" class="bold col-form-label">To Date: <span class="required"> *</span></label></div>
-                                        <div class="col-md-8">     <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-                            <div style="padding-top: 1.5%">
-
-                                <div class="wrapper">
-                                    <div class="row">
-                                        <div class="col-md-5" style="margin: 0 44.5% !important;">
-                                            <div class="form-group">
-
-                                                <button class="small blue button" id="btnSave" onclick="SaveContra()">
-
-                                                    Submit
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-                    </div>
+    <!-- Bank to Bank Section -->
+    <div class="jr-sides" style="display:none" id="btb">
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapNegativeColor)"><use href="#s-up"/></svg>From &middot; Bank <span class="mini">(Cr)</span></h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlFromBankAccount">Bank Account <span class="required">*</span></label>
+                    <div id="divFromBankAccount"><select class="form-select form-select-sm select2" onchange="LoadFromBankInfo()" style="width: 100%;" id="ddlFromBankAccount"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="lblFromBankBalance">Bank Balance</label>
+                    <label class="form-control form-control-sm" id="lblFromBankBalance"></label>
+                </div>
+                <div style="display:none">
+                    <input type="text" id="txtFromChequeNo" class="form-control form-control-sm" />
+                    <input type="text" id="txtFromChequeDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                    <label id="lblFromBankName"></label>
+                    <label id="lblFromBranchName"></label>
                 </div>
             </div>
         </div>
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapPositiveColor)"><use href="#s-dn"/></svg>To &middot; Bank <span class="mini">(Dr)</span></h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlToBankAccount">Bank Account <span class="required">*</span></label>
+                    <div id="divToBankAccount"><select class="form-select form-select-sm select2" style="width: 100%;" onchange="LoadToBankInfo()" id="ddlToBankAccount"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="txtToBankBalance">Amount <span class="required">*</span></label>
+                    <input type="number" id="txtToBankBalance" class="form-control form-control-sm" step="0.01" />
+                </div>
+                <div class="fld">
+                    <label for="txtToChequeNo">Cheque No <span class="required">*</span></label>
+                    <input type="text" id="txtToChequeNo" class="form-control form-control-sm" />
+                </div>
+                <div class="fld">
+                    <label for="txtToChequeDate">Cheque Date <span class="required">*</span></label>
+                    <input type="text" id="txtToChequeDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                </div>
+                <div class="fld">
+                    <label for="lblToBankName">Bank Name</label>
+                    <label class="form-control form-control-sm" id="lblToBankName"></label>
+                </div>
+                <div class="fld">
+                    <label for="lblToBranchName">Branch Name</label>
+                    <label class="form-control form-control-sm" id="lblToBranchName"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash to Cash Section -->
+    <div class="jr-sides" style="display:none" id="ctc">
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapNegativeColor)"><use href="#s-up"/></svg>From &middot; Cash <span class="mini">(Cr)</span></h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlFromCashAccount">Cash Account <span class="required">*</span></label>
+                    <div id="divFromCashAccount"><select class="form-select form-select-sm select2" style="width: 100%;" onchange="LoadFromCashInfo()" id="ddlFromCashAccount"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="lblFromCashBalance">Cash Balance</label>
+                    <label class="form-control form-control-sm" id="lblFromCashBalance"></label>
+                </div>
+                <div style="display:none">
+                    <input type="text" id="txtFromRefNo" class="form-control form-control-sm" />
+                    <input type="text" id="txtFromRefDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                </div>
+            </div>
+        </div>
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapPositiveColor)"><use href="#s-dn"/></svg>To &middot; Cash <span class="mini">(Dr)</span></h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlToCashAccount">Cash Account <span class="required">*</span></label>
+                    <div id="divToCashAccount"><select class="form-select form-select-sm select2" style="width: 100%;" onchange="LoadToCashInfo()" id="ddlToCashAccount"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="txtToCashBalance">Amount <span class="required">*</span></label>
+                    <input type="number" id="txtToCashBalance" class="form-control form-control-sm" step="0.01" />
+                </div>
+                <div class="fld">
+                    <label for="txtToRefNo">Ref. No</label>
+                    <input type="text" id="txtToRefNo" class="form-control form-control-sm" />
+                </div>
+                <div class="fld">
+                    <label for="txtToRefDate">Ref. Date</label>
+                    <input type="text" id="txtToRefDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash to Bank Section -->
+    <div class="jr-sides" style="display:none" id="ctb">
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapNegativeColor)"><use href="#s-up"/></svg>From &middot; Cash <span class="mini">(Cr)</span></h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlFromCashAccountCB">Cash Account <span class="required">*</span></label>
+                    <div id="divFromCashAccountCB"><select class="form-select form-select-sm select2" style="width: 100%;" onchange="LoadFromCashInfo()" id="ddlFromCashAccountCB"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="lblFromCashBalanceCB">Cash Balance</label>
+                    <label class="form-control form-control-sm" id="lblFromCashBalanceCB"></label>
+                </div>
+                <div class="fld">
+                    <label for="txtFromRefNoCB">Ref. No <span class="required">*</span></label>
+                    <input type="text" id="txtFromRefNoCB" class="form-control form-control-sm" />
+                </div>
+                <div class="fld">
+                    <label for="txtFromRefDateCB">Ref. Date <span class="required">*</span></label>
+                    <input type="text" id="txtFromRefDateCB" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                </div>
+            </div>
+        </div>
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapPositiveColor)"><use href="#s-dn"/></svg>To &middot; Bank <span class="mini">(Dr)</span></h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlToBankAccountCB">Bank Account <span class="required">*</span></label>
+                    <div id="divToBankAccountCB"><select class="form-select form-select-sm select2" style="width: 100%;" onchange="LoadToBankInfo()" id="ddlToBankAccountCB"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="txtToBankBalanceCB">Amount <span class="required">*</span></label>
+                    <input type="number" id="txtToBankBalanceCB" class="form-control form-control-sm" step="0.01" />
+                </div>
+                <div class="fld">
+                    <label for="lblBankNameCB">Bank Name</label>
+                    <label class="form-control form-control-sm" id="lblBankNameCB"></label>
+                </div>
+                <div class="fld">
+                    <label for="lblBranchNameCB">Branch Name</label>
+                    <label class="form-control form-control-sm" id="lblBranchNameCB"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank to Cash Section -->
+    <div class="jr-sides" style="display:none" id="btc">
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapNegativeColor)"><use href="#s-up"/></svg>From &middot; Bank <span class="mini">(Cr)</span></h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlFromBankAccountBC">Bank Account <span class="required">*</span></label>
+                    <div id="divFromBankAccountBC"><select class="form-select form-select-sm select2" onchange="LoadFromBankInfo()" style="width: 100%;" id="ddlFromBankAccountBC"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="lblFromBankBalanceBC">Bank Balance</label>
+                    <label class="form-control form-control-sm" id="lblFromBankBalanceBC"></label>
+                </div>
+                <div class="fld">
+                    <label for="txtChequeNoBC">Cheque No <span class="required">*</span></label>
+                    <input type="text" id="txtChequeNoBC" class="form-control form-control-sm" />
+                </div>
+                <div class="fld">
+                    <label for="txtChequeDateBC">Cheque Date <span class="required">*</span></label>
+                    <input type="text" id="txtChequeDateBC" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                </div>
+                <div class="fld">
+                    <label for="lblFromBankNameBC">Bank Name</label>
+                    <label class="form-control form-control-sm" id="lblFromBankNameBC"></label>
+                </div>
+                <div class="fld">
+                    <label for="lblFromBranchNameBC">Branch Name</label>
+                    <label class="form-control form-control-sm" id="lblFromBranchNameBC"></label>
+                </div>
+            </div>
+        </div>
+        <div class="jr-pay">
+            <h5><svg width="15" height="15" style="color:var(--sapPositiveColor)"><use href="#s-dn"/></svg>To &middot; Cash <span class="mini">(Dr)</span></h5>
+            <div class="jr-grid">
+                <div class="fld">
+                    <label for="ddlToCashAccountBC">Cash Account <span class="required">*</span></label>
+                    <div id="divToCashAccountBC"><select class="form-select form-select-sm select2" style="width: 100%;" onchange="LoadToCashInfo()" id="ddlToCashAccountBC"></select></div>
+                </div>
+                <div class="fld">
+                    <label for="txtToCashBalanceBC">Amount <span class="required">*</span></label>
+                    <input type="number" id="txtToCashBalanceBC" class="form-control form-control-sm" step="0.01" />
+                </div>
+                <div class="fld">
+                    <label for="txtToRefNoBC">Ref. No</label>
+                    <input type="text" id="txtToRefNoBC" class="form-control form-control-sm" />
+                </div>
+                <div class="fld">
+                    <label for="txtToRefDateBC">Ref. Date</label>
+                    <input type="text" id="txtToRefDateBC" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* hidden fiscal date range the balance lookups read *@
+<div style="display:none">
+    <input type="text" id="txtfrmDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+    <input type="text" id="txtToDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+</div>
+
+<div class="opsect">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <svg width="15" height="15" style="color:var(--sapBrandColor)"><use href="#s-doc"/></svg>
+        <b style="font-size:13px">Attachments</b><span class="mini" id="attachCount"></span>
+        <button type="button" class="btn sm" id="btnAttach" style="margin-left:auto" onclick="$('#attachFile').click()">Add</button>
+        <input type="file" id="attachFile" style="display:none" onchange="UploadAttachment(this)" />
+    </div>
+    <div id="attachList"></div>
+    <div class="mini" id="attachHint">Save the voucher first, then attach files (max 10 MB each).</div>
+</div>
+
+@* Simulation: the two detail rows the posting SP will create from the From/To selection. Nothing is sent to the server. *@
+<div class="opsect" id="simSection" style="display:none">
+    <h4>Simulation &mdash; document preview <span class="mini" style="font-weight:400">&middot; nothing is saved</span></h4>
+    <table class="sap" style="font-size:13px">
+        <thead><tr><th>Account</th><th class="num">Dr (BDT)</th><th class="num">Cr (BDT)</th><th>Check</th></tr></thead>
+        <tbody id="simBody"></tbody>
+    </table>
+    <div id="simChecks" style="margin-top:12px"></div>
+</div>
+
+<div class="jr-foot">
+    <div style="margin-left:auto;display:flex;gap:8px">
+        <a class="btn tr" href="@Url.Action("ContraList", "Contra")">Cancel</a>
+        <button type="button" class="btn" onclick="SimulateJournal()">Simulate</button>
+        <button type="button" class="btn" id="btnPark" onclick="SaveContra('Parked')">Park</button>
+        <button type="button" class="btn emph" id="btnSave" onclick="SaveContra('Posted')">Submit</button>
     </div>
 </div>
 
@@ -529,6 +340,129 @@
     <script type="text/javascript">
 
         let MasterId = $('#masterId').val();
+
+        var jrActionStatus = 'Posted';
+        var jrPeriodClosed = false;
+
+        // ---- FI period close: strip + lock; the server rejects a post into a closed month regardless ----
+        function CheckPeriod() {
+            var comID = $('#ddlCompany').val();
+            var d = $('#txtPostingDate').val();
+            if (!comID || comID == '0' || !d) { return; }
+            $.get('@Url.Action("PeriodCloseStatus", "Journal")', { companyId: comID, date: d }, function (r) {
+                jrPeriodClosed = r.closed;
+                $('#periodText').text('posting period of ' + d);
+                $('#periodStrip').toggle(r.closed);
+                $('#btnSave').prop('disabled', r.closed);
+            });
+        }
+
+        // ---- Attachments (shared voucher-attachment endpoints; enabled once the voucher is saved) ----
+        function fmtSize(b) { return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+
+        function LoadAttachments() {
+            if (!(MasterId > 0)) { $('#btnAttach').prop('disabled', true); return; }
+            $('#attachHint').hide();
+            $.get('@Url.Action("VoucherAttachmentList", "Journal")', { masterId: MasterId }, function (list) {
+                var h = '';
+                for (var i = 0; i < list.length; i++) {
+                    h += '<div class="jr-file"><svg width="14" height="14" style="color:#556b82;flex:none"><use href="#s-doc"/></svg>'
+                        + '<a href="@Url.Action("DownloadVoucherAttachment", "Journal")?id=' + list[i].AttachmentId + '">' + $('<div>').text(list[i].FileName).html() + '</a>'
+                        + '<span class="mini" style="margin-left:auto">' + fmtSize(list[i].FileSize) + '</span>'
+                        + '<button type="button" class="btn icon" style="width:26px;height:26px" title="Remove" onclick="DeleteAttachment(' + list[i].AttachmentId + ')"><svg width="13" height="13"><use href="#s-no"/></svg></button></div>';
+                }
+                $('#attachList').html(h);
+                $('#attachCount').text(list.length ? list.length + ' file' + (list.length > 1 ? 's' : '') : '');
+            });
+        }
+
+        function UploadAttachment(input) {
+            if (!input.files || !input.files.length) { return; }
+            var f = input.files[0];
+            input.value = '';
+            if (f.size > 10 * 1024 * 1024) { toastr.warning('File is larger than 10 MB.'); return; }
+            var fd = new FormData();
+            fd.append('masterId', MasterId);
+            fd.append('file', f);
+            $.ajax({
+                url: '@Url.Action("UploadVoucherAttachment", "Journal")',
+                type: 'POST', data: fd, processData: false, contentType: false,
+                success: function (r) {
+                    if (r.isSuccess) { LoadAttachments(); } else { toastr.error(r.msg || 'Upload failed.'); }
+                },
+                error: function () { toastr.error('Upload failed.'); }
+            });
+        }
+
+        function DeleteAttachment(id) {
+            $.post('@Url.Action("DeleteVoucherAttachment", "Journal")', { id: id }, function (r) {
+                if (r.isSuccess) { LoadAttachments(); } else { toastr.error('Delete failed.'); }
+            });
+        }
+
+        // ---- Simulation: the Dr (to) and Cr (from) rows the posting SP creates from the transfer selection ----
+        function jrEsc(s) { return $('<div>').text(s == null ? '' : s).html(); }
+        function jrMoney(n) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 4 }); }
+        function jrIcon(ok) { return '<svg width="13" height="13"><use href="' + (ok ? '#s-ok' : '#s-no') + '"/></svg>'; }
+
+        // per transfer type: which controls carry From account, From balance, To account and Amount
+        function jrTransferCtl() {
+            switch ($('input[name="transferType"]:checked').val()) {
+                case '1': return { from: '#ddlFromBankAccount', bal: '#lblFromBankBalance', to: '#ddlToBankAccount', amt: '#txtToBankBalance', label: 'Bank to Bank' };
+                case '2': return { from: '#ddlFromCashAccount', bal: '#lblFromCashBalance', to: '#ddlToCashAccount', amt: '#txtToCashBalance', label: 'Cash to Cash' };
+                case '3': return { from: '#ddlFromCashAccountCB', bal: '#lblFromCashBalanceCB', to: '#ddlToBankAccountCB', amt: '#txtToBankBalanceCB', label: 'Cash to Bank' };
+                case '4': return { from: '#ddlFromBankAccountBC', bal: '#lblFromBankBalanceBC', to: '#ddlToCashAccountBC', amt: '#txtToCashBalanceBC', label: 'Bank to Cash' };
+            }
+            return null;
+        }
+
+        function RenderSimulation() {
+            var ctl = jrTransferCtl();
+            if (!ctl) { $('#simBody').html(''); $('#simChecks').html('<div class="mini neg">Select a transfer type first.</div>'); return; }
+
+            var fromOk = (parseFloat($(ctl.from).val()) || 0) > 0;
+            var toOk = (parseFloat($(ctl.to).val()) || 0) > 0;
+            var fromName = fromOk ? $(ctl.from + ' option:selected').text() : 'From account not selected';
+            var toName = toOk ? $(ctl.to + ' option:selected').text() : 'To account not selected';
+            var amt = parseFloat($(ctl.amt).val()) || 0;
+            var balance = parseFloat($(ctl.bal).text().replace(/[^0-9.-]/g, '')) || 0;
+            var same = fromOk && toOk && $(ctl.from).val() == $(ctl.to).val();
+
+            var body = '<tr><td>' + jrEsc(toName) + ' <span class="mini">&middot; to, added on posting</span></td>'
+                + '<td class="num">' + jrMoney(amt) + '</td><td class="num">&mdash;</td>'
+                + '<td><span class="objstat ' + (toOk ? 'pos' : 'neg') + '">' + jrIcon(toOk) + (toOk ? 'ok' : 'Select account') + '</span></td></tr>'
+                + '<tr><td>' + jrEsc(fromName) + ' <span class="mini">&middot; from, added on posting</span></td>'
+                + '<td class="num">&mdash;</td><td class="num">' + jrMoney(amt) + '</td>'
+                + '<td><span class="objstat ' + (fromOk ? 'pos' : 'neg') + '">' + jrIcon(fromOk) + (fromOk ? 'ok' : 'Select account') + '</span></td></tr>'
+                + '<tr class="tot-row"><td>Document total &middot; ' + jrEsc(ctl.label) + '</td><td class="num">' + jrMoney(amt) + '</td><td class="num">' + jrMoney(amt) + '</td><td></td></tr>';
+            $('#simBody').html(body);
+
+            var checks = [
+                { ok: fromOk, t: 'From account selected', d: '' },
+                { ok: toOk, t: 'To account selected', d: '' },
+                { ok: !same, t: 'From and To are different accounts', d: same ? 'Both sides point to the same account' : '' },
+                { ok: amt > 0, t: 'Transfer amount entered', d: '' },
+                { ok: amt > 0 && amt <= balance, t: 'Within available balance', d: 'Amount ' + jrMoney(amt) + ' vs balance ' + jrMoney(balance) },
+                { ok: $.trim($('#txtToBankNarration').val()) !== '', t: 'Narration entered', d: '' }
+            ];
+            var html = '';
+            $.each(checks, function (i, c) {
+                html += '<div style="display:flex;gap:8px;margin-top:8px"><span class="objstat ' + (c.ok ? 'pos' : 'neg') + '">' + jrIcon(c.ok) + '</span>'
+                    + '<div><b style="font-size:13px"' + (c.ok ? '' : ' class="neg"') + '>' + jrEsc(c.t) + '</b>'
+                    + (c.d ? '<div class="mini' + (c.ok ? '' : ' neg') + '">' + jrEsc(c.d) + '</div>' : '') + '</div></div>';
+            });
+            $('#simChecks').html(html);
+        }
+
+        function SimulateJournal() {
+            RenderSimulation();
+            $('#simSection').show()[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        $(document).on('change input', 'input[name="transferType"], [id^=ddlFrom], [id^=ddlTo], [id^=txtTo]', function () {
+            if ($('#simSection').is(':visible')) { RenderSimulation(); }
+        });
+
         $(document).ready(function () {
             LoadCompany('ddlCompany');
             LoadCompany('ddlToCompany');
@@ -545,6 +479,10 @@
             }
             $("#bankToBank").prop("checked", true);
             toggleTransferSections();
+
+            LoadAttachments();
+            $('#txtPostingDate, #ddlCompany').on('change', CheckPeriod);
+            setTimeout(CheckPeriod, 600); // after LoadCompany has selected the default company
 
         });
 
@@ -1403,9 +1341,14 @@
         //}
 
 
-             function SaveContra() {
+             function SaveContra(status) {
 
-                 if (Contra_Validation() == true) {
+                 jrActionStatus = $('#masterId').val() > 0 ? 'Parked' : (status || 'Posted'); // editing an existing voucher: Update saves it as Parked
+                 if (jrPeriodClosed && jrActionStatus != 'Parked') {
+                     toastr.error("Posting period is closed. Park the voucher or change the posting date.");
+                     return;
+                 }
+                 if (Contra_Validation(jrActionStatus == 'Parked') == true) {
 
                    SaveContraFinal();
 
@@ -1419,7 +1362,7 @@
 
             swal({
                 title: "Are you sure?",
-                text: "Do you want to save this data?",
+                text: jrActionStatus == 'Parked' ? "Park this voucher as a draft? It will not go for approval." : "Do you want to save this data?",
                 type: "warning",
                 showCancelButton: true,
                 cancelButtonClass: 'btn-secondary waves-effect',
@@ -1443,6 +1386,7 @@
             jsonData["FinancialYearId"] = $('#ddlFyMain').val(); // Updated to match validation
             jsonData["PostingDate"] = $('#txtPostingDate').val();
             jsonData["VoucherNo"] = $('#txtVoucherNo').val();
+            jsonData["ActionStatus"] = jrActionStatus;
             jsonData["CurrencyId"] = $('#ddlCurrency').val();
             jsonData["CurrencyCovRate"] = $('#txtConversionRate').val();
             jsonData["Narration"] = $('#txtToBankNarration').val();
@@ -1455,7 +1399,6 @@
             jsonData["BankAccountId"] = null;
             jsonData["ChequeNo"] = null;
             jsonData["ChequeDate"] = null;
-            jsonData["Narration"] = null;
             jsonData["TotalAmount"] = null;
 
             // Set data based on transfer type (matching validation logic)
@@ -1521,6 +1464,14 @@
                             closeOnConfirm: false
                         }, function () {
                             window.location.href = '@Url.Action("ContraList", "Contra")';
+                        });
+                    }
+                    else {
+                        swal({
+                            title: "Not saved",
+                            text: result.msg || 'Something went wrong while saving data.',
+                            type: "error",
+                            confirmButtonText: 'OK'
                         });
                     }
                 },
@@ -1676,7 +1627,7 @@
         }
 
 
-        function Contra_Validation() {
+        function Contra_Validation(isPark) {
             var isValid = true;
             var message = "Some Values Required";
 
@@ -1726,7 +1677,7 @@
                     }
                     // Check from bank balance
                     var fromBankBalance = parseFloat($('#lblFromBankBalance').text().replace(/[^0-9.-]/g, '')) || 0;
-                    if (fromBankBalance <= 0) {
+                    if (fromBankBalance <= 0 && !isPark) {
                         ValidationColorChangeNew("ddlFromBankAccount", "divFromBankAccount", "From Bank Account has insufficient balance", true);
                         isValid = false;
                     }
@@ -1740,15 +1691,15 @@
                     }
                     // Check if transfer amount exceeds available balance
                     var transferAmount = parseFloat($('#txtToBankBalance').val()) || 0;
-                    if (transferAmount > 0 && transferAmount > fromBankBalance) {
+                    if (transferAmount > 0 && transferAmount > fromBankBalance && !isPark) {
                         ValidationColorChangeNew("txtToBankBalance", "", "Transfer amount exceeds available balance", false);
                         isValid = false;
                     }
-                    if ($('#txtToChequeNo').val().trim() == '' || $('#txtToChequeNo').val().trim() == null) {
+                    if (!isPark && ($('#txtToChequeNo').val().trim() == '' || $('#txtToChequeNo').val().trim() == null)) {
                         ValidationColorChangeNew("txtToChequeNo", "", "Cheque No Required", false);
                         isValid = false;
                     }
-                    if ($('#txtToChequeDate').val() == '' || $('#txtToChequeDate').val() == null) {
+                    if (!isPark && ($('#txtToChequeDate').val() == '' || $('#txtToChequeDate').val() == null)) {
                         ValidationColorChangeNew("txtToChequeDate", "", "Cheque Date Required", false);
                         isValid = false;
                     }
@@ -1766,7 +1717,7 @@
                     }
                     // Check from cash balance
                     var fromCashBalance = parseFloat($('#lblFromCashBalance').text().replace(/[^0-9.-]/g, '')) || 0;
-                    if (fromCashBalance <= 0) {
+                    if (fromCashBalance <= 0 && !isPark) {
                         ValidationColorChangeNew("ddlFromCashAccount", "divFromCashAccount", "From Cash Account has insufficient balance", true);
                         isValid = false;
                     }
@@ -1780,7 +1731,7 @@
                     }
                     // Check if transfer amount exceeds available balance
                     var transferAmount = parseFloat($('#txtToCashBalance').val()) || 0;
-                    if (transferAmount > 0 && transferAmount > fromCashBalance) {
+                    if (transferAmount > 0 && transferAmount > fromCashBalance && !isPark) {
                         ValidationColorChangeNew("txtToCashBalance", "", "Transfer amount exceeds available balance", false);
                         isValid = false;
                     }
@@ -1798,7 +1749,7 @@
                     }
                     // Check from cash balance
                     var fromCashBalanceCB = parseFloat($('#lblFromCashBalanceCB').text().replace(/[^0-9.-]/g, '')) || 0;
-                    if (fromCashBalanceCB <= 0) {
+                    if (fromCashBalanceCB <= 0 && !isPark) {
                         ValidationColorChangeNew("ddlFromCashAccountCB", "divFromCashAccountCB", "From Cash Account has insufficient balance", true);
                         isValid = false;
                     }
@@ -1810,17 +1761,17 @@
                         ValidationColorChangeNew("txtToBankBalanceCB", "", "Amount Required", false);
                         isValid = false;
                     }
-                    if ($('#txtFromRefNoCB').val().trim() == '' || $('#txtFromRefNoCB').val().trim() == null) {
+                    if (!isPark && ($('#txtFromRefNoCB').val().trim() == '' || $('#txtFromRefNoCB').val().trim() == null)) {
                         ValidationColorChangeNew("txtFromRefNoCB", "", "Ref No Required", false);
                         isValid = false;
                     }
-                    if ($('#txtFromRefDateCB').val().trim() == '' || $('#txtFromRefDateCB').val().trim() == null) {
+                    if (!isPark && ($('#txtFromRefDateCB').val().trim() == '' || $('#txtFromRefDateCB').val().trim() == null)) {
                         ValidationColorChangeNew("txtFromRefDateCB", "", "Ref Date Required", false);
                         isValid = false;
                     }
                     // Check if transfer amount exceeds available balance
                     var transferAmountCB = parseFloat($('#txtToBankBalanceCB').val()) || 0;
-                    if (transferAmountCB > 0 && transferAmountCB > fromCashBalanceCB) {
+                    if (transferAmountCB > 0 && transferAmountCB > fromCashBalanceCB && !isPark) {
                         ValidationColorChangeNew("txtToBankBalanceCB", "", "Transfer amount exceeds available balance", false);
                         isValid = false;
                     }
@@ -1833,7 +1784,7 @@
                     }
                     // Check from bank balance
                     var fromBankBalanceBC = parseFloat($('#lblFromBankBalanceBC').text().replace(/[^0-9.-]/g, '')) || 0;
-                    if (fromBankBalanceBC <= 0) {
+                    if (fromBankBalanceBC <= 0 && !isPark) {
                         ValidationColorChangeNew("ddlFromBankAccountBC", "divFromBankAccountBC", "From Bank Account has insufficient balance", true);
                         isValid = false;
                     }
@@ -1845,18 +1796,18 @@
                         ValidationColorChangeNew("txtToCashBalanceBC", "", "Amount Required", false);
                         isValid = false;
                     }
-                    if ($('#txtChequeDateBC').val().trim() == '' || $('#txtChequeDateBC').val().trim() == null) {
+                    if (!isPark && ($('#txtChequeDateBC').val().trim() == '' || $('#txtChequeDateBC').val().trim() == null)) {
                         ValidationColorChangeNew("txtChequeDateBC", "", "Amount Required", false);
                         isValid = false;
                     }
-                    if ($('#txtChequeNoBC').val().trim() == '' || $('#txtChequeNoBC').val().trim() == null) {
+                    if (!isPark && ($('#txtChequeNoBC').val().trim() == '' || $('#txtChequeNoBC').val().trim() == null)) {
                         ValidationColorChangeNew("txtChequeNoBC", "", "Amount Required", false);
                         isValid = false;
                     }
 
                     // Check if transfer amount exceeds available balance
                     var transferAmountBC = parseFloat($('#txtToCashBalanceBC').val()) || 0;
-                    if (transferAmountBC > 0 && transferAmountBC > fromBankBalanceBC) {
+                    if (transferAmountBC > 0 && transferAmountBC > fromBankBalanceBC && !isPark) {
                         ValidationColorChangeNew("txtToCashBalanceBC", "", "Transfer amount exceeds available balance", false);
                         isValid = false;
                     }
@@ -1976,6 +1927,8 @@
     },
     success: (data) => {
       try {
+        if (data.ActionStatus == 'Parked') { $('#parkedStrip').show(); }
+        setTimeout(CheckPeriod, 800)
         // Set basic form fields
         $("#ddlCompany").val(data.CompanyInfoId).trigger("change")
 

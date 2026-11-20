@@ -1,12 +1,12 @@
 @* Ported from Accounts\CSTL_Pro_to_Pay\Views\Dashboard\_FilterMasterInfo.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
 
 @* Fiori filter bar (wireframe: .filterbar > .fb-top + .fb-fields). Element ids, classes used by scripts and ShowReport() unchanged. *@
-<div class="filterbar fbar-card collapsed" id="fbarCard">
+<div class="filterbar fbar-card" id="fbarCard">
     <div class="fb-top">
         <div class="variant" role="button" tabindex="0" onclick="$('#fbarCard').toggleClass('collapsed')" onkeydown="if(event.key==='Enter'||event.key===' '){$('#fbarCard').toggleClass('collapsed');event.preventDefault();}">Filter <svg class="fb-chev" width="15" height="15" style="color:#556b82"><use href="#s-down"/></svg></div>
         <div class="fb-actions" style="margin-left:auto;display:flex;gap:6px;align-items:center">
             <button type="button" class="btn tr sm" onclick="ClearFilter()">Clear</button>
-            <button type="button" class="btn emph" onclick="ShowReport()"><svg width="14" height="14"><use href="#s-search"/></svg>Go</button>
+            <button type="button" class="btn emph" onclick="withLoader(ShowReport)"><svg width="14" height="14"><use href="#s-search"/></svg>Go</button>
         </div>
     </div>
     <div class="fb-fields">
@@ -20,7 +20,7 @@
         </div>
         <div class="fld">
             <label for="txtPostingFDate">Posting From Date</label>
-            <input type="text" id="txtPostingFDate" class="ctl datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+            <input type="text" id="txtPostingFDate" class="ctl datepicker" value="@DateTime.Now.AddDays(-(int)ViewBag.FromDays).ToString("dd MMMM, yyyy")" />
         </div>
         <div class="fld">
             <label for="txtPostingTDate">Posting To Date</label>
@@ -30,7 +30,7 @@
             <label for="ddlApprovalStatus">Approval Status</label>
             <select class="ctl" id="ddlApprovalStatus">
                 <option value="0">All</option>
-                <option value="Posted">Posting</option>
+                <option value="Parked">Parked</option>
                 <option value="Approved">Approved</option>
             </select>
         </div>
@@ -78,8 +78,8 @@
 
 
     function ClearFilter() {
-        var today = '@DateTime.Now.ToString("dd MMMM, yyyy")';
-        $('#txtPostingFDate, #txtPostingTDate').val(today);
+        $('#txtPostingFDate').val('@DateTime.Now.AddDays(-(int)ViewBag.FromDays).ToString("dd MMMM, yyyy")');
+        $('#txtPostingTDate').val('@DateTime.Now.ToString("dd MMMM, yyyy")');
         $('#ddlApprovalStatus').val('0');
         $('#ddlCompany').val('0').trigger('change');
     }

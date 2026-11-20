@@ -31,6 +31,7 @@ namespace New_Accounts.DAL
                 companyInformationList.Add(companyInformation);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return companyInformationList;
         }
 
@@ -51,6 +52,7 @@ namespace New_Accounts.DAL
                 companyInformationList.Add(companyInformation);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return companyInformationList;
         }
 
@@ -69,6 +71,7 @@ namespace New_Accounts.DAL
                 CountryList.Add(Country_dao);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return CountryList;
         }
 
@@ -87,6 +90,7 @@ namespace New_Accounts.DAL
                 businessUnit.ShortName = dr["CompanyUnitName"].ToString();
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -106,6 +110,7 @@ namespace New_Accounts.DAL
             
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -125,6 +130,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -143,6 +149,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
         public List<AccNo_DDL> GetAccountNObyBankCom(int companyId, int BankNameId)
@@ -161,6 +168,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -181,6 +189,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -202,6 +211,7 @@ namespace New_Accounts.DAL
                 SubsidaryTypeList.Add(SubsidaryType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return SubsidaryTypeList;
         }
 
@@ -223,6 +233,7 @@ namespace New_Accounts.DAL
                 SubsidaryTypeList.Add(SubsidaryType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return SubsidaryTypeList;
         }
         
@@ -244,6 +255,7 @@ namespace New_Accounts.DAL
                 SubsidaryTypeList.Add(SubsidaryType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return SubsidaryTypeList;
         }
 
@@ -266,6 +278,7 @@ namespace New_Accounts.DAL
                 SubsidaryTypeList.Add(SubsidaryType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return SubsidaryTypeList;
         }
         internal List<DDLDAO> LoadLoanCategoryList()
@@ -286,6 +299,7 @@ namespace New_Accounts.DAL
                 loanCategoryList.Add(loanCategory);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return loanCategoryList;
         }
         internal List<DDLDAO> LoadCurrencyList()
@@ -306,6 +320,7 @@ namespace New_Accounts.DAL
                 loanCategoryList.Add(loanCategory);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return loanCategoryList;
         }
         internal List<DDLDAO> LoadInterestTypeList()
@@ -326,6 +341,7 @@ namespace New_Accounts.DAL
                 interestTypeList.Add(interestType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return interestTypeList;
         }
         internal List<DDLDAO> LoadloanAccountList(int LCNoID)
@@ -346,6 +362,7 @@ namespace New_Accounts.DAL
                 interestTypeList.Add(interestType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return interestTypeList;
         }
         internal List<DDLDAO> LoadPaymentTypeList()
@@ -366,6 +383,7 @@ namespace New_Accounts.DAL
                 interestTypeList.Add(interestType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return interestTypeList;
         }
         internal List<DDLDAO> LoadInterestMethodList()
@@ -386,6 +404,7 @@ namespace New_Accounts.DAL
                 interestTypeList.Add(interestType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return interestTypeList;
         }
 
@@ -408,6 +427,7 @@ namespace New_Accounts.DAL
                 interestTypeList.Add(interestType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return interestTypeList;
         }
 
@@ -471,6 +491,7 @@ namespace New_Accounts.DAL
                 SubsidaryTypeList.Add(SubsidaryType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return SubsidaryTypeList;
         }
 
@@ -535,6 +556,7 @@ namespace New_Accounts.DAL
                 SubsidaryTypeList.Add(SubsidaryType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return SubsidaryTypeList;
         }
         internal List<ReferenceInfoDao> LoadReferenceByTypeIdComWise(int ReferenceTypeId, int BusinessUnitId)
@@ -559,6 +581,7 @@ namespace New_Accounts.DAL
                 SubsidaryTypeList.Add(SubsidaryType);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return SubsidaryTypeList;
         }
 
@@ -650,6 +673,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -668,6 +692,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
         public List<BankAccount_Ddl> GetAllBankCashAccountComId(int companyId)
@@ -685,6 +710,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -703,6 +729,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -724,6 +751,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -742,6 +770,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -760,6 +789,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -779,6 +809,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -840,6 +871,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -908,6 +940,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -975,6 +1008,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -1041,6 +1075,7 @@ namespace New_Accounts.DAL
            
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -1059,6 +1094,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -1077,6 +1113,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
         
@@ -1096,6 +1133,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -1115,6 +1153,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -1137,6 +1176,7 @@ namespace New_Accounts.DAL
                 businessUnitList.Add(businessUnit);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
 
@@ -1155,6 +1195,7 @@ namespace New_Accounts.DAL
 
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return businessUnitList;
         }
         public List<City> CitybyCountryId(int CountryId)
@@ -1172,6 +1213,7 @@ namespace New_Accounts.DAL
 
                 CityList.Add(_City);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return CityList;
         }
         public string GetUserInfoStrig(string id)
@@ -1285,6 +1327,7 @@ namespace New_Accounts.DAL
                 incoTermList.Add(incoTerm);
             }
 
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return incoTermList;
         }
 
@@ -1334,6 +1377,7 @@ namespace New_Accounts.DAL
 
                 _cList.Add(aCur);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return _cList;
         }
 
@@ -1351,6 +1395,7 @@ namespace New_Accounts.DAL
 
                 _cList.Add(aCur);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return _cList;
         }
 
@@ -1368,6 +1413,7 @@ namespace New_Accounts.DAL
 
                 _cList.Add(aCur);
             }
+            accessManager.SqlConnectionClose(); // leak fix: lookups left a pooled connection + open txn behind (pool exhausted after ~90 calls)
             return _cList;
         }
 

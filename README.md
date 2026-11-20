@@ -31,6 +31,18 @@ menu authorization). No credentials live in source.
 | Security findings and decisions | `docs/security/legacy-security-findings.md` |
 | Final report | `docs/migration/final-migration-report.md` |
 
+## Accounts Integrity Dashboard (new page, not ported from the legacy app)
+
+`/AccountsIntegrity/Index` lists the voucher problems of Delivery Confirmation, Customer Payment, Invoice Adjustment,
+Non-Transactional Sales Return and Delivery Sales Return (missing voucher, value mismatch, subsidiary ledger, reference),
+with a Fix button per transaction (and "fix all" per problem). It reads the Sales DB (`Db:SalesDb`) and the accounts DB.
+
+- Detectors: `Sql/AccountsIntegrity/Detect_*.sql` (one per page, `{ACC}` / `{ERP}` are replaced by `Db:CSTL_ERP_DB` / `Db:ControlPanel`).
+- Fixes: `DAL/AccountsIntegrity/AccountsIntegrityFixSql.cs`. Each fix runs in its own transaction: re-check, fix, check again, commit.
+  The "Simulate only" box runs the same steps and rolls back. Posting fixes call the same stored procedures as the pages.
+- Every fix attempt is logged in `dbo.tblAccountsIntegrityFixLog` (Sales DB, created on first use).
+- The page is not in the DB-driven side menu; open it by URL or add a `tbl_MainMenu_MVC` row (controller `AccountsIntegrity`, action `Index`).
+
 ## Tools
 
 - `docs/migration/tools/port-legacy-source.ps1` — re-runnable mechanical port of the legacy code (controllers, DAL, models, views, assets) plus the documented hand patches.

@@ -42,11 +42,10 @@
     <link href="/VerticalAsset/Other/toastr.css" rel="stylesheet" />
     <link href="/AssetsStatic/CSS/jquery-ui.min.css" rel="stylesheet" />
     <link href="/VerticalAsset/MySweetAlert/sweetalert.css" rel="stylesheet" />
-    <link href="/VerticalAsset/MySweetAlert/SpinnerStyle.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     @* Fiori design system (wireframe tokens) and the bridge that maps the legacy page classes onto it - always last *@
     <link href="/css/fiori/fiori.css" rel="stylesheet" />
-    <link href="/css/fiori/fiori-bridge.css" rel="stylesheet" />
+    <link href="/css/fiori/fiori-bridge.css?v=5" rel="stylesheet" />
 
     <script src="/VerticalAsset/MySweetAlert/jquery-2.2.3.min.js"></script>
     <script src="/VerticalAsset/js/bootstrap.bundle.min.js"></script>
@@ -68,10 +67,27 @@
         $.ajaxSetup({ headers: { 'RequestVerificationToken': '@token' } });
         // Session expiry: the server answers AJAX calls with 401 JSON instead of the legacy redirected login HTML.
         $(document).ajaxError(function (e, xhr) { if (xhr.status === 401) { window.location.href = '/Home/Index'; } });
+        // Loading card on every AJAX call, so pages need no markup of their own. Skipped for pages that carry their own
+        // #loadingSpinner (would stack two scrims) and for select2 typeahead lookups (an open dropdown).
+        window.ajaxBusy = 0;
+        $(document).ajaxSend(function (e, xhr, s) {
+            if (s.global === false || $('#loadingSpinner').length || $('.select2-container--open').length) { xhr.noLoader = true; return; }
+            window.ajaxBusy++; $('#overlay').stop(true, true).fadeIn(150);
+        }).ajaxComplete(function (e, xhr) {
+            if (!xhr.noLoader && --window.ajaxBusy <= 0) { window.ajaxBusy = 0; $('#overlay').stop(true, true).fadeOut(150); }
+        });
     </script>
     @RenderSection("head", required: false)
 </head>
 <body>
+@* loading overlay: visible from first paint, hidden on window load; also shown by AJAX calls and main-nav clicks (script below).
+   Page scripts still call $("#overlay").fadeIn()/fadeOut() around AJAX saves. *@
+<div id="overlay" style="display:block">
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+</div>
 @await Html.PartialAsync("_FioriIcons")
 <div class="app">
     <div class="shellbar">
@@ -139,17 +155,6 @@
     </div>
 </div>
 
-@* legacy loading overlay: page scripts call $("#overlay").fadeIn()/fadeOut() around AJAX saves *@
-<div id="overlay">
-    <div class="cv-spinner">
-        <div class="alert border-0 border-start bg-secondary border-5 border-info alert-dismissible fade show py-2">
-            <div class="d-flex align-items-center">
-                <span class="spinner"></span>
-                <div class="ms-3"><h6 class="mb-0 text-info">Loading... Please wait</h6></div>
-            </div>
-        </div>
-    </div>
-</div>
 <div id="toasts"></div>
 <div class="dlg-overlay" id="dlgConfirm" hidden>
     <div class="dlg" role="dialog" aria-modal="true">
@@ -179,11 +184,23 @@
 </script>
 @RenderSection("Scripts", required: false)
 <script type="text/javascript">
-    $(window).load(function () {
-        $("#overlay").fadeIn(400);
+    // Loader covers the whole page life cycle: shown from first paint, hidden once the page is loaded
+    // (or straight away when restored from the back/forward cache), and shown again when a main-nav link is clicked.
+    $(window).on('load', function () { if (!window.ajaxBusy) { $("#overlay").fadeOut(250); } });
+    // Run a page action (e.g. a filter's ShowReport) behind the loader. Many legacy pages use synchronous AJAX, which freezes the
+    // browser before the card can paint, so show it first and start the work on the next tick; AJAX-based work keeps it up until ajaxComplete.
+    window.withLoader = function (fn) {
+        var $o = $("#overlay");
+        $o.stop(true, true).show();
         setTimeout(function () {
-            $("#overlay").fadeOut(400);
-        }, 500);
+            try { fn(); } finally { if (!window.ajaxBusy) { $o.fadeOut(250); } }
+        }, 60);
+    };
+    window.addEventListener('pageshow', function (e) { if (e.persisted) { $("#overlay").stop(true, true).hide(); } });
+    $(document).on('click', '.topnav a, .sidenav a', function (e) {
+        var a = this;
+        if (e.isDefaultPrevented() || e.ctrlKey || e.metaKey || e.shiftKey || a.target === '_blank' || a.origin !== location.origin || a.hash && a.pathname === location.pathname) { return; }
+        $("#overlay").stop(true, true).fadeIn(100);
     });
     $(function () {
         $('.select2').select2();

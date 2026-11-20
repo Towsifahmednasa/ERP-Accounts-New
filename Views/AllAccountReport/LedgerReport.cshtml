@@ -1,17 +1,38 @@
-@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\LedgerReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@* Ledger Report laid out like the wireframe report screens: title, filter bar (company / ledger type / account / period) with
+   Export and Go actions, and one report card holding the statement header and the ledger table. Element ids, inline handlers,
+   the table (#dtTb / #ledgerlist, read by Export) and the page scripts are the same contract as before. *@
 
 @{
     ViewBag.Title = "Ledger Report";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <style>
-    .radio-label {
-        font-weight: bold !important;
-    }
+    .hidden { display: none; }
+    .rp-filter { border-radius: 12px; box-shadow: var(--sapContent_Shadow0); margin-bottom: 14px; padding: 12px 20px 14px; }
+    .rp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 18px; align-items: end; }
+    .rp-grid .fld { min-width: 0; }
+    .rp-grid .form-control, .rp-grid .form-select { width: 100%; }
+    .rp-full { grid-column: 1 / -1; }
+    .rp-radios { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; min-height: 34px; }
+    .rp-radios label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px !important; color: var(--sapTextColor) !important; cursor: pointer; padding: 0 !important; }
+    .rp-acts { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; margin-top: 12px; }
+    .rp-card { background: #fff; border-radius: 12px; box-shadow: var(--sapContent_Shadow0); overflow: hidden; }
+    .rp-hd { padding: 10px 14px; border-bottom: 1px solid var(--sapList_HeaderBorderColor); display: flex; align-items: center; gap: 8px; }
+    .rp-hd b { font-size: 13.5px; }
+    .rp-scroll { max-height: calc(100vh - 260px); min-height: 200px; overflow: auto; }
 
-    .hidden {
-        display: none;
-    }
+    #dtTb { width: 100%; margin: 0; border-collapse: collapse; font-size: 12.5px; }
+    #dtTb td, #dtTb th { border: 0; border-bottom: 1px solid var(--sapList_BorderColor); padding: 7px 10px; background: #fff; vertical-align: middle; }
+    #dtTb thead.rp-meta td, #dtTb thead.rp-meta th { padding: 6px 14px; border-bottom: 0; background: #fff; }
+    #dtTb thead.rp-meta .rp-title { text-align: center; font-size: 15px; font-weight: 600; padding-top: 12px; }
+    #dtTb thead.rp-meta .k { color: var(--sapContent_LabelColor); font-size: 12px; font-weight: 400; white-space: nowrap; }
+    #dtTb thead.rp-meta label { font-size: 13px !important; color: var(--sapTextColor) !important; font-weight: 600 !important; padding: 0 !important; }
+    #dtTb thead.rp-cols th { position: sticky; top: 0; z-index: 1; background: #fafbfc; color: var(--sapContent_LabelColor); font-size: 12px; font-weight: 600; text-align: center; border-bottom-color: var(--sapList_HeaderBorderColor); border-top: 1px solid var(--sapList_HeaderBorderColor); white-space: nowrap; }
+    #dtTb tbody tr:hover td { background: #f5f9fe; }
+    #ledgerlist td { color: var(--sapTextColor) !important; font-variant-numeric: tabular-nums; }
+    #ledgerlist td[colspan] { background: #f2f4f6 !important; font-weight: 600; }
+    #ledgerlist a.popupLink { color: var(--sapLinkColor); font-weight: 600; text-decoration: none !important; }
+    #ledgerlist a.popupLink:hover { text-decoration: underline !important; }
 </style>
 <div id="loadingSpinner" style="display:none;">
     <div class="overlay"></div>
@@ -21,349 +42,139 @@
     </div>
 </div>
 
-
-<div class="page-wrapper">
-    <div class="page-content">
-        <div class="row">
-            <div class="col">
-                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
-                    <div class="card-body" style="border-style: none !important;">
-                        <div class="border p-2 rounded">
-
-                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
-                                <div class="breadcrumb-title pe-3">
-                                    <div class="card-title d-flex align-items-center">
-                                        <div>
-                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
-                                        </div>
-                                        <h5 class="mb-0 text-dark cstlfs">
-                                            <span class=""> Ledger Report </span>
-                                        </h5>
-                                    </div>
-                                </div>
-                                <div class="ms-auto">
-
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card-body">
-
-                                        @*<div class="card-title d-flex align-items-center">
-                                                <div>
-                                                    <i class="bx bxs-filter-alt me-1 font-22 text-primary"></i>
-                                                </div>
-                                                <h5 class="mb-0 text-primary">Filtering Criteria</h5>
-                                            </div>*@
-
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                            </div>
-
-                                            <div class="col-md-5">
-                                                <div class="card bg-light bg-gradient ">
-                                                    <div class="card-body">
-                                                        <div class="p-3 text-dark rounded">
-
-
-                                                            <div class="form-group">
-                                                                <div class="form-group">
-                                                                    <div class="row">
-                                                                        <div class="col-md-4"><label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
-                                                                        <div class="col-md-8" id="divCompany"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select> </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row">
-                                                                    <div class="col-md-4"><label for="ddlCompany" class="bold col-form-label">Ledger Type: <span class="required"> *</span> </label>  </div>
-                                                                    <div class="col-md-8">
-
-                                                                        <input type="radio" id="COA" name="category" value="coa">
-                                                                        <label for="COA" style="font-weight: bold !important;">GL</label>
-
-                                                                        <input type="radio" id="subsidiary" name="category" value="subsidiary">
-                                                                        <label for="subsidiary" style="font-weight: bold !important;">Subsidiary</label>
-
-                                                                        <input type="radio" id="cost-center" name="category" value="cost-center">
-                                                                        <label for="cost-center" style="font-weight: bold !important;">Cost Center</label>
-
-                                                                        <input type="radio" id="reference" name="category" value="reference">
-                                                                        <label for="reference" style="font-weight: bold !important;">Reference</label>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-
-
-                                                            <div class="form-group" id="coa-div">
-
-                                                                <div class="row">
-                                                                    <div class="col-md-4"><label for="ddlcoa" class="bold col-form-label"> Chart of Account: <span id="requiredCoa" style="color: orangered !important;"> </span></label></div>
-                                                                    <div class="col-md-8" id="divcashAccount"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlcoa" onchange="GetSubsidoryorCSDDlbyCOAId()"></select> </div>
-                                                                </div>
-
-                                                            </div>
-
-
-
-                                                            <div class="form-group hidden" id="subsidiary-div">
-
-                                                                <div class="row">
-                                                                    <div class="col-md-4"><label for="ddlSubsidiaryType" class="bold col-form-label">Subsidiary Type: <span id="requiredSubsidiaryType" style="color: orangered !important;"> *</span></label></div>
-                                                                    <div class="col-md-8" id="divSubsidiaryType"><select class="form-select form-select-sm mb-3 select2" onchange="GetSubsidoryByType()" style="width: 100%;" id="ddlSubsidiaryType"></select> </div>
-                                                                </div>
-
-                                                                <div class="row">
-                                                                    <div class="col-md-4"><label for="ddlSubsidiary" class="bold col-form-label">Subsidiary: <span id="requiredSubsidiary" style="color: orangered !important;"> *</span></label></div>
-                                                                    <div class="col-md-8" id="divSubsidiary">
-                                                                        <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlSubsidiary"></select>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-                                                            <div class="form-group hidden" id="reference-div">
-
-                                                                <div class="row">
-                                                                    <div class="col-md-4"><label for="ddlReferenceType" class="bold col-form-label">Reference Type: <span id="requiredReferenceType" style="color: orangered !important;"> *</span></label></div>
-                                                                    <div class="col-md-8" id="divReferenceType"><select class="form-select form-select-sm mb-3 select2" onchange="GetReferenceByType()" style="width: 100%;" id="ddlReferenceType"></select> </div>
-                                                                </div>
-
-                                                                <div class="row">
-                                                                    <div class="col-md-4"><label for="ddlReference" class="bold col-form-label">Reference: <span id="requiredReference" style="color: orangered !important;"> *</span></label></div>
-                                                                    <div class="col-md-8" id="divReference">
-                                                                        <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlReference"></select>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-
-                                                            <div class="form-group hidden" id="cs-div">
-
-                                                                <div class="row">
-                                                                    <div class="col-md-4">   <label for="ddlcoa" class="bold col-form-label">Cost Center: <span style="color: orangered !important;"> *</span></label></div>
-                                                                    <div class="col-md-8" id="divCS"><select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCS"></select> </div>
-                                                                </div>
-
-                                                            </div>
-
-                                                            <div class="form-group">
-                                                                <div class="row">
-                                                                    <div class="col-md-4">   <label for="ddlFinansialYear" class="bold col-form-label">Financial Year: <span class="required"> *</span></label></div>
-                                                                    <div class="col-md-8" id="divFinansialYear">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlFinansialYear" onchange="LoadDaterangebyFiscal()"></select> </div>
-                                                                </div>
-                                                            </div>
-
-
-                                                            <div class="form-group">
-                                                                <div class="row">
-                                                                    <div class="col-md-4">   <label for="txtfrmDate" class="bold col-form-label">From Date: <span class="required"> *</span></label></div>
-                                                                    <div class="col-md-8">     <input type="text" id="txtfrmDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                                                </div>
-                                                            </div>
-
-
-                                                            <div class="form-group">
-                                                                <div class="row">
-                                                                    <div class="col-md-4">   <label for="txtToDate" class="bold col-form-label">To Date: <span class="required"> *</span></label></div>
-                                                                    <div class="col-md-8">     <input type="text" id="txtToDate" class="form-control form-control-sm mb-3 datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" /> </div>
-                                                                </div>
-                                                            </div>
-
-
-                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
-
-                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
-
-                                                                <div class="col-md-8" id="divTransactionType">
-
-                                                                    <div class="row">
-                                                                        <diiv class="col-md-6" style="display: none">
-                                                                            <div class="form-check form-switch">
-                                                                                <input class="form-check-input" checked type="checkbox" id="customSwitch1">
-                                                                                <label class="custom-control-label" for="customSwitch1">Monthly</label>
-                                                                            </div>
-
-                                                                        </diiv>
-                                                                        <diiv class="col-md-6" style="display:none">
-                                                                            <div class="form-check form-switch">
-                                                                                <input class="form-check-input" onchange="NarationHideShow()" type="checkbox" id="chkNarration">
-                                                                                <label class="custom-control-label" for="chkNarration">Narration</label>
-                                                                            </div>
-                                                                        </diiv>
-                                                                    </div>
-
-
-                                                                </div>
-
-                                                            </div>
-
-                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
-                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
-
-                                                                <div class="col-md-8" id="divTransactionType" style="display:none">
-
-
-                                                                    <div class="form-check form-switch">
-                                                                        <input class="form-check-input" type="checkbox" id="chkAllCompany">
-                                                                        <label class="custom-control-label" for="chkAllCompany">All Company</label>
-                                                                    </div>
-
-
-                                                                </div>
-
-                                                            </div>
-
-                                                            <div class="form-group row" style="margin-bottom: 3px !important;">
-                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
-                                                                <div class="col-md-8">
-                                                                    <button style="display:none" class="small blue button" id="Reject" onclick="PrintReport()">
-                                                                        <i class="fa fa-search" aria-hidden="true"></i>
-                                                                        Search
-                                                                    </button>
-
-                                                                    <button class="small blue button" onclick="GetDetailLedgerReport()">
-                                                                        <i class="fa fa-search" aria-hidden="true"></i>
-                                                                        Search
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            <br />
-
-
-                                                        </div>
-
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="col-12">
-
-                                        <div class="row m-2">
-                                            <div class="col-12">
-
-                                                <div class="row">
-
-                                                    <div class="col-11"></div>
-
-                                                    <div class="col-1">
-
-                                                        <button id="exportButton" class="btn btn-sm btn-success mb-3 btn-block">
-                                                            <i class="fa fa-file-excel"></i> Export to Excel
-                                                        </button>
-
-
-
-                                                    </div>
-
-                                                </div>
-                                            </div>
-
-                                            <div class="row m-2">
-                                                <div class="col-12">
-
-                                                    <div class="table-responsive" style="width: 99% !important; margin: 0 auto !important">
-
-                                                        <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable p-2">
-                                                            <thead>
-
-                                                                <tr>
-                                                                    <th colspan="10" style="text-align: center; font-weight: bold; font-size: 16px; color: blue;"> <label id="lblheading"> LEDGER ACCOUNT </label> </th>
-                                                                </tr>
-
-                                                                <tr class="jobRow">
-                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Job Type: </td>
-                                                                    <td style="text-align: left;">
-                                                                        <label style="font-size: 18px !important;" id="lblJobType"></label>
-                                                                    </td>
-                                                                    <td colspan="4"></td>
-                                                                    <td colspan="2"></td>
-                                                                </tr>
-                                                                <tr class="jobRow" style="text-align: left;">
-                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Job Code: </td>
-                                                                    <td style="text-align: left;">
-                                                                        <label style="font-size: 18px !important;" id="lblJobCode"></label>
-                                                                    </td>
-                                                                    <td colspan="4"></td>
-                                                                    <td colspan="2"></td>
-                                                                </tr>
-
-
-                                                                <tr>
-                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Business Unit: </td>
-                                                                    <td>
-                                                                        <label style="font-size: 18px !important;" id="lblBusinessUnit"></label>
-                                                                    </td>
-                                                                    <td colspan="4"></td>
-                                                                    <td style="font-weight: bold; font-size: 18px !important;"> From Date: </td>
-                                                                    <td colspan="2">
-                                                                        <label style="font-size: 18px !important;" id="lblFromDate"></label>
-                                                                    </td>
-
-
-                                                                </tr>
-
-                                                                <tr>
-                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Financial Year: </td>
-                                                                    <td>
-                                                                        <label style="font-size: 18px !important;" id="lblFinancialYear"></label>
-                                                                    </td>
-                                                                    <td colspan="4"></td>
-                                                                    <td style="font-weight: bold; font-size: 18px !important;"> To Date: </td>
-                                                                    <td colspan="2">
-                                                                        <label style="font-size: 18px !important;" id="lblToDate"></label>
-                                                                    </td>
-                                                                </tr>
-
-
-
-                                                                <tr>
-                                                                    <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Currency: </td>
-                                                                    <td>
-                                                                        <label style="font-size: 18px !important;" id="lblCurrency"></label>
-                                                                    </td>
-                                                                    <td colspan="4"></td>
-                                                                    <td style="font-weight: bold; font-size: 18px !important; color: forestgreen !important; "> Opening Balance: </td>
-                                                                    <td colspan="2">
-                                                                        <label style="font-weight: bold; font-size: 18px !important; color: forestgreen !important; " id="lblOpeningBalance">  </label>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td colspan="10"></td>
-                                                                </tr>
-                                                                <tr style="background-color: #285B86 !important">
-                                                                    <th style="width: 2% !important; color:white; text-align: center !important;"> # SL</th>
-                                                                    <th style="width: 8% !important; color:white; text-align: center !important;"> Date </th>
-                                                                    <th style="width: 6% !important; color:white; text-align: center !important;"> Voucher No </th>
-                                                                    <th style="width: 10% !important; color:white; text-align: center !important;"> GL Code </th>
-                                                                    <th style="width: 10% !important; color:white;  text-align: center !important;"> GL </th>
-                                                                    <th style="width: 36% !important; color:white;  text-align: center !important;"> Narration </th>
-                                                                    <th style="width: 3% !important; color:white; text-align: center !important;"> Voucher Type </th>
-                                                                    @*<th style="width: 5% !important; color:white; text-align: center !important;"> Currency </th>*@
-                                                                    <th style="width: 10% !important; color:white;  text-align: center !important;"> Debit </th>
-                                                                    <th style="width: 10% !important; color:white;  text-align: center !important;"> Credit  </th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="ledgerlist">
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<div style="margin:0 0 12px"><h5 class="mb-0 cstlfs" style="font-size:20px !important">Ledger Report</h5></div>
+
+<div class="filterbar rp-filter">
+    <div class="rp-grid">
+        <div class="fld" id="divCompany">
+            <label for="ddlCompany">Company <span class="required">*</span></label>
+            <select class="form-select form-select-sm select2" style="width: 100%;" id="ddlCompany" onchange="LoadDDlbyCom()"></select>
+        </div>
+        <div class="fld">
+            <label>Ledger Type <span class="required">*</span></label>
+            <div class="rp-radios">
+                <label for="COA"><input type="radio" id="COA" name="category" value="coa"> GL</label>
+                <label for="subsidiary"><input type="radio" id="subsidiary" name="category" value="subsidiary"> Subsidiary</label>
+                <label for="cost-center"><input type="radio" id="cost-center" name="category" value="cost-center"> Cost Center</label>
+                <label for="reference"><input type="radio" id="reference" name="category" value="reference"> Reference</label>
+            </div>
+        </div>
+
+        <div class="fld" id="coa-div">
+            <label for="ddlcoa">Chart of Account <span id="requiredCoa" style="color: orangered !important;"></span></label>
+            <select class="form-select form-select-sm select2" style="width: 100%;" id="ddlcoa" onchange="GetSubsidoryorCSDDlbyCOAId()"></select>
+        </div>
+
+        <div class="rp-full hidden" id="subsidiary-div">
+            <div class="rp-grid">
+                <div class="fld" id="divSubsidiaryType">
+                    <label for="ddlSubsidiaryType">Subsidiary Type <span id="requiredSubsidiaryType" style="color: orangered !important;">*</span></label>
+                    <select class="form-select form-select-sm select2" onchange="GetSubsidoryByType()" style="width: 100%;" id="ddlSubsidiaryType"></select>
+                </div>
+                <div class="fld" id="divSubsidiary">
+                    <label for="ddlSubsidiary">Subsidiary <span id="requiredSubsidiary" style="color: orangered !important;">*</span></label>
+                    <select class="form-select form-select-sm select2" style="width: 100%;" id="ddlSubsidiary"></select>
                 </div>
             </div>
         </div>
+
+        <div class="rp-full hidden" id="reference-div">
+            <div class="rp-grid">
+                <div class="fld" id="divReferenceType">
+                    <label for="ddlReferenceType">Reference Type <span id="requiredReferenceType" style="color: orangered !important;">*</span></label>
+                    <select class="form-select form-select-sm select2" onchange="GetReferenceByType()" style="width: 100%;" id="ddlReferenceType"></select>
+                </div>
+                <div class="fld" id="divReference">
+                    <label for="ddlReference">Reference <span id="requiredReference" style="color: orangered !important;">*</span></label>
+                    <select class="form-select form-select-sm select2" style="width: 100%;" id="ddlReference"></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="fld hidden" id="cs-div">
+            <label for="ddlCS">Cost Center <span style="color: orangered !important;">*</span></label>
+            <div id="divCS"><select class="form-select form-select-sm select2" style="width: 100%;" id="ddlCS"></select></div>
+        </div>
+
+        <div class="fld" id="divFinansialYear">
+            <label for="ddlFinansialYear">Financial Year <span class="required">*</span></label>
+            <select class="form-select form-select-sm select2" style="width: 100%;" id="ddlFinansialYear" onchange="LoadDaterangebyFiscal()"></select>
+        </div>
+        <div class="fld">
+            <label for="txtfrmDate">From Date <span class="required">*</span></label>
+            <input type="text" id="txtfrmDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+        </div>
+        <div class="fld">
+            <label for="txtToDate">To Date <span class="required">*</span></label>
+            <input type="text" id="txtToDate" class="form-control form-control-sm datepicker" value="@DateTime.Now.ToString("dd MMMM, yyyy")" />
+        </div>
+    </div>
+
+    <div style="display:none" id="divTransactionType">
+        <input class="form-check-input" checked type="checkbox" id="customSwitch1">
+        <input class="form-check-input" onchange="NarationHideShow()" type="checkbox" id="chkNarration">
+        <input class="form-check-input" type="checkbox" id="chkAllCompany">
+        <button type="button" id="Reject" onclick="PrintReport()">Search</button>
+    </div>
+
+    <div class="rp-acts">
+        <button id="exportButton" class="btn sm" type="button"><svg width="13" height="13"><use href="#s-dl"/></svg> Export to Excel</button>
+        <button class="btn emph" type="button" onclick="GetDetailLedgerReport()"><svg width="13" height="13"><use href="#s-search"/></svg> Go</button>
     </div>
 </div>
+
+<div class="rp-card">
+    <div class="rp-hd"><b>Ledger account</b></div>
+    <div class="rp-scroll">
+        <table id="dtTb">
+            <thead class="rp-meta">
+                <tr><th colspan="9" class="rp-title"><label id="lblheading">LEDGER ACCOUNT</label></th></tr>
+                <tr class="jobRow">
+                    <td colspan="2" class="k">Job Type</td>
+                    <td colspan="7"><label id="lblJobType"></label></td>
+                </tr>
+                <tr class="jobRow">
+                    <td colspan="2" class="k">Job Code</td>
+                    <td colspan="7"><label id="lblJobCode"></label></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="k">Business Unit</td>
+                    <td colspan="3"><label id="lblBusinessUnit"></label></td>
+                    <td colspan="2" class="k">From Date</td>
+                    <td colspan="2"><label id="lblFromDate"></label></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="k">Financial Year</td>
+                    <td colspan="3"><label id="lblFinancialYear"></label></td>
+                    <td colspan="2" class="k">To Date</td>
+                    <td colspan="2"><label id="lblToDate"></label></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="k">Currency</td>
+                    <td colspan="3"><label id="lblCurrency"></label></td>
+                    <td colspan="2" class="k">Opening Balance</td>
+                    <td colspan="2"><label id="lblOpeningBalance"></label></td>
+                </tr>
+            </thead>
+            <thead class="rp-cols">
+                <tr>
+                    <th style="width: 40px"># SL</th>
+                    <th>Date</th>
+                    <th>Voucher No</th>
+                    <th>GL Code</th>
+                    <th>GL</th>
+                    <th>Narration</th>
+                    <th>Voucher Type</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                </tr>
+            </thead>
+            <tbody id="ledgerlist">
+            </tbody>
+        </table>
+    </div>
+</div>
+
 @section Scripts
 {
 
@@ -620,6 +431,10 @@
                     referenceId: referenceId
                 },
                 async: false,
+                error: function (xhr) {
+                    $("#loadingSpinner").hide();
+                    alert("Ledger report failed to load (HTTP " + xhr.status + ").\n" + (xhr.responseText || "").substring(0, 500));
+                },
                 beforeSend: function () {
                     // Show loading overlay or spinner if needed
 
@@ -787,8 +602,8 @@
                             "</tr>";
 
                         var footerRow2 = "<tr>" +
-                            "<td colspan='7' style='text-align: right !important; font-weight: bold; font-size: 18px !important; color: forestgreen !important;'>Closing Balance</td>" +
-                            "<td colspan='2' style='text-align: right !important; font-weight: bold; font-size: 18px !important; color: forestgreen !important;'>" + _closingBlnc + "</td>" +
+                            "<td colspan='7' style='text-align: right !important; font-weight: bold;'>Closing Balance</td>" +
+                            "<td colspan='2' style='text-align: right !important; font-weight: bold;'>" + _closingBlnc + "</td>" +
                             "</tr>";
 
                         // Append the footer rows to your table
@@ -832,21 +647,7 @@
 
         function PrintVoucherReport(MasterId)
         {
-            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
-            var reportValue = "AllVoucherReport";
-
-        $.ajax({
-            url: urlpath,
-            data: { MasterId: MasterId, reportValue: reportValue},
-                dataType: 'json',
-                type: "Get",
-                success: function (data) {
-                    if (data.isSuccess) {
-                        //OpenPopUp('BasicReportViewer.aspx');
-                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
-                    }
-                }
-            });
+            window.open('@Url.Action("VoucherPrint", "AccountingTaskReport")?MasterId=' + MasterId, "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=yes, menubar=no,resizable=yes,directories=no,location=no");
         }
 
 

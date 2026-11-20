@@ -101,9 +101,9 @@ namespace New_Accounts.Controllers
 
 
 
-        public ActionResult LoadFilterInPartialView()
+        public ActionResult LoadFilterInPartialView(int days = 7)
         {
-          
+            ViewBag.FromDays = days;
             return PartialView("_FilterMasterInfo");
         }
 

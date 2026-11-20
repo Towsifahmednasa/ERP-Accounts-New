@@ -1,4 +1,4 @@
-@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AccountingTaskReport\VoucherPrint.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@* Debit voucher print - layout follows the finance team's "Debit Voucher / Journal Entry / Credit Voucher" Excel template. Data comes from AccountingTaskReportController.VoucherPrint. *@
 @using System.Data
 @{
     Layout = null;
@@ -14,12 +14,19 @@
         var imgBytes = h["RptImage"] as byte[];
         if (imgBytes != null && imgBytes.Length > 0) { logoBase64 = Convert.ToBase64String(imgBytes); }
     }
-    DateTime postingDate = Convert.ToDateTime(m["PostingDate"]);
-    decimal totalDebit = ViewBag.TotalDebit;
-    decimal totalCredit = ViewBag.TotalCredit;
-
-    Func<decimal, string> amt = v => v > 0 ? v.ToString("#,##0.00") : "";
+    Func<object, string> date = v => v == null || v == DBNull.Value ? "" : Convert.ToDateTime(v).ToString("dd-MMM-yyyy");
     Func<object, decimal> dec = v => { decimal d; decimal.TryParse(Convert.ToString(v), out d); return d; };
+    Func<decimal, string> amt = v => v > 0 ? v.ToString("#,##0.00") : "";
+
+    bool isBank = Convert.ToString(m["VoucherType"]).EndsWith("Bank");
+    bool showPay = !string.IsNullOrEmpty((string)ViewBag.ChequeNo);   // only Debit/Credit vouchers; not Journal / Contra
+    string offsetCol = ViewBag.ReportTitle == "DEBIT VOUCHER" ? "CreditAmountBDT" : "DebitAmountBDT";
+    string cashBankAccount = "";   // debit voucher: credited line; credit voucher: debited line = the bank/cash ledger
+    foreach (DataRow d in detail.Rows)
+    {
+        if (dec(d[offsetCol]) > 0) { cashBankAccount = d["AccountName"].ToString(); break; }
+    }
+    int sl = 0;
 }
 <!DOCTYPE html>
 <html>
@@ -27,116 +34,141 @@
     <meta charset="utf-8" />
     <title>@ViewBag.ReportTitle - @m["VoucherCode"]</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #000; margin: 0; background: #fff; }
-        .page { width: 800px; margin: 0 auto; padding: 25px 20px; }
-        .rpt-header { position: relative; text-align: center; margin-bottom: 8px; }
-        .rpt-logo { position: absolute; left: 0; top: 0; max-height: 60px; max-width: 130px; }
-        .company-name { font-size: 20px; }
-        .company-address { font-size: 12px; margin-top: 2px; }
-        .rpt-title { font-size: 15px; margin-top: 12px; letter-spacing: 1px; }
-        .info { width: 100%; margin: 14px 0 6px 0; font-size: 12px; }
-        .info td { padding: 2px 0; }
-        .info .lbl { width: 95px; }
-        .info .sep { width: 12px; }
-        .detail { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        .detail th, .detail td { border: 1px solid #000; padding: 4px 6px; vertical-align: top; }
-        .detail th { font-weight: normal; font-size: 13px; text-align: center; background: #f2f2f2; padding: 8px 6px; }
-        .detail td.num { text-align: right; white-space: nowrap; }
-        .detail .total-lbl { text-align: right; font-size: 13px; border-left: none; border-bottom: none; }
-        .words { margin-top: 16px; font-size: 12.5px; }
-        .narration { margin-top: 10px; font-size: 12.5px; }
-        .signs { width: 100%; margin-top: 70px; font-size: 12px; }
-        .signs td { width: 20%; text-align: center; vertical-align: bottom; padding: 0 12px; }
-        .signs .line { border-top: 1px solid #000; padding-top: 4px; }
-        .signs .name { padding-bottom: 4px; font-weight: bold; text-transform: uppercase; }
-        .printed { margin-top: 22px; font-size: 10.5px; }
+        :root { --navy: #000; --tint: transparent; --total: transparent; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; color: #000; margin: 0; background: #fff; }
+        .page { width: 794px; max-width: 100%; margin: 0 auto; }
+        .banner { background: none; color: #000; border-bottom: 2px solid #000; text-align: center; padding: 4px 110px 5px; position: relative; }
+        .banner .logo { position: absolute; left: 6px; top: 4px; max-height: 38px; max-width: 90px; }
+        .banner .company { font-size: 16px; font-weight: bold; }
+        .banner .address { font-size: 10px; font-weight: bold; margin-top: 2px; }
+        .title { text-align: center; color: var(--navy); font-weight: bold; font-size: 12px; margin: 5px 0 4px; }
+        .meta { width: 100%; border-collapse: collapse; }
+        .meta td { padding: 1px 4px; border-bottom: 1px solid #999; }
+        .meta td.lbl { width: 120px; font-weight: bold; color: var(--navy); border-bottom: none; }
+        .meta td.gap { width: 14%; border-bottom: none; }
+        .meta td.val { width: 28%; }
+        .band { font-weight: bold; padding: 2px 4px; margin-top: 5px; border-bottom: 1px solid #000; }
+        .entries { width: 100%; border-collapse: collapse; }
+        .entries th { border-bottom: 2px solid #000; padding: 2px 4px; text-align: center; font-weight: bold; }
+        .entries td { padding: 2px 4px; border-bottom: 1px solid #999; vertical-align: top; }
+        .entries td.c { text-align: center; }
+        .entries td.num { text-align: right; white-space: nowrap; background: var(--tint); }
+        .entries tr.total td { border-top: 2px solid var(--navy); border-bottom: 2px solid var(--navy); font-weight: bold; }
+        .entries tr.total td.num { background: var(--total); }
+        .words { margin-top: 4px; font-weight: bold; }
+        .narration { padding: 3px 4px; }
+        .signs { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        .signs th, .signs td { border: 1px solid #000; text-align: center; padding: 2px; width: 20%; }
+        .signs th { color: var(--navy); }
+        .signs td { height: 34px; color: #333; }
+        .signs td.who { vertical-align: bottom; }
+        .printed { margin-top: 4px; font-size: 9px; }
         .no-print { text-align: center; padding: 10px; }
         @@media print {
             .no-print { display: none; }
-            .page { width: auto; padding: 0; }
+            .page { width: auto; }
+            @@page { size: A4 portrait; margin: 6mm; }
         }
     </style>
 </head>
 <body>
-    <div class="no-print">
-        <button onclick="window.print()">Print</button>
-    </div>
+    <div class="no-print"><button onclick="window.print()">Print</button></div>
     <div class="page">
-        <div class="rpt-header">
-            @if (logoBase64 != null)
-            {
-                <img class="rpt-logo" src="data:image/png;base64,@logoBase64" alt="" />
-            }
-            else
-            {
-                <img class="rpt-logo" src="@Url.Content("~/VerticalAsset/images/unicorn-logo.png")" alt="" />
-            }
-            <div class="company-name">@companyName</div>
-            <div class="company-address">@companyAddress</div>
-            <div class="rpt-title">@ViewBag.ReportTitle</div>
+        <div class="banner">
+            <img class="logo" id="logo" src="@(logoBase64 != null ? "data:image/png;base64," + logoBase64 : Url.Content("~/VerticalAsset/images/unicorn-logo.png"))" alt="" />
+            <div class="company">@companyName</div>
+            <div class="address">@companyAddress</div>
         </div>
+        <div class="title">@ViewBag.ReportTitle</div>
 
-        @{ bool showPay = !string.IsNullOrEmpty((string)ViewBag.ChequeNo); }
-        <table class="info">
+        <table class="meta">
             <tr>
-                <td class="lbl">@(showPay ? "Payment Mode" : "")</td><td class="sep">@(showPay ? ":" : "")</td><td>@ViewBag.PaymentMode</td>
-                <td class="lbl" style="text-align:left; width:95px;">Voucher No</td><td class="sep">:</td><td style="width:170px;">@m["VoucherCode"]</td>
+                <td class="lbl">Voucher No.:</td><td class="val">@m["VoucherCode"]</td>
+                <td class="gap"></td>
+                <td class="lbl">Posting Date:</td><td class="val">@date(m["PostingDate"])</td>
             </tr>
             <tr>
-                <td class="lbl">@(showPay ? "Cheque No" : "")</td><td class="sep">@(showPay ? ":" : "")</td><td>@ViewBag.ChequeNo</td>
-                <td class="lbl">Voucher Date</td><td class="sep">:</td><td>@postingDate.ToString("dd-MMM-yyyy")</td>
+                <td class="lbl">Document Date:</td><td class="val">@date(m["VoucherDate"])</td>
+                <td class="gap"></td>
+                <td class="lbl">Voucher Type:</td><td class="val">@(new[] { m["VoucherCategory"], m["JournalType"], ViewBag.ReportTitle }.Select(Convert.ToString).First(s => !string.IsNullOrWhiteSpace(s)))</td>
             </tr>
+            <tr>
+                <td class="lbl">Financial Year:</td><td class="val">@m["FinancialYearDesc"]</td>
+                <td class="gap"></td>
+                <td class="lbl">Currency:</td><td class="val">@m["CurrencyName"]</td>
+            </tr>
+            @if (showPay)
+            {
+            <tr>
+                <td class="lbl">Payment Mode:</td><td class="val">@(isBank ? "Bank" : "Cash")</td>
+                <td class="gap"></td>
+                <td class="lbl">Bank / Cash Account:</td><td class="val">@cashBankAccount</td>
+            </tr>
+            <tr>
+                <td class="lbl">Cheque No.:</td><td class="val">@(isBank ? m["BankCheckNo"] : "")</td>
+                <td class="gap"></td>
+                <td class="lbl">Cheque Date:</td><td class="val">@(isBank ? date(m["BankCheckDate"]) : "")</td>
+            </tr>
+            }
         </table>
 
-        <table class="detail">
+        <div class="band">ACCOUNTING ENTRIES</div>
+        @{
+            bool hasCC = detail.Rows.Cast<DataRow>().Any(r => !string.IsNullOrWhiteSpace(Convert.ToString(r["CostCenter"])));
+            bool hasRef = detail.Rows.Cast<DataRow>().Any(r => !string.IsNullOrWhiteSpace(Convert.ToString(r["RefInfo"])));
+        }
+        <table class="entries">
             <tr>
-                <th style="width:12%;">Accounts Code</th>
-                <th style="width:20%;">Accounts Head</th>
-                <th style="width:10%;">Cost Center</th>
-                <th style="width:10%;">Ref. Info.</th>
-                <th style="width:12%;">Subsidiary</th>
-                <th style="width:11%;">Debit Amount</th>
-                <th style="width:11%;">Credit Amount</th>
-                <th style="width:14%;">Remarks</th>
+                <th style="width:4%;">SL</th>
+                <th style="width:10%;">G/L Account Code</th>
+                <th style="width:13%;">Sub Sub Control Ledger</th>
+                <th style="width:14%;">G/L Account Name</th>
+                <th style="width:14%;">Subsidiary Ledger</th>
+                <th style="width:11%;">Debit (BDT)</th>
+                <th style="width:11%;">Credit (BDT)</th>
+                @if (hasCC) { <th style="width:10%;">Cost Center</th> }
+                @if (hasRef) { <th style="width:10%;">Ref. Info.</th> }
+                <th style="width:10%;">Line Remarks</th>
             </tr>
             @foreach (DataRow d in detail.Rows)
             {
+                sl++;
                 <tr>
+                    <td class="c">@sl</td>
                     <td>@d["AccountCode"]</td>
+                    <td>@(detail.Columns.Contains("SubSubControlLedger") ? d["SubSubControlLedger"] : "")</td>
                     <td>@d["AccountName"]</td>
-                    <td>@d["CostCenter"]</td>
-                    <td>@d["RefInfo"]</td>
                     <td>@d["SubsidoryLedger"]</td>
                     <td class="num">@amt(dec(d["DebitAmountBDT"]))</td>
                     <td class="num">@amt(dec(d["CreditAmountBDT"]))</td>
+                    @if (hasCC) { <td>@d["CostCenter"]</td> }
+                    @if (hasRef) { <td>@d["RefInfo"]</td> }
                     <td>@d["Remarks"]</td>
                 </tr>
             }
-            <tr>
-                <td class="total-lbl" colspan="5">Total:</td>
-                <td class="num">@totalDebit.ToString("#,##0.00")</td>
-                <td class="num">@totalCredit.ToString("#,##0.00")</td>
-                <td></td>
+            <tr class="total">
+                <td colspan="5">TOTAL</td>
+                <td class="num">@(((decimal)ViewBag.TotalDebit).ToString("#,##0.00"))</td>
+                <td class="num">@(((decimal)ViewBag.TotalCredit).ToString("#,##0.00"))</td>
+                <td colspan="@(1 + (hasCC ? 1 : 0) + (hasRef ? 1 : 0))"></td>
             </tr>
         </table>
+        <div class="words">Taka In Words : @ViewBag.TakaInWords</div>
 
-        <div class="words">Taka In Words :&nbsp; @ViewBag.TakaInWords</div>
-        <div class="narration">Narration: @m["Narration"]</div>
+        <div class="band" style="background:#17375e;color:#fff;border-bottom:none;">NARRATION</div>
+        <div class="narration">@m["Narration"]</div>
 
         <table class="signs">
+            
             <tr>
-                <td>
-                    <div class="name">@m["EntryBy"]</div>
-                    <div class="line">Prepared by</div>
-                </td>
-                <td><div class="name">&nbsp;</div><div class="line">Recommend by</div></td>
-                <td><div class="name">&nbsp;</div><div class="line">Head (A&amp;F)</div></td>
-                <td><div class="name">&nbsp;</div><div class="line">Managing Director</div></td>
-                <td><div class="name">&nbsp;</div><div class="line">Received By</div></td>
+                <td class="who">@m["EntryBy"]<br />@date(m["EntryDate"])</td>
+                <td></td><td></td><td></td><td></td>
             </tr>
+            <tr><th>Prepared By</th><th>Recommended By</th><th>Checked By</th><th>Approved By</th><th>Receiver Signature</th></tr>
         </table>
 
-        <div class="printed">Printed from Computer Address : User: @ViewBag.PrintedUser ,Time: @DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss tt")</div>
+        <div class="printed">Printed by: @ViewBag.PrintedUser, Time: @DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss tt")</div>
     </div>
 </body>
 </html>

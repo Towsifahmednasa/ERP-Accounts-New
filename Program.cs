@@ -23,6 +23,7 @@ CultureInfo.DefaultThreadCurrentUICulture = culture;
 SqlUserAccess.Template = builder.Configuration.GetConnectionString("Template");
 DataBase.ControlPanel = builder.Configuration["Db:ControlPanel"] ?? DataBase.ControlPanel;
 DataBase.CSTL_ERP_DB = builder.Configuration["Db:CSTL_ERP_DB"] ?? DataBase.CSTL_ERP_DB;
+DataBase.SalesDb = builder.Configuration["Db:SalesDb"] ?? DataBase.SalesDb;
 
 builder.Services.AddHttpContextAccessor();
 builder.Services

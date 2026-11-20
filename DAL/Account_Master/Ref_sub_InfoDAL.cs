@@ -30,6 +30,7 @@ namespace New_Accounts.DAL.Account_Master
                 businessUnit.isReadOnly = Convert.ToInt32(dr["isReadOnly"]);
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: see UtilityDAL
             return businessUnitList;
         }
 
@@ -49,6 +50,7 @@ namespace New_Accounts.DAL.Account_Master
                 businessUnit.isrefrence = Convert.ToInt32(dr["isrefrence"]);
                 businessUnitList.Add(businessUnit);
             }
+            accessManager.SqlConnectionClose(); // leak fix: see UtilityDAL
             return businessUnitList;
         }
 

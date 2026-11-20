@@ -192,11 +192,6 @@ table.dataTable.no-footer{border-bottom:1px solid var(--sapList_BorderColor)}
 #toast-container>.toast-warning{background-color:var(--sapCriticalColor)}
 #toast-container>.toast-info{background-color:var(--sapInformativeColor)}
 
-/* ---- loading overlay (legacy #overlay / SpinnerStyle.css) ---- */
-#overlay{display:none;position:fixed;inset:0;background:rgba(29,45,62,.35);z-index:200}
-#overlay .cv-spinner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
-#overlay .alert{background:#fff !important;border:0 !important;border-radius:12px !important;box-shadow:var(--sapContent_Shadow2);padding:14px 18px !important}
-#overlay .alert h6{color:var(--sapTextColor) !important;font-weight:600}
 
 /* ---- side navigation additions: group numbers (wireframe index "Chart of Accounts 80") and the module heading ---- */
 .sidenav .navhead{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sapBrandColor);padding:10px 16px 6px}
@@ -212,3 +207,16 @@ table.dataTable.no-footer{border-bottom:1px solid var(--sapList_BorderColor)}
 hr{border-color:var(--sapList_BorderColor);opacity:1}
 .text-muted{color:var(--sapContent_LabelColor) !important}
 .font-22{font-size:16px}
+
+/* ---- page loading overlay: full-screen scrim + centred card. #overlay is the global one in _Layout (jQuery fadeIn/fadeOut + every page load),
+        #loadingSpinner is the per-page copy on the report pages; both share this one design ---- */
+#loadingSpinner,#overlay{position:fixed;inset:0;z-index:2000;background:rgba(29,45,62,.35);backdrop-filter:blur(1px)}
+#overlay{display:none}
+#loadingSpinner .overlay{display:none}
+:is(#loadingSpinner,#overlay) .spinner-container{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:12px;
+  min-width:180px;padding:22px 30px;background:#fff;border-radius:12px;box-shadow:var(--sapContent_Shadow2)}
+:is(#loadingSpinner,#overlay) .loading-text{font-size:13px;font-weight:600;color:var(--sapTextColor)}
+.spinner{display:inline-block;width:34px;height:34px;border:3px solid var(--sapList_BorderColor);border-top-color:var(--sapBrandColor);border-radius:50%;animation:cstl-spin .8s linear infinite;flex:none}
+@keyframes cstl-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}
+.btn.emph:hover{color:#fff}

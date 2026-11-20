@@ -1,0 +1,215 @@
+@* Accounts Integrity Dashboard: voucher problems per transaction page, with a Fix button per transaction.
+   Data: GET /AccountsIntegrity/GetIssues. Fix: POST /AccountsIntegrity/Fix and /FixAll (anti-forgery header comes from _Layout). *@
+@{
+    ViewBag.Title = "Accounts Integrity Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .ai { padding: 4px 2px 40px; }
+    .ai-head h4 { margin: 0 0 2px; font-weight: 600; }
+    .ai-muted { color: #6a6d70; font-size: 12px; }
+    .ai-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 10px 14px; margin: 12px 0; }
+    .ai-bar label { font-size: 12px; margin: 0; color: #32363a; }
+    .ai-bar input[type=date] { height: 30px; border: 1px solid #89919a; border-radius: 6px; padding: 0 6px; font-size: 13px; }
+    .ai-sim { background: #fff4d6; border: 1px solid #f0c36d; border-radius: 6px; padding: 3px 8px; }
+    .ai-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .ai-tile { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 12px 14px; cursor: pointer; box-shadow: 0 0 2px rgba(0,0,0,.08); }
+    .ai-tile.on { border-color: #0a6ed1; box-shadow: 0 0 0 2px #0a6ed1 inset; }
+    .ai-tile .t { font-size: 13px; font-weight: 600; color: #32363a; }
+    .ai-tile .n { font-size: 30px; font-weight: 600; line-height: 1.1; margin: 4px 0 2px; }
+    .ai-tile .n.ok { color: #107e3e; } .ai-tile .n.bad { color: #bb0000; }
+    .ai-tile .s { font-size: 11px; color: #6a6d70; }
+    .ai-pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+    .ai-pill { border: 1px solid #c9ced3; background: #fff; border-radius: 999px; padding: 3px 12px; font-size: 12px; cursor: pointer; }
+    .ai-pill.on { background: #0a6ed1; border-color: #0a6ed1; color: #fff; }
+    .ai-search { margin-left: auto; height: 30px; border: 1px solid #89919a; border-radius: 6px; padding: 0 8px; min-width: 220px; font-size: 13px; }
+    .ai-page { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+    .ai-page > .hd { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; background: #f7f7f7; }
+    .ai-page > .hd .nm { font-weight: 600; }
+    .ai-page > .hd .cnt { margin-left: auto; font-size: 12px; color: #6a6d70; }
+    .ai-grp { border-top: 1px solid #eee; padding: 8px 14px 12px; }
+    .ai-grp .gh { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 4px; }
+    .ai-grp .gt { font-weight: 600; font-size: 13px; }
+    .ai-grp .tok { font-family: Consolas, monospace; font-size: 11px; color: #6a6d70; }
+    .ai-grp .note { font-size: 12px; color: #6a6d70; margin: 0 0 6px; }
+    .ai-badge { display: inline-block; font-size: 11px; border-radius: 6px; padding: 1px 7px; color: #fff; }
+    .ai-c1 { background: #bb0000; } .ai-c2 { background: #e9730c; } .ai-c3 { background: #0a6ed1; } .ai-c4 { background: #5b738b; } .ai-c5 { background: #6a6d70; }
+    .ai table { width: 100%; font-size: 12px; border-collapse: collapse; }
+    .ai th { text-align: left; background: #eef1f4; padding: 5px 8px; font-weight: 600; white-space: nowrap; }
+    .ai td { padding: 4px 8px; border-top: 1px solid #f0f0f0; vertical-align: top; }
+    .ai td.num, .ai th.num { text-align: right; white-space: nowrap; }
+    .ai td.act { white-space: nowrap; text-align: right; }
+    .ai-manual { color: #6a6d70; font-size: 11px; border: 1px dashed #b0b5ba; border-radius: 6px; padding: 1px 7px; cursor: help; }
+    .ai-more { background: none; border: 0; color: #0a6ed1; font-size: 12px; padding: 4px 0; cursor: pointer; }
+    .ai-empty { text-align: center; padding: 40px 10px; color: #107e3e; background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; }
+</style>
+
+<div class="ai">
+    <div class="ai-head">
+        <h4>Accounts Integrity Dashboard</h4>
+        <div class="ai-muted">Vouchers of Delivery Confirmation, Customer Payment, Invoice Adjustment, Non-Transactional Sales Return and Delivery Sales Return, checked against their transactions: missing voucher, value mismatch, subsidiary ledger and reference.</div>
+    </div>
+
+    <div class="ai-bar">
+        <div><label for="aiFrom">From</label><br /><input type="date" id="aiFrom" /></div>
+        <div><label for="aiTo">To</label><br /><input type="date" id="aiTo" /></div>
+        <div style="align-self:flex-end"><button type="button" class="btn btn-sm btn-primary" id="aiLoad">Refresh</button></div>
+        <label class="ai-sim" title="Runs the fix and the check, then rolls everything back. Nothing is saved.">
+            <input type="checkbox" id="aiSim" /> Simulate only (nothing is saved)
+        </label>
+        <span class="ai-muted" id="aiStamp"></span>
+    </div>
+
+    <div class="ai-tiles" id="aiTiles"></div>
+
+    <div class="ai-pills" id="aiPills"></div>
+
+    <div id="aiBody"></div>
+</div>
+
+<script>
+    (function () {
+        var CATS = ['Missing voucher', 'Value mismatch', 'Subsidiary', 'Reference', 'Other'];
+        var state = { issues: [], pages: [], page: '', cat: '', q: '', collapsed: {}, showAll: {} };
+        var ROW_LIMIT = 50;
+
+        function esc(s) { return $('<div/>').text(s == null ? '' : String(s)).html(); }
+        function num(v) { return Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function catClass(c) { return 'ai-c' + (CATS.indexOf(c) + 1); }
+        function say(ok, msg) { if (window.toastr) { (ok ? toastr.success : toastr.error)(msg); } else { alert(msg); } }
+
+        function params() { return { fromDate: $('#aiFrom').val() || null, toDate: $('#aiTo').val() || null }; }
+
+        function load() {
+            $('#aiStamp').text('Loading...');
+            $.getJSON('/AccountsIntegrity/GetIssues', params()).done(function (res) {
+                state.issues = res.Issues || [];
+                state.pages = res.Pages || [];
+                $('#aiStamp').text('Checked ' + res.GeneratedAt);
+                render();
+            }).fail(function (xhr) {
+                var d = xhr.responseJSON;
+                $('#aiStamp').text('');
+                say(false, d && d.detail ? d.detail : 'Could not load the integrity data.');
+            });
+        }
+
+        function visible() {
+            var q = state.q.toLowerCase();
+            return state.issues.filter(function (i) {
+                return (!state.page || i.AreaKey === state.page) && (!state.cat || i.Category === state.cat) &&
+                    (!q || (i.DocNo + ' ' + i.Customer + ' ' + i.Detail + ' ' + i.Problem).toLowerCase().indexOf(q) >= 0);
+            });
+        }
+
+        function render() {
+            // tiles: one per page (counts ignore the page filter so the tiles stay stable)
+            var tiles = state.pages.map(function (p) {
+                var mine = state.issues.filter(function (i) { return i.AreaKey === p.Key; });
+                var docs = {}; mine.forEach(function (i) { docs[i.DocId] = 1; });
+                var fixable = mine.filter(function (i) { return i.FixCode; }).length;
+                var cls = mine.length ? 'bad' : 'ok';
+                return '<div class="ai-tile' + (state.page === p.Key ? ' on' : '') + '" data-page="' + p.Key + '">' +
+                    '<div class="t">' + esc(p.Page) + '</div><div class="n ' + cls + '">' + mine.length + '</div>' +
+                    '<div class="s">' + (mine.length ? Object.keys(docs).length + ' transactions &middot; ' + fixable + ' fixable here' : 'No problems') + '</div></div>';
+            });
+            $('#aiTiles').html(tiles.join(''));
+
+            // category pills
+            var pills = ['<span class="ai-muted">Problem type:</span><button class="ai-pill' + (state.cat ? '' : ' on') + '" data-cat="">All (' + state.issues.filter(function (i) { return !state.page || i.AreaKey === state.page; }).length + ')</button>'];
+            CATS.forEach(function (c) {
+                var n = state.issues.filter(function (i) { return i.Category === c && (!state.page || i.AreaKey === state.page); }).length;
+                if (n) { pills.push('<button class="ai-pill' + (state.cat === c ? ' on' : '') + '" data-cat="' + c + '">' + c + ' (' + n + ')</button>'); }
+            });
+            pills.push('<input class="ai-search" id="aiQ" placeholder="Search document, customer, detail" value="' + esc(state.q) + '" />');
+            $('#aiPills').html(pills.join(''));
+
+            // body: page -> problem group
+            var rows = visible(), html = [];
+            state.pages.forEach(function (p) {
+                var inPage = rows.filter(function (i) { return i.AreaKey === p.Key; });
+                if (!inPage.length) { return; }
+                var collapsed = !!state.collapsed[p.Key];
+                html.push('<div class="ai-page"><div class="hd" data-toggle-page="' + p.Key + '"><span>' + (collapsed ? '&#9656;' : '&#9662;') + '</span><span class="nm">' + esc(p.Page) + '</span>' +
+                    '<span class="cnt">' + inPage.length + ' problem(s)</span></div>');
+                if (!collapsed) {
+                    var groups = {}, order = [];
+                    inPage.forEach(function (i) { if (!groups[i.Problem]) { groups[i.Problem] = []; order.push(i.Problem); } groups[i.Problem].push(i); });
+                    order.sort(function (a, b) { return CATS.indexOf(groups[a][0].Category) - CATS.indexOf(groups[b][0].Category); });
+                    order.forEach(function (tok) { html.push(groupHtml(p.Key, tok, groups[tok])); });
+                }
+                html.push('</div>');
+            });
+            if (!html.length) {
+                html.push('<div class="ai-empty">' + (state.issues.length ? 'No problem matches this filter.' : 'No problems found. Vouchers match their transactions.') + '</div>');
+            }
+            $('#aiBody').html(html.join(''));
+        }
+
+        function groupHtml(area, tok, list) {
+            var f = list[0], key = area + ':' + tok;
+            var fixable = list.filter(function (i) { return i.FixCode; }).length;
+            var show = state.showAll[key] ? list : list.slice(0, ROW_LIMIT);
+            var h = '<div class="ai-grp"><div class="gh"><span class="ai-badge ' + catClass(f.Category) + '">' + esc(f.Category) + '</span>' +
+                '<span class="gt">' + esc(f.Title) + '</span><span class="tok">' + esc(tok) + ' &middot; ' + list.length + '</span>';
+            if (fixable) {
+                h += '<button class="btn btn-sm btn-outline-primary" data-fixall="' + area + '|' + tok + '|' + fixable + '" style="margin-left:auto">' + esc(f.FixLabel || 'Fix') + ' all (' + fixable + ')</button>';
+            }
+            h += '</div><p class="note">' + esc(f.Note) + '</p><table><thead><tr><th>Transaction</th><th>Date</th><th>Customer</th><th class="num">Expected</th><th class="num">In accounts</th><th>Detail</th><th></th></tr></thead><tbody>';
+            show.forEach(function (i) {
+                h += '<tr><td>' + esc(i.DocNo) + '</td><td>' + esc(i.DocDate) + '</td><td>' + esc(i.Customer) + '</td><td class="num">' + num(i.Expected) + '</td><td class="num">' + num(i.Actual) + '</td><td>' + esc(i.Detail) + '</td><td class="act">';
+                if (i.FixCode) {
+                    h += '<button class="btn btn-sm btn-primary" data-fix="' + esc(i.AreaKey + '|' + i.Problem + '|' + i.DocId + '|' + i.DocId2) + '">' + esc(i.FixLabel) + '</button>';
+                } else {
+                    h += '<span class="ai-manual" title="' + esc(i.Note) + '">Manual</span>';
+                }
+                h += '</td></tr>';
+            });
+            h += '</tbody></table>';
+            if (list.length > show.length) { h += '<button class="ai-more" data-more="' + key + '">Show all ' + list.length + '</button>'; }
+            return h + '</div>';
+        }
+
+        function sim() { return $('#aiSim').is(':checked'); }
+
+        function fixOne(btn) {
+            var a = btn.data('fix').split('|'), issue = state.issues.filter(function (i) {
+                return i.AreaKey === a[0] && i.Problem === a[1] && String(i.DocId) === a[2];
+            })[0];
+            var q = issue.FixLabel + ' - ' + issue.DocNo + '\n\n' + issue.Note + (sim() ? '\n\nSIMULATION: nothing will be saved.' : '');
+            if (!window.confirm(q)) { return; }
+            btn.prop('disabled', true);
+            $.post('/AccountsIntegrity/Fix', { area: a[0], problem: a[1], docId: a[2], docId2: a[3], simulate: sim() }).done(function (r) {
+                say(r.Success, (r.DocNo || issue.DocNo) + ': ' + r.Message);
+                if (r.Success && !r.Simulated) { load(); } else { btn.prop('disabled', false); }
+            }).fail(function () { say(false, 'The fix request failed.'); btn.prop('disabled', false); });
+        }
+
+        function fixAll(btn) {
+            var a = btn.data('fixall').split('|');
+            var q = btn.text() + ' for ' + a[2] + ' transaction(s)?\n\nEach one is fixed and re-checked in its own transaction; a failed one is left unchanged.' + (sim() ? '\n\nSIMULATION: nothing will be saved.' : '');
+            if (!window.confirm(q)) { return; }
+            btn.prop('disabled', true);
+            var p = params();
+            $.post('/AccountsIntegrity/FixAll', { area: a[0], problem: a[1], fromDate: p.fromDate, toDate: p.toDate, simulate: sim() }).done(function (r) {
+                var msg = (r.Simulated ? 'Simulation: ' : '') + r.Fixed + ' of ' + r.Total + ' fixed' + (r.Failed ? ', ' + r.Failed + ' not fixed' : '') + '.';
+                if (r.Failures && r.Failures.length) { msg += ' First problem: ' + (r.Failures[0].DocNo || '') + ' - ' + r.Failures[0].Message; }
+                say(r.Failed === 0, msg);
+                if (!r.Simulated && r.Fixed) { load(); } else { btn.prop('disabled', false); }
+            }).fail(function () { say(false, 'The fix request failed.'); btn.prop('disabled', false); });
+        }
+
+        $(document).on('click', '[data-page]', function () { var k = $(this).data('page'); state.page = state.page === k ? '' : k; render(); });
+        $(document).on('click', '[data-cat]', function () { state.cat = $(this).data('cat'); render(); });
+        $(document).on('click', '[data-toggle-page]', function () { var k = $(this).data('toggle-page'); state.collapsed[k] = !state.collapsed[k]; render(); });
+        $(document).on('click', '[data-more]', function () { state.showAll[$(this).data('more')] = true; render(); });
+        $(document).on('click', '[data-fix]', function () { fixOne($(this)); });
+        $(document).on('click', '[data-fixall]', function () { fixAll($(this)); });
+        $(document).on('input', '#aiQ', function () { state.q = $(this).val(); var pos = this.selectionStart; render(); var el = document.getElementById('aiQ'); el.focus(); el.setSelectionRange(pos, pos); });
+        $('#aiLoad').on('click', load);
+        $('#aiSim').on('change', function () { $('.ai-sim').toggleClass('on', this.checked); });
+
+        load();
+    })();
+</script>

@@ -1,94 +1,59 @@
-@* Ported from Accounts\CSTL_Pro_to_Pay\Views\AllAccountReport\COAReport.cshtml - page markup and inline scripts unchanged; presentation comes from the Fiori shell/stylesheet. *@
+@* Chart of Account Report laid out like wireframe screen 81 "Chart of accounts": filter bar, "Account hierarchy" master list
+   (expand/collapse tree) and a read-only account master pane for the selected row. Element ids, the tree table (#dtTb / #ledgerlist,
+   used by the Excel export) and the data calls are the same contract as before. *@
 
 @{
     ViewBag.Title = "Chart of Account Report";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <style>
-    .radio-label {
-        font-weight: bold !important;
-    }
+    .coa-filter { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; border-radius: 12px; box-shadow: var(--sapContent_Shadow0); margin-bottom: 14px; padding: 10px 20px 12px; }
+    .coa-filter .fld { min-width: 280px; }
+    .coa-filter .coa-acts { margin-left: auto; display: flex; gap: 7px; flex-wrap: wrap; }
+    .coa-split { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+    .coa-master { flex: 1 1 520px; max-width: 760px; background: #fff; border-radius: 12px; box-shadow: var(--sapContent_Shadow0); overflow: hidden; }
+    .coa-detail { flex: 1 1 320px; background: #fff; border-radius: 12px; box-shadow: var(--sapContent_Shadow0); overflow: hidden; }
+    .coa-hd { padding: 10px 14px; border-bottom: 1px solid var(--sapList_HeaderBorderColor); display: flex; align-items: center; gap: 8px; }
+    .coa-hd b { font-size: 13.5px; }
+    .coa-hd .mini { margin-left: auto; }
+    .coa-scroll { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; }
 
-    .hidden {
-        display: none;
-    }
+    #dtTb { width: 100%; margin: 0; border-collapse: collapse; font-size: 12.5px; }
+    #dtTb td, #dtTb th { border: 0; border-bottom: 1px solid var(--sapList_BorderColor); padding: 7px 10px; background: #fff; vertical-align: middle; }
+    #dtTb thead th { position: sticky; top: 0; z-index: 1; background: #fafbfc; color: var(--sapContent_LabelColor); font-size: 12px; font-weight: 600; text-align: left; border-bottom-color: var(--sapList_HeaderBorderColor); }
+    #dtTb .coa-xl-only { display: none; }
+    #dtTb .coa-sl { width: 76px; color: var(--sapContent_LabelColor); font-size: 12px; font-variant-numeric: tabular-nums; }
+    #dtTb .coa-code { width: 120px; }
+    #dtTb .coa-tp { width: 130px; text-align: right; }
+    #dtTb .coa-hint td { text-align: center; color: var(--sapContent_LabelColor); padding: 26px 10px; }
 
-    .coa-tree-table {
-        min-width: 1000px;
-    }
+    .coa-name { display: flex; align-items: center; gap: 7px; }
+    .coa-name svg { flex: none; color: #556b82; }
+    .coa-tree-clickable { cursor: pointer; user-select: none; }
+    .coa-tree-clickable:not(.coa-tree-open) .coa-caret { transform: rotate(-90deg); }
+    .coa-level-1 .coa-name { padding-left: 0; }
+    .coa-level-2 .coa-name { padding-left: 16px; }
+    .coa-level-3 .coa-name { padding-left: 32px; }
+    .coa-level-4 .coa-name { padding-left: 48px; }
+    .coa-level-5 .coa-name { padding-left: 64px; }
+    .coa-level-5 .coa-name svg { color: #8b9aab; }
+    tr.coa-level-1 td { background: #f2f4f6; font-weight: 600; }
+    tr.coa-level-2 td { font-weight: 600; }
+    tr.coa-tree-clickable:hover td, tr.coa-account-row:hover td { background: #f5f9fe; }
+    tr.coa-sel td { background: var(--sapList_SelectionBackgroundColor); font-weight: 600; }
+    tr.coa-sel td:first-child { box-shadow: inset 3px 0 0 var(--sapBrandColor); }
+    .coa-copy-code { color: var(--sapLinkColor); font-weight: 600; cursor: pointer; }
+    .coa-copy-code:hover { text-decoration: underline; }
+    .coa-chip { display: inline-block; font-size: 11.5px; line-height: 1; padding: 3px 8px; border-radius: 10px; background: #eef2f6; color: var(--sapContent_LabelColor); font-weight: 400; }
 
-    .coa-tree-clickable {
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .coa-tree-toggle {
-        display: inline-block;
-        width: 18px;
-        font-weight: bold;
-        text-align: center;
-    }
-
-    .coa-tree-toggle-empty {
-        visibility: hidden;
-    }
-
-    .coa-level-1 .coa-name { padding-left: 12px !important; }
-    .coa-level-2 .coa-name { padding-left: 36px !important; }
-    .coa-level-3 .coa-name { padding-left: 60px !important; }
-    .coa-level-4 .coa-name { padding-left: 84px !important; }
-    .coa-level-5 .coa-name { padding-left: 108px !important; }
-
-    .coa-gl-row td {
-        background: #173A5A !important;
-        color: #ffffff !important;
-        font-weight: bold;
-    }
-
-    .coa-control-row td {
-        background: #D0DFF0 !important;
-        color: #102F4F !important;
-        font-weight: bold;
-    }
-
-    .coa-sub-row td {
-        background: #EEF3FA !important;
-        color: #285B86 !important;
-        font-weight: bold;
-    }
-
-    .coa-subsub-row td {
-        background: #F7FAFD !important;
-        color: #2B4F70 !important;
-        font-weight: bold;
-    }
-
-    .coa-account-row td {
-        background: #ffffff !important;
-    }
-
-    .coa-account-row {
-        cursor: default;
-    }
-
-    .coa-copy-code {
-        cursor: pointer;
-        user-select: text;
-    }
-
-    .coa-copy-code:hover {
-        text-decoration: underline;
-    }
-
-    #expandCOAAllButton,
-    #collapseCOAAllButton,
-    #exportButton {
-        display: inline-block;
-        width: auto !important;
-        min-width: auto !important;
-        white-space: nowrap;
-        vertical-align: middle;
-    }
+    .coa-id { display: flex; align-items: center; gap: 12px; padding: 14px; border-bottom: 1px solid var(--sapList_BorderColor); }
+    .coa-id .cd { min-width: 52px; padding: 9px 8px; border-radius: 8px; background: #eef2f6; text-align: center; font-weight: 700; word-break: break-all; }
+    .coa-id h4 { margin: 0; font-size: 15px; font-weight: 600; }
+    .coa-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px 20px; padding: 14px; }
+    .coa-fields .k { font-size: 12px; color: var(--sapContent_LabelColor); }
+    .coa-fields .v { margin-top: 2px; }
+    .coa-fields .wide { grid-column: 1 / -1; }
+    .coa-empty { padding: 40px 14px; text-align: center; color: var(--sapContent_LabelColor); }
 </style>
 <div id="loadingSpinner" style="display:none;">
     <div class="overlay"></div>
@@ -97,151 +62,60 @@
         <div class="loading-text">Loading...</div>
     </div>
 </div>
-<div class="page-wrapper">
-    <div class="page-content">
-        <div class="row">
-            <div class="col">
-                <div class="card border-top border-0 border-4 border-dark mt-3" style="margin-top: 3px !important">
-                    <div class="card-body" style="border-style: none !important;">
-                        <div class="border p-2 rounded">
 
-                            <div class="page-breadcrumb d-none d-sm-flex align-items-center headerBorderBottom">
-                                <div class="breadcrumb-title pe-3">
-                                    <div class="card-title d-flex align-items-center">
-                                        <div>
-                                            <i class="bx bxs-right-arrow-square me-1 font-22 text-inverse"></i>
-                                        </div>
-                                        <h5 class="mb-0 text-dark cstlfs">
-                                            <span class=""> Chart of Account Report</span>
-                                        </h5>
-                                    </div>
-                                </div>
-                                <div class="ms-auto">
+<div class="page-title" style="margin:0 0 12px">
+    <h5 class="mb-0 cstlfs" style="font-size:20px !important">Chart of Account Report</h5>
+</div>
 
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card-body">
+<div class="strip info">
+    <svg width="15" height="15" style="flex:none;margin-top:1px"><use href="#s-i"/></svg>
+    <div><b>Chart of accounts &mdash; master&ndash;detail over the ledger tree.</b> The hierarchy on the left is the operational chart; the right pane shows the master data of whatever is selected. Click a code to copy it.</div>
+</div>
 
-                                        <div class="row">
-
-                                            <div class="col-md-4">
-
-
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="card bg-light bg-gradient ">
-                                                    <div class="card-body">
-                                                        <div class="p-3 text-dark rounded">
-
-
-                                                            <div class="form-group">
-                                                                <div class="row">
-                                                                    <div class="col-md-4">   <label for="ddlCompany" class="bold col-form-label">Company: <span class="required"> *</span></label></div>
-                                                                    <div class="col-md-8" id="divCompany">    <select class="form-select form-select-sm mb-3 select2" style="width: 100%;" id="ddlCompany"></select> </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="form-group row" style="margin-top: 3px !important;">
-                                                                <label style="text-align: right !important; font-size: small !important" class="col-md-4 bold col-form-label"><span style="color: orangered !important;"> </span></label>
-                                                                <div class="col-md-8" style="margin-top: 10px !important;">
-                                                                    <button class="small blue button" id="Reject" onclick="ShowReport()">
-                                                                        <i class="fa fa-search" aria-hidden="true"></i>
-                                                                        Search
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-
-
-
-
-
-
-                                        <!-- Rana Code Start-->
-
-
-                                        <div class="col-12">
-
-                                            <div class="row m-2">
-                                                <div class="col-12">
-
-                                                    <div class="row mb-2">
-                                                        <div class="col-12 text-end">
-                                                            <button id="expandCOAAllButton" class="btn btn-sm btn-outline-primary me-2" type="button" style="display:none;">
-                                                                <i class="fa fa-plus-square"></i> Expand All
-                                                            </button>
-
-                                                            <button id="collapseCOAAllButton" class="btn btn-sm btn-outline-secondary me-2" type="button" style="display:none;">
-                                                                <i class="fa fa-minus-square"></i> Collapse All
-                                                            </button>
-
-                                                            <button id="exportButton" class="btn btn-sm btn-success" type="button">
-                                                                <i class="fa fa-file-excel"></i> Export to Excel
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row m-2">
-                                                    <div class="col-12">
-
-                                                        <div class="table-responsive" style="width: 99% !important; margin: 0 auto !important">
-
-                                                            <table id="dtTb" class="table table-bordered table-striped table-hover jdtDataTable p-2 coa-tree-table">
-                                                                <thead>
-
-                                                                    <tr>
-                                                                        <th colspan="4" style="text-align: center; font-weight: bold; font-size: 16px; color: blue;"> <label id="lblheading"> Chart Of Account </label> </th>
-                                                                    </tr>
-
-                                                                    <tr class="jobRow" style="text-align: left;">
-                                                                        <td colspan="2" style="font-weight: bold; font-size: 18px !important;"> Company Name: </td>
-                                                                        <td style="text-align: left;">
-                                                                            <label style="font-size: 18px !important;" id="lblGetCompanyName"></label>
-                                                                        </td>
-                                                                        <td colspan="1"></td>
-                                                                    </tr>
-
-                                                                    <tr style="background-color: #285B86 !important">
-                                                                        <th style="width: 6% !important; color:white; text-align: center !important;">SL</th>
-                                                                        <th style="width: 18% !important; color:white; text-align: left !important;">Code</th>
-                                                                        <th style="width: 55% !important; color:white; text-align: left !important;">Particular Name</th>
-                                                                        <th style="width: 10% !important; color:white; text-align: center !important;">Type</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody id="ledgerlist">
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-
-                                        <!-- Rana Code End-->
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="filterbar coa-filter">
+    <div class="fld">
+        <label for="ddlCompany">Company <span class="required">*</span></label>
+        <select class="form-select form-select-sm select2" style="width: 100%;" id="ddlCompany"></select>
+    </div>
+    <div class="coa-acts">
+        <button id="expandCOAAllButton" class="btn sm" type="button" style="display:none;"><svg width="13" height="13"><use href="#s-plus"/></svg> Expand All</button>
+        <button id="collapseCOAAllButton" class="btn sm" type="button" style="display:none;"><svg width="13" height="13"><use href="#s-up"/></svg> Collapse All</button>
+        <button id="exportButton" class="btn sm" type="button"><svg width="13" height="13"><use href="#s-dl"/></svg> Export to Excel</button>
+        <button class="btn emph" id="Reject" type="button" onclick="ShowReport()"><svg width="13" height="13"><use href="#s-search"/></svg> Go</button>
     </div>
 </div>
+
+<div class="coa-split">
+    <div class="coa-master">
+        <div class="coa-hd">
+            <b>Account hierarchy</b>
+            <span class="mini" id="coaCounts"></span>
+        </div>
+        <div class="coa-scroll">
+            <table id="dtTb">
+                <thead>
+                    <tr class="coa-xl-only"><th colspan="4" style="text-align:center"><label id="lblheading">Chart Of Account</label></th></tr>
+                    <tr class="coa-xl-only"><th colspan="2">Company Name:</th><th colspan="2"><label id="lblGetCompanyName"></label></th></tr>
+                    <tr>
+                        <th class="coa-sl">SL</th>
+                        <th class="coa-code">Code</th>
+                        <th>Particular Name</th>
+                        <th class="coa-tp">Type</th>
+                    </tr>
+                </thead>
+                <tbody id="ledgerlist">
+                    <tr class="coa-hint"><td colspan="4">Select a company and press Go to load the chart of accounts.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="coa-detail">
+        <div class="coa-hd"><b>Account master</b><span class="mini">Read-only</span></div>
+        <div id="coaDetail"><div class="coa-empty">Select an account in the hierarchy to see its master data.</div></div>
+    </div>
+</div>
+
 @section Scripts
 {
 
@@ -306,7 +180,8 @@
             if (!data || data.length === 0) {
                 $('#expandCOAAllButton').hide();
                 $('#collapseCOAAllButton').hide();
-                $tbody.append('<tr><td colspan="4" style="text-align:center;">No data found.</td></tr>');
+                $tbody.append('<tr class="coa-hint"><td colspan="4">No data found.</td></tr>');
+                $('#coaCounts').text('');
                 return;
             }
 
@@ -453,25 +328,74 @@
             $('#ledgerlist tr[data-parent!=""]').hide();
             bindCOATreeClick();
             bindCOACodeCopyClick();
+            $('#ledgerlist').off('click.coasel').on('click.coasel', 'tr', selectCOARow);
+            updateCOACounts();
+            $('#coaDetail').html('<div class="coa-empty">Select an account in the hierarchy to see its master data.</div>');
             $('#expandCOAAllButton').show();
             $('#collapseCOAAllButton').show();
         }
 
         function appendCOATreeRow($tbody, opt) {
-            var toggle = opt.isClickable
-                ? '<span class="coa-tree-toggle">+</span>'
-                : '<span class="coa-tree-toggle coa-tree-toggle-empty"></span>';
+            var icon = opt.isClickable
+                ? '<svg class="coa-caret" width="12" height="12"><use href="#s-down"/></svg>'
+                : '<svg width="12" height="12"><use href="#s-doc"/></svg>';
 
             $tbody.append(
                 '<tr ' +
                     'data-id="' + htmlEncodeCOA(opt.rowId) + '" ' +
                     'data-parent="' + htmlEncodeCOA(opt.parentId) + '" ' +
+                    'data-status="' + htmlEncodeCOA(opt.status) + '" ' +
                     'class="' + opt.rowClass + ' coa-level-' + opt.level + (opt.isClickable ? ' coa-tree-clickable' : '') + '">' +
-                    '<td style="text-align:center;">' + htmlEncodeCOA(opt.sl) + '</td>' +
-                    '<td class="coa-copy-code" data-code="' + htmlEncodeCOA(opt.code) + '" title="Click to copy" style="text-align:left;">' + htmlEncodeCOA(opt.code) + '</td>' +
-                    '<td class="coa-name" style="text-align:left;">' + toggle + htmlEncodeCOA(opt.name) + '</td>' +
-                    '<td style="text-align:center;">' + htmlEncodeCOA(opt.type) + '</td>' +
+                    '<td class="coa-sl">' + htmlEncodeCOA(opt.sl) + '</td>' +
+                    '<td class="coa-code coa-copy-code" data-code="' + htmlEncodeCOA(opt.code) + '" title="Click to copy">' + htmlEncodeCOA(opt.code) + '</td>' +
+                    '<td><div class="coa-name">' + icon + '<span>' + htmlEncodeCOA(opt.name) + '</span></div></td>' +
+                    '<td class="coa-tp"><span class="coa-chip">' + htmlEncodeCOA(opt.type) + '</span></td>' +
                 '</tr>'
+            );
+        }
+
+        function updateCOACounts() {
+            var heads = $('#ledgerlist tr.coa-level-1').length;
+            var groups = $('#ledgerlist tr.coa-level-2, #ledgerlist tr.coa-level-3, #ledgerlist tr.coa-level-4').length;
+            var ledgers = $('#ledgerlist tr.coa-level-5').length;
+            $('#coaCounts').text(heads + ' heads \u00b7 ' + groups + ' groups \u00b7 ' + ledgers + ' ledgers');
+        }
+
+        function coaCell($tr, idx) {
+            return $.trim($tr.children('td').eq(idx).text());
+        }
+
+        function selectCOARow() {
+            var $tr = $(this);
+            if ($tr.hasClass('coa-hint')) return;
+
+            $('#ledgerlist tr.coa-sel').removeClass('coa-sel');
+            $tr.addClass('coa-sel');
+
+            var path = [];
+            var $cur = $tr;
+            while ($cur.length) {
+                path.unshift(coaCell($cur, 1) + ' ' + coaCell($cur, 2));
+                var pid = $cur.attr('data-parent');
+                $cur = pid ? $('#ledgerlist tr[data-id="' + pid + '"]') : $();
+            }
+
+            var status = $tr.attr('data-status');
+            var statusHtml = status === 'Active' ? '<span class="objstat"><svg width="13" height="13" style="color:var(--sapPositiveColor)"><use href="#s-ok"/></svg>Active</span>'
+                : status === 'Inactive' ? '<span class="objstat"><svg width="13" height="13" style="color:var(--sapNegativeColor)"><use href="#s-no"/></svg>Inactive</span>'
+                : '&mdash;';
+
+            $('#coaDetail').html(
+                '<div class="coa-id"><div class="cd">' + htmlEncodeCOA(coaCell($tr, 1)) + '</div>' +
+                    '<div><h4>' + htmlEncodeCOA(coaCell($tr, 2)) + '</h4><span class="mini">' + htmlEncodeCOA(coaCell($tr, 3)) + '</span></div></div>' +
+                '<div class="coa-fields">' +
+                    '<div><div class="k">Account code</div><div class="v">' + htmlEncodeCOA(coaCell($tr, 1)) + '</div></div>' +
+                    '<div><div class="k">Account type</div><div class="v">' + htmlEncodeCOA(coaCell($tr, 3)) + '</div></div>' +
+                    '<div><div class="k">Serial</div><div class="v">' + htmlEncodeCOA(coaCell($tr, 0)) + '</div></div>' +
+                    '<div><div class="k">Status</div><div class="v">' + statusHtml + '</div></div>' +
+                    '<div class="wide"><div class="k">Company</div><div class="v">' + htmlEncodeCOA($('#lblGetCompanyName').text()) + '</div></div>' +
+                    '<div class="wide"><div class="k">Hierarchy</div><div class="v">' + htmlEncodeCOA(path.join(' \u203a ')) + '</div></div>' +
+                '</div>'
             );
         }
 
@@ -486,11 +410,9 @@
                 if (isOpen) {
                     collapseCOAChildren(rowId);
                     $row.removeClass('coa-tree-open');
-                    $row.find('.coa-tree-toggle').first().text('+');
                 } else {
                     showCOAChildren(rowId);
                     $row.addClass('coa-tree-open');
-                    $row.find('.coa-tree-toggle').first().text('-');
                 }
             });
         }
@@ -565,7 +487,6 @@
 
                 $(this).hide();
                 $(this).removeClass('coa-tree-open');
-                $(this).find('.coa-tree-toggle').first().text('+');
             });
         }
 
@@ -574,7 +495,6 @@
 
             $('#ledgerlist tr.coa-tree-clickable').each(function () {
                 $(this).addClass('coa-tree-open');
-                $(this).find('.coa-tree-toggle').first().text('-');
             });
         }
 
@@ -585,7 +505,6 @@
 
             $('#ledgerlist tr.coa-tree-clickable').each(function () {
                 $(this).removeClass('coa-tree-open');
-                $(this).find('.coa-tree-toggle').first().text('+');
             });
         }
 

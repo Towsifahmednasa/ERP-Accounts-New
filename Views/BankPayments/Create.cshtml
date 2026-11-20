@@ -1234,7 +1234,7 @@
                    return;
                }
 
-               jrActionStatus = status || 'Posted';
+               jrActionStatus = $('#masterId').val() > 0 ? 'Parked' : (status || 'Posted'); // editing an existing voucher: Update saves it as Parked
                if (jrPeriodClosed && jrActionStatus != 'Parked') {
                    toastr.error("Posting period is closed. Park the voucher or change the posting date.");
                    return;

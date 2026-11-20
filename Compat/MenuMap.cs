@@ -32,12 +32,12 @@ namespace New_Accounts.Compat
         // wireframe screen number, title, icon, controllers that belong to it
         private static readonly (int No, string Title, string Icon, string[] Controllers)[] Groups =
         {
-            (80, "Chart of Accounts", "s-grid", new[] { "LedgerHead", "ControlLedger", "SubControl", "SubSubControlLedger", "ChartOfAccount", "Subsubsidairy", "OpeningBlnc", "Ref_Sub_Type", "Refference", "FinancialYear", "CurrencyConversion" }),
-            (81, "Voucher Entry", "s-doc", new[] { "BankPayments", "CreditVoucher", "Journal", "Contra", "DebitVoucher", "AllApproval" }),
+            (80, "Accounts General", "s-grid", new[] { "LedgerHead", "ControlLedger", "SubControl", "SubSubControlLedger", "ChartOfAccount", "Subsubsidairy", "OpeningBlnc", "Ref_Sub_Type", "Refference", "FinancialYear", "CurrencyConversion" }),
+            (81, "Accounting Task", "s-doc", new[] { "BankPayments", "CreditVoucher", "Journal", "Contra", "DebitVoucher", "AllApproval" }),
             (82, "Receivables & Payables Ageing", "s-people", new[] { "Loan", "LCRelatedBankPayment" }),
-            (83, "Bank & Cash Reconciliation", "s-shop", new[] { "BanckAccount", "CashAccount", "ReconcileBankAccount", "CashBook", "BankBook" }),
-            (84, "Trial Balance & Financials", "s-chart", new[] { "AllAccountReport", "TrialBalance", "BalanceSheet", "IncomeStatement", "CashFlow", "BalanceSheetDynamicReport", "IncomeStatementDynamicReport", "VoucherValidation", "AccountingTaskReport" }),
+            (83, "Reconciliation", "s-shop", new[] { "BanckAccount", "CashAccount", "ReconcileBankAccount", "CashBook", "BankBook" }),
             (85, "Cost Centre & Budget Control", "s-pin", new[] { "CostCentre", "Budget" }),
+            (84, "Reports", "s-chart", new[] { "AllAccountReport", "TrialBalance", "BalanceSheet", "IncomeStatement", "CashFlow", "BalanceSheetDynamicReport", "IncomeStatementDynamicReport", "VoucherValidation", "AccountingTaskReport", "AccountsIntegrity" }),
         };
 
         private static readonly (string Match, string Icon)[] IconMap =
@@ -79,7 +79,7 @@ namespace New_Accounts.Compat
 
         public static List<NavGroup> Build(IEnumerable<MenuStepOne> tree)
         {
-            var leaves = Leaves(tree);
+            var leaves = Leaves(tree).SelectMany(Expand).ToList();
             var groups = Groups.Select(g => new NavGroup { Number = g.No, Title = g.Title, Icon = g.Icon }).ToList();
             var more = new NavGroup { Number = 0, Title = "More", Icon = "s-doc" };
             foreach (var leaf in leaves)
@@ -91,9 +91,26 @@ namespace New_Accounts.Compat
             return groups.Where(g => g.Items.Count > 0).ToList();
         }
 
+        // Display only (Leaves() still drives authorization): the report-launcher page is shown as its seven reports.
+        private static IEnumerable<NavItem> Expand(NavItem leaf)
+        {
+            if (!leaf.Controller.Equals("AllAccountReport", StringComparison.OrdinalIgnoreCase) || !leaf.Action.Equals("ReportList", StringComparison.OrdinalIgnoreCase))
+                return new[] { leaf };
+            return new[]
+            {
+                Item("Chart of Account Report", "AllAccountReport", "COAReport", "Reports"),
+                Item("Bank Book Report", "AllAccountReport", "BankBookReport", "Reports"),
+                Item("Cash Book Report", "AllAccountReport", "CashBookReport", "Reports"),
+                Item("Ledger Report", "AllAccountReport", "LedgerReport", "Reports"),
+                Item("Trial Balance Report", "AllAccountReport", "TrialBalanceReport", "Reports"),
+                Item("Income Statement Report", "IncomeStatementDynamicReport", "Index", "Reports"),
+                Item("Balance Sheet Report", "BalanceSheetDynamicReport", "Index", "Reports"),
+            };
+        }
+
         private static NavItem Item(string title, string controller, string action, string legacyGroup)
         {
-            var item = new NavItem { Title = (title ?? "").Trim(), Controller = controller.Trim(), Action = (action ?? "Index").Trim(), LegacyGroup = legacyGroup };
+            var item = new NavItem { Title = (title ?? "").Trim(), Controller = controller.Trim(), Action = (action ?? "Index").Trim(), LegacyGroup = (legacyGroup ?? "").Trim().Equals("Approval & Reports", StringComparison.OrdinalIgnoreCase) ? "Approval" : legacyGroup };
             foreach (var (match, icon) in IconMap)
                 if (item.Title.Contains(match, StringComparison.OrdinalIgnoreCase)) { item.Icon = icon; break; }
             return item;

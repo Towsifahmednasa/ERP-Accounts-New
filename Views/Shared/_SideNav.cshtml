@@ -6,6 +6,14 @@
     var groups = MenuMap.Build(Model);
     string currentController = (Context.GetRouteValue("controller") as string ?? "");
     var active = groups.FirstOrDefault(g => g.Items.Any(i => i.Controller.Equals(currentController, System.StringComparison.OrdinalIgnoreCase)));
+    string path = Context.Request.Path.Value ?? "";
+    // Several report items share one controller: when the URL is exactly a menu item, highlight only that item.
+    bool exact = groups.Any(g => g.Items.Any(i => path.Equals(i.Href, System.StringComparison.OrdinalIgnoreCase)));
+    void Link(New_Accounts.Compat.NavItem item)
+    {
+        bool on = exact ? path.Equals(item.Href, System.StringComparison.OrdinalIgnoreCase) : item.Controller.Equals(currentController, System.StringComparison.OrdinalIgnoreCase);
+        <a href="@item.Href" class="@(on ? "on" : null)" title="@item.Title"><svg width="17" height="17"><use href="#@item.Icon"/></svg><span class="lbl">@item.Title</span></a>
+    }
 }
 <nav class="sidenav" aria-label="Navigation">
     <div class="grp"><span class="lbl">Dashboard</span></div>
@@ -17,8 +25,7 @@
             <div class="grp"><span class="lbl">@sect.Key</span></div>
             foreach (var item in sect)
             {
-                bool on = item.Controller.Equals(currentController, System.StringComparison.OrdinalIgnoreCase);
-                <a href="@item.Href" class="@(on ? "on" : null)" title="@item.Title"><svg width="17" height="17"><use href="#@item.Icon"/></svg><span class="lbl">@item.Title</span></a>
+                Link(item);
             }
         }
     }
@@ -29,8 +36,7 @@
             <div class="grp"><span class="lbl">@group.Title</span>@if (group.Number > 0) {<span class="nu">@group.Number</span>}</div>
             foreach (var item in group.Items)
             {
-                bool on = item.Controller.Equals(currentController, System.StringComparison.OrdinalIgnoreCase);
-                <a href="@item.Href" class="@(on ? "on" : null)" title="@item.Title"><svg width="17" height="17"><use href="#@item.Icon"/></svg><span class="lbl">@item.Title</span></a>
+                Link(item);
             }
         }
     }

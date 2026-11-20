@@ -297,21 +297,7 @@
 
     function PrintReport(MasterId)
         {
-            var urlpath = '@Url.Action("rptDebitVoucher", "AccountingTaskReport")';
-        var reportValue = "AllVoucherReport";
-
-        $.ajax({
-            url: urlpath,
-            data: { MasterId: MasterId, reportValue: reportValue},
-                dataType: 'json',
-                type: "Get",
-                success: function (data) {
-                    if (data.isSuccess) {
-                        //OpenPopUp('BasicReportViewer.aspx');
-                        window.open("/CrystalViewer/CrystalViewer.aspx", "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=no, menubar=no,resizable=yes,directories=no,location=no");
-                    }
-                }
-            });
+            window.open('@Url.Action("VoucherPrint", "AccountingTaskReport")?MasterId=' + MasterId, "_blank", "WIDTH=1024,HEIGHT=768,scrollbars=yes, menubar=no,resizable=yes,directories=no,location=no");
         }
 
 
@@ -348,7 +334,6 @@
 
 
         function SaveApproval() {
-            $("#overlay").fadeIn(300);
             if (validation()) {
 
                 var jsonData = {};

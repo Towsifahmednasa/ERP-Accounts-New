@@ -20,5 +20,8 @@ namespace New_Accounts.DataManager
         // Unicorn
         public static string ControlPanel = @"CSTL_ERPDB_Unicorn";
         public static string CSTL_ERP_DB = @"CSTL_ACCDB_Unicorn";
+
+        // Sales & Distribution DB: the Accounts Integrity Dashboard compares its transactions with the vouchers above.
+        public static string SalesDb = @"SalesDisDB_Unicorn_DB";
     }
 }

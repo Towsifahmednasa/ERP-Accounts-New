@@ -48,9 +48,22 @@ namespace New_Accounts.Controllers
         [HttpPost]
         public ActionResult SaveContra(DebitCreditVoucherMaster aMaster)
         {
+            // FI period close: posting into a closed month is a hard stop; parking a draft is allowed.
+            if (aMaster.ActionStatus != "Parked" && aMaster.PostingDate.HasValue
+                && new JournalDAL().IsPeriodClosed(aMaster.CompanyInfoId ?? 0, aMaster.PostingDate.Value))
+            {
+                return Json(new ResultResponse { isSuccess = false, pk = 0, msg = "Posting period " + aMaster.PostingDate.Value.ToString("MM/yyyy") + " is closed for financial accounting. Park the voucher or re-open the period." });
+            }
 
-            ResultResponse aResponse = dbDal.SaveContra(aMaster,  (Session[SessionCollection.UserName].ToString()));
-            return Json(aResponse);
+            try
+            {
+                return Json(dbDal.SaveContra(aMaster, (Session[SessionCollection.UserName].ToString())));
+            }
+            catch (Exception ex)
+            {
+                // Surface the SQL/DAL error on the page instead of a generic 500 ("Something went wrong").
+                return Json(new ResultResponse { isSuccess = false, pk = 0, msg = ex.Message });
+            }
         }
 
 

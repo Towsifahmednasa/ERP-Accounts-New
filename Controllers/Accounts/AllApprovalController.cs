@@ -1,4 +1,4 @@
-// Ported unchanged from Accounts\CSTL_Pro_to_Pay\Controllers\Accounts\AllApprovalController.cs (framework-level edits only: usings, namespace, MVC 5 -> ASP.NET Core API names).
+﻿// Ported unchanged from Accounts\CSTL_Pro_to_Pay\Controllers\Accounts\AllApprovalController.cs (framework-level edits only: usings, namespace, MVC 5 -> ASP.NET Core API names).
 using New_Accounts.DAL.Accounts;
 using New_Accounts.DAL.Loan_DAL;
 using New_Accounts.Models;
@@ -69,12 +69,12 @@ namespace New_Accounts.Controllers.Accounts
             }
 
 
-            List<DebitVoucherView> aList = dbDal.BankPaymentList(param + "  and  ISNULL( mas.ActionStatus,'Posted')   = 'Posted'");
+            List<DebitVoucherView> aList = dbDal.BankPaymentList(param + "  and  ISNULL( mas.ActionStatus,'Posted')   IN ('Parked','Posted')");
             return Json(aList);
 
         }
 
-        
+
 
 
         public ActionResult LoadLoanList(string param)

@@ -105,6 +105,9 @@ namespace New_Accounts.DAL.Accounts
                 aSqlParameterlist.Add(new SqlParameter("@EntryBy", user));
                 aSqlParameterlist.Add(new SqlParameter("@EntryDate", System.DateTime.Now));
 
+                // Park feature: 'Parked' keeps the voucher out of the approval queue; anything else behaves as before ('Posted').
+                aSqlParameterlist.Add(new SqlParameter("@ActionStatus", aDebitCreditVoucherNewMaster.ActionStatus == "Parked" ? "Parked" : "Posted"));
+
 
                 if (aDebitCreditVoucherNewMaster.VoucherMasterId > 0)
                 {
@@ -234,6 +237,8 @@ namespace New_Accounts.DAL.Accounts
 
 
                     aMaster.Narration = dr["Narration"].ToString();
+
+                    aMaster.ActionStatus = dr["ActionStatus"].ToString();
 
 
                 }

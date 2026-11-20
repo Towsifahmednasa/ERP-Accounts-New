@@ -49,6 +49,9 @@ namespace New_Accounts.DAL.Accounts
                 aSqlParameterlist.Add(new SqlParameter("@EntryBy", user));
                 aSqlParameterlist.Add(new SqlParameter("@EntryDate", entryDate));
 
+                // Park feature: 'Parked' keeps the voucher out of the approval queue; anything else behaves as before ('Posted').
+                aSqlParameterlist.Add(new SqlParameter("@ActionStatus", aDebitCreditVoucherNewMaster.ActionStatus == "Parked" ? "Parked" : "Posted"));
+
 
                
 
@@ -113,6 +116,8 @@ namespace New_Accounts.DAL.Accounts
                     aMaster.CurrencyCovRate = DBNull.Value.Equals(dr["CurrencyCovRate"]) ? 0 : Convert.ToDecimal(dr["CurrencyCovRate"]);
                     aMaster.VoucherCategoryID = DBNull.Value.Equals(dr["VoucherCategoryID"]) ? 0 : Convert.ToInt32(dr["VoucherCategoryID"]);
                     aMaster.BankAccountId = DBNull.Value.Equals(dr["BankAccountId"]) ? 0 : Convert.ToInt32(dr["BankAccountId"]);
+
+                    aMaster.ActionStatus = dr["ActionStatus"].ToString();
 
 
                     aMaster.ChequeNo = dr["ChequeNo"].ToString();

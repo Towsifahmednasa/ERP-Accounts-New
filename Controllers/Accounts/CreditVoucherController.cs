@@ -56,6 +56,12 @@ namespace New_Accounts.Controllers.Accounts
         [HttpPost]
         public ActionResult SaveCRVoucher(DebitCreditVoucherMaster aMaster)
         {
+            // FI period close: posting into a closed month is a hard stop; parking a draft is allowed.
+            if (aMaster.ActionStatus != "Parked" && aMaster.PostingDate.HasValue
+                && new JournalDAL().IsPeriodClosed(aMaster.CompanyInfoId ?? 0, aMaster.PostingDate.Value))
+            {
+                return Json(new ResultResponse { isSuccess = false, pk = 0, msg = "Posting period " + aMaster.PostingDate.Value.ToString("MM/yyyy") + " is closed for financial accounting. Park the voucher or re-open the period." });
+            }
 
             ResultResponse aResponse = dbDal.SaveBankPaymentMaster(aMaster,  (Session[SessionCollection.UserName].ToString()));
             return Json(aResponse);
